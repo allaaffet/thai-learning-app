@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLesson, lessons } from "@/data/curriculum";
+import {
+  getCourseLesson as getLesson,
+  courseLessons as lessons,
+} from "@/data/course";
 import { LessonPlayer } from "@/components/lesson-player";
 
 export function generateStaticParams() {

@@ -15,7 +15,11 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { lessons } from "@/data/curriculum";
+import {
+  courseLessons as lessons,
+  getCourseChapter,
+  getChapterLessons,
+} from "@/data/course";
 import { useLearning } from "@/components/learning-provider";
 import { LessonCard } from "@/components/lesson-card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +36,11 @@ export function Dashboard() {
   ).length;
   const next = getNextLesson(progress, lessons);
   const active = next ?? lessons[0];
+  const activeChapter = getCourseChapter(active.chapterId)!;
+  const chapterLessons = getChapterLessons(active.chapterId);
+  const chapterCompleted = chapterLessons.filter(
+    (entry) => progress.lessons[entry.id]?.completedAt,
+  ).length;
   const xp = getTotalXp(progress);
   const todayDone = ready && progress.studyDays.includes(dateKey(new Date()));
   const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
@@ -94,15 +103,15 @@ export function Dashboard() {
             <div className="hero-lesson-tag">
               <BookOpen size={14} />
               <span>
-                第1章 <span className="separator">/</span> レッスン{" "}
-                {String(active.number).padStart(2, "0")}
+                第{activeChapter.number}章 <span className="separator">/</span>{" "}
+                レッスン {String(active.number).padStart(2, "0")}
               </span>
             </div>
             <Button size="lg" asChild={ready} disabled={!ready}>
               {ready ? (
                 <Link href={next ? `/lessons/${next.id}` : "/roadmap"}>
                   {completed === lessons.length
-                    ? "第1章を復習する"
+                    ? "学んだことを復習する"
                     : completed
                       ? "学習をつづける"
                       : "学習をはじめる"}
@@ -218,7 +227,9 @@ export function Dashboard() {
           <div>
             <p className="eyebrow">YOUR LEARNING PATH</p>
             <h2>タイ語の、はじめの一歩。</h2>
-            <p>第1章 · タイ語の文字と発音の基礎</p>
+            <p>
+              第{activeChapter.number}章 · {activeChapter.title}
+            </p>
           </div>
           <Link href="/roadmap" className="text-link">
             ロードマップを見る <ArrowRight size={15} />
@@ -229,17 +240,19 @@ export function Dashboard() {
             <GraduationCap size={18} />
           </span>
           <span>音を知る。文字に出会う。少しずつ、読める。</span>
-          <strong>{ready ? completed : "–"} / 6</strong>
+          <strong>
+            {ready ? chapterCompleted : "–"} / {chapterLessons.length}
+          </strong>
           <div className="track">
             <span
               style={{
-                width: `${ready ? (completed / lessons.length) * 100 : 0}%`,
+                width: `${ready ? (chapterCompleted / chapterLessons.length) * 100 : 0}%`,
               }}
             />
           </div>
         </div>
         <div className="lesson-grid">
-          {lessons.map((lesson) => (
+          {chapterLessons.map((lesson) => (
             <LessonCard key={lesson.id} lesson={lesson} />
           ))}
         </div>
@@ -282,7 +295,7 @@ export function Dashboard() {
       <div className="content-status">
         <span>教材について</span>
         <p>
-          この第1章は専門家レビュー前の教材案です。文字名など資料で照合できた範囲と、発音・語義など未検証の内容を区別しています。
+          この教材は専門家レビュー前の教材案です。文字名など資料で照合できた範囲と、発音・語義など未検証の内容を区別しています。
           <Link href="/characters#content-sources">
             出典と確認状況を見る <ArrowRight size={12} />
           </Link>

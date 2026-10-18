@@ -11,12 +11,13 @@ import {
   Flame,
   House,
   Leaf,
+  PencilLine,
   Route,
   Sparkles,
 } from "lucide-react";
 import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
-import { lessons } from "@/data/curriculum";
+import { courseLessons as lessons } from "@/data/course";
 import { cn } from "@/lib/utils";
 import { ThaiFontToggle } from "@/components/thai-font-toggle";
 
@@ -29,6 +30,7 @@ const navigation = [
     mobile: "文字",
     icon: BookOpen,
   },
+  { href: "/writing", label: "書き取り練習", mobile: "書く", icon: PencilLine },
   {
     href: "/progress",
     label: "学習の記録",
@@ -89,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             新しい世界につながる。
           </p>
           <div className="sidebar-course-meta">
-            <span>第1章の進み具合</span>
+            <span>コースの進み具合</span>
             <strong>
               {ready ? completed : "–"} / {lessons.length}
             </strong>
@@ -154,7 +156,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               学ぶ楽しさを、毎日に。
             </span>
             <span>
-              <Leaf size={13} /> Phase 1 · ローカル保存
+              <Leaf size={13} /> Phase 2 · ローカル保存
             </span>
           </footer>
         </main>

@@ -18,7 +18,7 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { lessons } from "@/data/curriculum";
+import { courseLessons as lessons, getCourseChapter } from "@/data/course";
 import type { Lesson } from "@/lib/content-types";
 import {
   getNextLesson,
@@ -212,7 +212,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <header className="lesson-heading">
         <div>
           <p className="eyebrow">
-            CHAPTER 01 <span className="separator">/</span> LESSON{" "}
+            CHAPTER{" "}
+            {String(getCourseChapter(lesson.chapterId)?.number).padStart(
+              2,
+              "0",
+            )}{" "}
+            <span className="separator">/</span> LESSON{" "}
             {String(lesson.number).padStart(2, "0")}
           </p>
           <h1 className="page-title">{lesson.title}</h1>

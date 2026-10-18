@@ -21,7 +21,22 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
           className={cn("lesson-glyph thai", completed && "completed")}
           lang="th"
         >
-          {completed ? <Check size={26} /> : glyphs[lesson.number - 1]}
+          {completed ? (
+            <Check size={26} />
+          ) : (
+            ((
+              {
+                "mid-consonants": "ก",
+                "high-consonants": "ข",
+                "low-pairs-one": "ค",
+                "low-pairs-two": "พ",
+                "low-sonorants": "น",
+                "vowels-central": "ือ",
+                "vowels-surround": "แ",
+                "vowel-compounds": "ัว",
+              } as Record<string, string>
+            )[lesson.id] ?? glyphs[lesson.number - 1])
+          )}
         </span>
         <span className={cn("lesson-state", completed && "done")}>
           {!ready ? (

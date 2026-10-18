@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import { characters, lessons } from "../src/data/curriculum";
+import { lessons } from "../src/data/curriculum";
+import { alphabetCharacters as characters } from "../src/data/alphabet";
 import type { Lesson } from "../src/lib/content-types";
 import {
   getTotalXp,
@@ -319,9 +320,10 @@ test("第1章の6レッスンを順番に学習して全問正解で完了でき
       );
       await nextLink.click();
     } else {
-      await page
-        .getByRole("link", { name: "ロードマップに戻る", exact: true })
-        .click();
+      await expect(
+        page.getByRole("link", { name: "次のレッスンへ", exact: true }),
+      ).toHaveAttribute("href", "/lessons/mid-consonants");
+      await page.goto("/roadmap");
     }
   }
   await expect(page).toHaveURL(/\/roadmap$/);
@@ -349,7 +351,7 @@ test("文字ライブラリ・結合文字・絞り込み・キーボードと�
   page,
 }, testInfo) => {
   await page.goto("/characters");
-  await expect(page.getByRole("button", { name: /の詳細$/ })).toHaveCount(10);
+  await expect(page.getByRole("button", { name: /の詳細$/ })).toHaveCount(44);
   await expect(page.locator("#character-detail-heading")).toHaveText(
     characters[0].name,
   );

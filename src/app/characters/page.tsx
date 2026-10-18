@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { CharactersPage } from "@/components/library-pages";
+import { CharactersPage } from "@/components/alphabet-library";
 
 export const metadata: Metadata = {
   title: "文字ライブラリ",
   description:
-    "第1章で学ぶタイ文字の形、子音クラス、音価、例語を確認できます。",
+    "44子音と32母音パターンの形、音価、用例を確認し、書き取りを練習できます。",
 };
 
 export default function Page() {
