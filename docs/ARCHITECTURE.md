@@ -9,7 +9,7 @@
 | 教材   | ローカルのTypeScript構造化データ                  | コンテンツと画面を分離し、参照と型を検査する         |
 | 進捗   | `localStorage` と保存処理のインターフェース       | 外部サービスなしで動作し、将来の移行箇所を限定する   |
 | テスト | Vitest / 必要なReact Testing Library / Playwright | ロジックと実際の学習フローを検証する                 |
-| 配信   | Next.js対応環境、将来Vercel                       | Phase 2まで外部DB・認証・有料APIを必要としない       |
+| 配信   | Next.js対応環境、将来Vercel                       | Phase 3まで外部DB・認証・有料APIを必要としない       |
 
 Thaiは `@fontsource-variable/noto-sans-thai-looped`（標準・ループあり）と `@fontsource-variable/noto-sans-thai`（ループなし）、日本語は `@fontsource-variable/noto-sans-jp` をnpmから導入し、アプリの静的ファイルとして自己配信する。描画時の外部フォントAPIへの依存はない。ライセンスは `public/licenses/` に同梱する。
 
@@ -33,38 +33,41 @@ public/licenses/    フォントと参考運筆データのライセンス
 docs/                日本語の設計・カリキュラム・開発計画
 ```
 
-教材全体の参照先は `src/data/course.ts` とする。第1章の既存データは `curriculum.ts` に残し、第2・3章の追加8レッスンを `phase-two.ts`、44子音・32母音を `alphabet.ts` に分ける。`course.ts` が部・章・レッスン・出典を集約し、UIが特定の章数や第1章だけに依存しないようにする。本文や正答を画面コンポーネントへ埋め込まない。
+教材全体の参照先は `src/data/course.ts` とする。第1章の既存データは `curriculum.ts` に残し、第2・3章の追加8レッスンを `phase-two.ts`、第4・5章の追加8レッスンを `phase-three.ts`、44子音・32母音を `alphabet.ts` に分ける。登録語の分解・声調分析・IPA・出典は `syllables.ts` に保持する。`course.ts` が部・章・レッスン・出典を集約し、UIが特定の章数や第1章だけに依存しないようにする。本文や正答を画面コンポーネントへ埋め込まない。
 
-クイズ判定・前提判定・XP計算・進捗の検証はUIから独立させる。`src/lib/content-types.ts`・`alphabet-types.ts` が教材の型、`src/lib/progress.ts` が採点・保存の境界、`src/components/learning-provider.tsx` がブラウザの状態管理を担当する。文字ノートは `alphabet-library.tsx` の `CharactersPage`、書取りは `writing-page.tsx` と `handwriting-pad.tsx` が担当する。
+クイズ判定・前提判定・XP計算・進捗の検証はUIから独立させる。`src/lib/content-types.ts`・`alphabet-types.ts`・`tone-types.ts` が教材の型、`src/lib/progress.ts` が採点・保存の境界、`src/components/learning-provider.tsx` がブラウザの状態管理を担当する。文字ノートは `alphabet-library.tsx` の `CharactersPage`、書取りは `writing-page.tsx` と `handwriting-pad.tsx`、発音・声調ラボは `tone-lab.tsx` と `tone-contour.tsx` が担当する。`tone-engine.ts` はReact・ブラウザ・教材に依存しない。
 
 ## 実装済みのデータモデル
 
-| エンティティ         | 主な情報                                                                         |
-| -------------------- | -------------------------------------------------------------------------------- |
-| Part                 | ID、名前、説明、表示順、公開状態                                                 |
-| Chapter              | ID、Part ID、名前、説明、Lessonの参照                                            |
-| Lesson               | ID、Chapter ID、目標、前提Lesson ID、所要時間、XP、LearningBlock、Exercise、要点 |
-| LearningBlock        | ID、見出し、解説の段落、任意の例と補足。解説の種別を分ける型はまだ持たない       |
-| ExploreItem          | ID、Thai表記、IPA、日本語訳、構成・発音の注記                                    |
-| Character            | 文字、名前、子音クラス、初頭音、任意の末子音、例語、出典、確認状況               |
-| AlphabetCharacter    | Characterに加え、現代の使用状況、Unicode名、導入レッスン、異なる初頭音・注記     |
-| VowelPattern         | 図示パターン、母音IPA、長短・特殊形、配置、対のID、用例、注記、出典・確認状況    |
-| ExampleSentence      | Thai表記、日本語訳、IPA、任意の注記                                              |
-| Exercise             | ID、種別、問題文、選択肢、正答、解説、学習事項、難易度                           |
-| ExerciseOption       | 選択肢ID、表示内容、任意の補足                                                   |
-| ContentSource        | ID、題名、発行者、URL、確認日、参照可否、確認対象                                |
-| ExerciseAttempt      | Exercise ID、Lesson ID、選択した答え、正誤、回答時刻。受講回IDはまだ持たない     |
-| LessonProgress       | 完了日時、最高正答率、受講回数、付与済みXP、最終学習日時                         |
-| LearningProgress     | スキーマ版、Lesson別結果、回答履歴、学習したローカル日付                         |
-| AudioAsset           | 素材参照先、音声種別、ライセンス、確認状況の型のみ。素材・再生機能は未実装       |
-| ReferenceStrokeGuide | 対象文字ID、viewBox、記録順のSVGパス、出典・ライセンス・照合日、監修上の制約     |
-| HandwritingState     | 正規化座標の線、入力中の線とポインターID。ブラウザ内の一時状態のみ               |
+| エンティティ         | 主な情報                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| Part                 | ID、名前、説明、表示順、公開状態                                                           |
+| Chapter              | ID、Part ID、名前、説明、Lessonの参照                                                      |
+| Lesson               | ID、Chapter ID、目標、前提Lesson ID、所要時間、XP、LearningBlock、Exercise、要点           |
+| LearningBlock        | ID、見出し、解説の段落、任意の例と補足。解説の種別を分ける型はまだ持たない                 |
+| ExploreItem          | ID、Thai表記、IPA、日本語訳、構成・発音の注記                                              |
+| Character            | 文字、名前、子音クラス、初頭音、任意の末子音、例語、出典、確認状況                         |
+| AlphabetCharacter    | Characterに加え、現代の使用状況、Unicode名、導入レッスン、異なる初頭音・注記               |
+| VowelPattern         | 図示パターン、母音IPA、長短・特殊形、配置、対のID、用例、注記、出典・確認状況              |
+| SyllableEntry        | 1音節のThai表記・IPA・訳、初頭・母音・末尾、分析、登録声調、出典・確認状況、任意の辞書補完 |
+| SyllableAnalysis     | 子音クラス、母音長、末音種別、声調記号、単子音／真正子音連続／先行子音の区別               |
+| ToneResult           | 判定済みの声調・生死・有効クラス・説明手順・適用方法、または判定不能の理由                 |
+| ExampleSentence      | Thai表記、日本語訳、IPA、任意の注記                                                        |
+| Exercise             | ID、種別、問題文、選択肢、正答、解説、学習事項、難易度                                     |
+| ExerciseOption       | 選択肢ID、表示内容、任意の補足                                                             |
+| ContentSource        | ID、題名、発行者、URL、確認日、参照可否、確認対象                                          |
+| ExerciseAttempt      | Exercise ID、Lesson ID、選択した答え、正誤、回答時刻。受講回IDはまだ持たない               |
+| LessonProgress       | 完了日時、最高正答率、受講回数、付与済みXP、最終学習日時                                   |
+| LearningProgress     | スキーマ版、Lesson別結果、回答履歴、学習したローカル日付                                   |
+| AudioAsset           | 録音素材用の参照先・種別・ライセンス型。録音素材は未収録、端末合成は別モジュール           |
+| ReferenceStrokeGuide | 対象文字ID、viewBox、記録順のSVGパス、出典・ライセンス・照合日、監修上の制約               |
+| HandwritingState     | 正規化座標の線、入力中の線とポインターID。ブラウザ内の一時状態のみ                         |
 
-Phase 1は6レッスン・30問、Phase 2で8レッスン・40問を追加し、計14レッスン・70問。動作するExerciseは `multiple-choice` と `character-recognition` の判別可能な型で、ほかの採点付き演習形式は未実装。書取りはこの採点システムから分離する。追加時も未対応の形式を既存UIで誤って処理しない。
+Phase 1は6レッスン・30問、Phase 2・3で各8レッスン・40問を追加し、計22レッスン・110問。動作するExerciseは `multiple-choice` と `character-recognition` の判別可能な型で、ほかの採点付き演習形式は未実装。書取りとラボの条件変更はこの採点システムから分離する。追加時も未対応の形式を既存UIで誤って処理しない。
 
-`VowelPattern` はPhase 2で独立した型と32形のデータを実装した。`Syllable`、`Vocabulary`、`GrammarPoint`、`ReviewSchedule` は将来の設計候補であり、独立した型・保存領域・画面としては未実装。現在の音節・例語の解説は `LearningBlock` と `ExploreItem` 等に保持する。SRS、語彙DB、文法リファレンスが完成済みとは扱わない。
+`VowelPattern` は32形、`SyllableEntry` は32語の独立したデータを持つ。音節カタログは声調規則の教材用であり、一般語彙辞書ではない。`Vocabulary`、`GrammarPoint`、`ReviewSchedule` は将来の設計候補で、独立した保存領域・画面としては未実装。SRS、語彙DB、文法リファレンスが完成済みとは扱わない。
 
-Lesson・Character・VowelPatternは出典IDと `source-checked` / `unreviewed` を持ち、資料側に参照可否と確認対象を記録する。現教材は `unreviewed` の教材案であり、専門家の監修は未完了。運筆例の `source-checked` は記録軌跡・利用条件との限定照合で、`standardStrokeVerified: false` を必須にする。専門家による標準筆順の監修済みという意味には使わない。
+Lesson・Character・VowelPattern・SyllableEntryは出典IDと `source-checked` / `unreviewed` を持ち、資料側に参照可否と確認対象を記録する。現教材は `unreviewed` の教材案であり、専門家の監修は未完了。基本声調表との限定的な照合は、個々の語義・IPA・初頭分析の確認と分けて記録する。運筆例の `source-checked` は記録軌跡・利用条件との限定照合で、`standardStrokeVerified: false` を必須にする。専門家による標準筆順の監修済みという意味には使わない。
 
 ## 学習フロー
 
@@ -89,7 +92,7 @@ flowchart LR
 
 保存データのスキーマ版は `1`、保存キーは `thai-learning.progress.v1`。読み込み時にスキーマ版と各項目の型・範囲を検証する。壊れたJSON、未知の版、欠損や無効な数値はそのまま信用しない。不正な保存データは読み込み時には元のまま保持し、警告して画面内で空の進捗を使用する。その後に新しい受講結果を保存すると元の保存内容を置き換える。ブラウザの書き込み拒否等は捕捉して、保存できていない状態を伝える。
 
-Phase 2は旧6レッスンのIDとデータを維持し、同じ保存版のLesson別レコードに新8IDを追加する。既存データの移行や初期化は不要。全レッスンの初回XPは570、第1章分240を引き継いで追加330を得られる。章数・レッスン総数の表示は `course.ts` の集約データから算出する。
+Phase 3は旧14レッスンのIDとデータを維持し、同じ保存版のLesson別レコードに新8IDを追加する。既存データの移行や初期化は不要。全レッスンの初回XPは890、第1〜3章分570を引き継いで追加320を得られる。章数・レッスン総数の表示は `course.ts` の集約データから算出する。ラボの検索・条件変更・図の比較は進捗データへ保存しない。
 
 Lesson別には、完了状態、最高正答率、初回完了日時、受講回数、付与済みXPを保持する。正答率80%以上で完了でき、初回完了時だけXPを付与する。再受講は以前の最高正答率を下げず、XPを重複加算しない。学習日と連続学習日数は、利用ブラウザのローカル日付を基準とする。
 
@@ -99,7 +102,7 @@ Lesson別には、完了状態、最高正答率、初回完了日時、受講�
 
 Progress画面は各Lessonの最高正答率・受講回数・完了状態、全受講回の初回回答の正答率、XP、学習日数を表示する。苦手概念ごとの集計、受講履歴の詳細画面、実測学習時間、SRSは未実装。
 
-進捗アクセスは `ProgressRepository` 等の型付きインターフェースを通す。現在はブラウザの実装を利用し、将来Supabaseへ移行する際はアダプターと認証・同期の設計を追加する。Phase 2までにサーバー保存があるようには表示しない。
+進捗アクセスは `ProgressRepository` 等の型付きインターフェースを通す。現在はブラウザの実装を利用し、将来Supabaseへ移行する際はアダプターと認証・同期の設計を追加する。Phase 3までにサーバー保存があるようには表示しない。
 
 初期描画時は保存内容の読み込み前に「未学習」と断定しない。ブラウザAPIに依存する進捗・演習部分はClient Componentへ閉じ込め、必要以上にページ全体へ責務を広げない。
 
@@ -113,15 +116,35 @@ Progress画面は各Lessonの最高正答率・受講回数・完了状態、全
 
 `src/data/stroke-trajectories.json` は独立したMITライセンスの手録り座標4字（ก・ง・จ・ม）を保存する。`stroke-guides.ts` が元の点順を保ってSVGパスへ変換し、出典固定コミットとライセンスを付ける。`src/lib/stroke-types.ts` で不完全な参照を拒否し、`ReferenceStrokeGuide` の `standardStrokeVerified: false` と未監修の注記を保持する。再生、一筆ずつ表示、リセットを備え、動きを減らす設定では全軌跡を表示する。他の40子音と全母音には運筆アニメーションを出さない。
 
+## 音節分析と声調判定
+
+`src/lib/tone-types.ts` は `SyllableAnalysis` と、`determined` / `unknown` で分岐する `ToneResult` を定義する。`determineTone(unknown)` は入力オブジェクトのキー・値を実行時にも検証し、子音クラス、母音長、末音、生死、声調記号、初頭構造の基本規則を適用する。結果には有効クラス・生死・説明手順を含める。未対応の記号・クラスの組み合わせや不正入力は、推測せず理由付きの `unknown` にする。
+
+`src/data/syllables.ts` は32個の登録語のThai・IPA・訳、文字上の初頭・母音・末尾、発音上の条件を保持する。`lookupSyllable` は前後の空白を除いた完全一致のみで検索し、Unicode結合文字を分割・並べ替えない。文字の並びから音節を生成する処理は持たない。`analyzeEntry` は登録声調と規則結果の不一致を拒否し、確認が終わるまで判定を表示しない。
+
+真正子音連続は先頭クラスを使用し、ห นำ・อ นำはカタログで確認した適用対象の条件として渡す。エンジンは、任意の文字列にその規則が適用できるかを解析しない。辞書補完を使う場合は `dictionaryOverride` の理由と出典ID、`source-checked`、登録声調との一致を要求し、結果の `method` を `dictionary` にする。現在の32語に例外指定はなく、補完機構はテスト用の分析データで検証する。
+
+`/pronunciation` の `ToneLab` は、登録語の分解と判定手順、未知語の説明、手動条件指定を表示する。`ToneContour` はChao表記に合わせた静止SVGの模式図を描く。録音の実測ピッチではなく、図から合成音声を生成しない。ラボは採点・XP・進捗保存から独立する。録音音声は未収録。端末合成音声は下記の独立した境界で扱う。
+
 ## 将来拡張の境界
 
-声調判定は、将来 `Syllable` の明示的な解析結果を受け取るUI独立モジュールとする。例外の辞書補完と判定不能の結果を表現できる必要がある。Phase 3には着手せず、一般的なThai文字列から声調を推測する機能を実装しない。
+任意のタイ語の形態素解析、一般的な音節分割、網羅的な例外辞書は未実装。現在の明示的な分析条件を受け取る境界を保ち、後で辞書や解析器を追加する場合も、確認状況と判定不能の扱いを省略しない。
 
 正式な筆順教材は参考運筆例とは別の監修工程を必要とし、字形から手順を自動生成しない。音声は `AudioAsset` のライセンスと確認状況を満たすものだけを使用する。SRS、Supabase、AI会話、録音の実装は後続Phaseに限定する。
 
 ## 品質確認
 
-- ユニットテスト：44字とクラス内訳・母音対、教材の参照・導入と前提関係、IPA一貫性、採点、80%境界、前提の解放、570XPと重複防止、進捗の復元・不正データ、書取りの座標と履歴。
-- E2E：解説から完了まで、誤答の理由、再受講、追加章の解放、リロードによる旧進捗継続、文字検索・分類、書取り入力と操作、4字の参考運筆例の限定表示。
+- ユニットテスト：44字とクラス内訳・母音対、教材の参照・導入と前提関係、IPA一貫性、採点、80%境界、前提の解放、890XPと重複防止、進捗の復元・不正データ、書取りの座標と履歴、声調規則の主要分岐・判定不能・辞書補完。
+- E2E：解説から完了まで、誤答の理由、再受講、追加章の解放、リロードによる旧進捗継続、文字検索・分類、書取り入力と操作、4字の参考運筆例の限定表示、発音ラボの登録語・未知語・手動条件。
 - 表示確認：PCとスマートフォン、横はみ出し、Thaiの上下記号、フォーカス、色に依存しない正誤表示。
 - `typecheck`、`lint`、`test`、本番 `build` を実行し、実行できていない検査は理由と共に報告する。
+
+実行結果・件数と実ブラウザの確認範囲は [VALIDATION.md](VALIDATION.md) に記録する。
+
+## 端末の合成音声
+
+`device-speech.ts` は端末の能力と再生を管理する。実際の音声一覧からタイ語のみ選び、端末内の候補を優先する。声の非同期取得と変更、開始・完了・エラー、イベントが返らない場合のタイムアウトを扱う。所有者ごとにセッションを持ち、音声の切替時は前の再生を止め、古いイベントで新しい再生を完了扱いしない。画面移動はその所有者の音声だけを停止する。
+
+`SpeakButton` は第4・5章のExploreとラボの登録語に付く。`SpeechPractice` は独立した任意の3問で、文字・IPA・解説は `speech-practice.ts` に分離する。音声の完了後だけ答えを確認でき、回答確定後は選び直せない。XP・受講結果・進級には使わない。声がなければ問題を有効にせず理由を示す。
+
+音声ファイルを配信・保存する機能ではない。ブラウザとOSの音声サービスをユーザー操作で呼び出し、端末の合成音声・未監修と明示する。提供元への通信があり得る声も表示する。再配布できる録音素材と、そのライセンス情報を持つ `AudioAsset` は未収録である。

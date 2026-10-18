@@ -1,0 +1,18 @@
+Thai IPA reference excerpts — CC BY-SA 3.0
+
+Attribution: Thai Wiktionary contributors and PyThaiNLP / lexicon-thai contributors.
+Source: https://github.com/PyThaiNLP/lexicon-thai/blob/f826bca74edafb281aa2bf7ecbb2ae38ec72fe63/G2P/wiktionary-11-2-2020.tsv
+Source license declaration: https://github.com/PyThaiNLP/lexicon-thai/blob/f826bca74edafb281aa2bf7ecbb2ae38ec72fe63/G2P/README.md
+License: Creative Commons Attribution-ShareAlike 3.0 Unported
+https://creativecommons.org/licenses/by-sa/3.0/
+Legal code: https://creativecommons.org/licenses/by-sa/3.0/legalcode
+
+Scope: 30 word/IPA reference excerpts identified in docs/PHASE3_SOURCES.md
+and the corresponding source references in src/data/syllables.ts.
+Changes: removed segmentation spaces and enclosed IPA in slashes; retained
+one long-vowel variant for ข้าว while noting the source's short variant.
+The source corpus is not bundled in full. These IPA excerpts retain CC BY-SA 3.0.
+Japanese explanations, UI, and rule implementation were independently authored.
+Source checking is not expert review or a guarantee of pronunciation quality.
+
+Checked: 2026-10-18

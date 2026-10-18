@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | Thai Learning",
   },
   description:
-    "日本語で、文字と発音の仕組みから学ぶタイ語。44子音・母音の形を、短いレッスンとなぞり書きで学べます。",
+    "日本語で、文字と発音の仕組みから学ぶタイ語。44子音・母音と声調の仕組みを、短いレッスン・書き取り・声調ラボで学べます。",
 };
 
 export default function RootLayout({

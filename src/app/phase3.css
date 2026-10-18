@@ -1,0 +1,531 @@
+.pronunciation-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+.pronunciation-explorer,
+.pronunciation-comparison,
+.pronunciation-manual {
+  padding: 28px;
+  min-width: 0;
+}
+.pronunciation-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.pronunciation-small-tag {
+  color: var(--forest);
+  background: var(--sage);
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.pronunciation-explorer h2,
+.pronunciation-comparison h2 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.pronunciation-comparison > .eyebrow {
+  margin-bottom: 14px;
+}
+.pronunciation-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 23px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pronunciation-field select,
+.pronunciation-manual-fields select {
+  width: 100%;
+  background: white;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 46px;
+  padding: 9px 34px 9px 12px;
+  font: inherit;
+  font-weight: 400;
+  font-size: 14px;
+}
+.pronunciation-search {
+  margin-top: 18px;
+}
+.pronunciation-search > label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.pronunciation-search > div {
+  display: flex;
+  gap: 8px;
+}
+.pronunciation-search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: #fff;
+}
+.pronunciation-search-input input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  border: 0;
+  outline-offset: 2px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+}
+.pronunciation-search .button {
+  min-width: 112px;
+  padding-inline: 13px;
+}
+.pronunciation-word {
+  display: flex;
+  gap: 23px;
+  align-items: center;
+  margin-top: 28px;
+  padding: 14px 2px 20px;
+}
+.pronunciation-word > .thai {
+  color: var(--forest);
+  font-size: 68px;
+  line-height: 1.9;
+}
+.pronunciation-word > div {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.pronunciation-word .pronunciation-ipa {
+  color: var(--forest);
+  font-size: 19px;
+}
+.pronunciation-decomposition {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.pronunciation-decomposition > div {
+  text-align: center;
+  background: #f6f8f4;
+  border-radius: 10px;
+  padding: 15px 6px 8px;
+  min-width: 0;
+}
+.pronunciation-decomposition dt {
+  font-size: 10px;
+  color: #748075;
+}
+.pronunciation-decomposition dd {
+  margin: 0;
+  padding-top: 6px;
+  font-size: 30px;
+  min-height: 62px;
+  overflow-wrap: anywhere;
+}
+.pronunciation-decomposition-note {
+  font-size: 10px;
+  line-height: 1.95;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.pronunciation-entry-note {
+  border-left: 3px solid #d9b97a;
+  background: #faf7ef;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.9;
+  margin-top: 17px;
+}
+.pronunciation-rule-result {
+  margin-top: 23px;
+}
+.pronunciation-tone-answer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 23px;
+}
+.pronunciation-tone-answer h3 {
+  font-size: 23px;
+  color: var(--forest);
+  font-weight: 700;
+  margin-top: 8px;
+}
+.pronunciation-tone-answer h3 > span {
+  display: inline-block;
+  margin-left: 13px;
+  font-size: 29px;
+  font-weight: 400;
+}
+.pronunciation-tone-answer p:last-child {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+.pronunciation-tone-answer > .tone-contour {
+  width: 115px;
+  height: 86px;
+}
+.pronunciation-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.pronunciation-result-tags > span {
+  padding: 5px 10px;
+  color: var(--forest);
+  font-size: 10px;
+  background: var(--sage);
+  border-radius: 5px;
+}
+.pronunciation-rule-steps {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pronunciation-rule-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  font-size: 12px;
+  line-height: 1.95;
+}
+.pronunciation-rule-steps li > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  background: #edf2eb;
+  color: #667d62;
+  border-radius: 50%;
+  font-size: 10px;
+  margin-top: 1px;
+}
+.pronunciation-sources {
+  margin-top: 22px;
+}
+.pronunciation-sources > summary {
+  font-size: 11px;
+}
+.pronunciation-sources p {
+  font-size: 10px;
+  line-height: 1.9;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+.pronunciation-section-copy {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.9;
+}
+.pronunciation-tone-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 23px;
+}
+.pronunciation-tone-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: 5px 2px 9px;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.pronunciation-tone-option.active {
+  border-color: #739881;
+  color: var(--forest);
+  background: #eef5ed;
+  font-weight: 700;
+}
+.pronunciation-tone-option > .tone-contour {
+  width: 100%;
+  height: 43px;
+}
+.tone-contour {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.tone-contour-grid {
+  stroke: #e7ece6;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.tone-contour-label {
+  fill: #819080;
+  font-size: 10px;
+}
+.tone-contour-line {
+  stroke: #467b58;
+  fill: none;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tone-contour-compact .tone-contour-line {
+  stroke-width: 5.5;
+}
+.pronunciation-selected-tone {
+  text-align: center;
+  border-radius: 12px;
+  background: #f6f8f3;
+  padding: 22px 20px 18px;
+  margin-top: 17px;
+}
+.pronunciation-tone-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--forest);
+}
+.pronunciation-tone-title h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+.pronunciation-tone-title > span {
+  font-size: 29px;
+  line-height: 1.4;
+}
+.pronunciation-selected-tone > .tone-contour {
+  max-width: 260px;
+  margin: 7px auto 9px;
+}
+.pronunciation-selected-tone > p {
+  font-size: 12px;
+}
+.pronunciation-selected-tone > small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 9px;
+}
+.pronunciation-example-link {
+  display: flex;
+  width: 100%;
+  min-height: 61px;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e4eadf;
+  background: white;
+  margin-top: 18px;
+}
+.pronunciation-example-link > .thai {
+  font-size: 29px;
+  color: var(--forest);
+  line-height: 1.5;
+}
+.pronunciation-example-link > span:nth-child(2) {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.pronunciation-example-link small {
+  font-size: 9px;
+  color: var(--muted);
+}
+.pronunciation-chart-note {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.95;
+  margin-top: 17px;
+}
+.pronunciation-unknown {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 20px;
+  background: #f8f5ec;
+  border-radius: 10px;
+  color: #786137;
+}
+.pronunciation-unknown h3 {
+  font-size: 14px;
+  font-weight: 650;
+}
+.pronunciation-unknown p,
+.pronunciation-unknown li {
+  font-size: 12px;
+  line-height: 1.95;
+  margin-top: 8px;
+}
+.pronunciation-search-unknown {
+  margin-top: 27px;
+}
+.pronunciation-manual > summary {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--forest);
+  list-style-position: outside;
+  margin-left: 17px;
+}
+.pronunciation-manual > summary > svg {
+  display: inline;
+  vertical-align: middle;
+  margin: 0 9px 2px 3px;
+}
+.pronunciation-manual-intro {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.95;
+  margin-top: 19px;
+  max-width: 760px;
+}
+.pronunciation-manual-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+  margin-top: 22px;
+}
+.pronunciation-manual-fields > label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+.pronunciation-manual-fields select {
+  font-size: 12px;
+}
+.pronunciation-manual-result {
+  max-width: 680px;
+}
+.pronunciation-manual-result > .pronunciation-unknown {
+  margin-top: 23px;
+}
+.pronunciation-next-note {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 25px 28px;
+}
+.pronunciation-next-note > svg {
+  color: var(--forest);
+}
+.pronunciation-next-note > div {
+  flex: 1;
+  min-width: 0;
+}
+.pronunciation-next-note h2 {
+  font-size: 14px;
+  font-weight: 650;
+}
+.pronunciation-next-note p {
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin-top: 8px;
+}
+@media (max-width: 1100px) {
+  .pronunciation-lab-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pronunciation-comparison {
+    max-width: none;
+  }
+  .pronunciation-tone-options {
+    max-width: 470px;
+  }
+  .pronunciation-selected-tone {
+    max-width: 470px;
+  }
+}
+@media (max-width: 600px) {
+  .pronunciation-explorer,
+  .pronunciation-comparison,
+  .pronunciation-manual {
+    padding: 21px 18px;
+  }
+  .pronunciation-explorer h2,
+  .pronunciation-comparison h2 {
+    font-size: 16px;
+  }
+  .pronunciation-section-heading {
+    gap: 7px;
+  }
+  .pronunciation-section-heading .eyebrow {
+    font-size: 9px;
+  }
+  .pronunciation-small-tag {
+    font-size: 9px;
+  }
+  .pronunciation-search > div {
+    flex-wrap: wrap;
+  }
+  .pronunciation-search-input {
+    flex-basis: 100%;
+  }
+  .pronunciation-search .button {
+    width: 100%;
+  }
+  .pronunciation-word {
+    gap: 20px;
+  }
+  .pronunciation-word > .thai {
+    font-size: 60px;
+  }
+  .pronunciation-decomposition {
+    gap: 7px;
+  }
+  .pronunciation-decomposition dd {
+    font-size: 27px;
+  }
+  .pronunciation-tone-answer h3 {
+    font-size: 21px;
+  }
+  .pronunciation-tone-answer > .tone-contour {
+    width: 94px;
+  }
+  .pronunciation-manual-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pronunciation-next-note {
+    flex-wrap: wrap;
+    padding: 23px 20px;
+    gap: 15px;
+  }
+  .pronunciation-next-note > div {
+    flex-basis: calc(100% - 50px);
+  }
+  .pronunciation-next-note > .button {
+    width: 100%;
+  }
+}

@@ -10,6 +10,10 @@ import {
   type LearningProgress,
 } from "../src/lib/progress";
 
+const phaseTwoCourseLessons = courseLessons.filter((lesson) =>
+  ["chapter-1", "chapter-2", "chapter-3"].includes(lesson.chapterId),
+);
+
 const chapterOneLessons = courseLessons.filter(
   (lesson) => lesson.chapterId === "chapter-1",
 );
@@ -115,7 +119,7 @@ test("第1章の保存記録を保ちながら追加8レッスンを学習し、
   test.setTimeout(120_000);
   expect(chapterOneLessons).toHaveLength(6);
   expect(phaseTwoLessons).toHaveLength(8);
-  expect(courseLessons).toHaveLength(14);
+  expect(phaseTwoCourseLessons).toHaveLength(14);
   const originalProgress = completedChapterOne();
   expect(isLearningProgress(originalProgress)).toBe(true);
   expect(getTotalXp(originalProgress)).toBe(240);
@@ -160,10 +164,8 @@ test("第1章の保存記録を保ちながら追加8レッスンを学習し、
     } else {
       await expect(
         page.getByRole("link", { name: "次のレッスンへ", exact: true }),
-      ).toHaveCount(0);
-      await page
-        .getByRole("link", { name: "ロードマップに戻る", exact: true })
-        .click();
+      ).toHaveAttribute("href", "/lessons/syllable-parts");
+      await page.goto("/roadmap");
     }
   }
 
@@ -173,7 +175,10 @@ test("第1章の保存記録を保ちながら追加8レッスンを学習し、
   expect(getTotalXp(restored)).toBe(570);
   expect(Object.keys(restored.lessons)).toHaveLength(14);
   expect(restored.attempts).toHaveLength(
-    courseLessons.reduce((total, lesson) => total + lesson.exercises.length, 0),
+    phaseTwoCourseLessons.reduce(
+      (total, lesson) => total + lesson.exercises.length,
+      0,
+    ),
   );
   expect(restored.attempts.slice(0, originalProgress.attempts.length)).toEqual(
     originalProgress.attempts,
@@ -182,7 +187,7 @@ test("第1章の保存記録を保ちながら追加8レッスンを学習し、
     expect(restored.lessons[lesson.id]).toEqual(
       originalProgress.lessons[lesson.id],
     );
-  for (const lesson of courseLessons)
+  for (const lesson of phaseTwoCourseLessons)
     await expect(page.getByTestId(`lesson-card-${lesson.id}`)).toContainText(
       "完了",
     );

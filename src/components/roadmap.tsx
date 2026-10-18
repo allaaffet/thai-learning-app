@@ -99,7 +99,7 @@ export function Roadmap() {
           <div>
             <p className="eyebrow">LOOKING AHEAD</p>
             <h2>この先につながる学び</h2>
-            <p>第1〜3章の14レッスンを収録しています。以下は今後の計画です。</p>
+            <p>第1〜5章の22レッスンを収録しています。以下は今後の計画です。</p>
           </div>
           <span className="badge neutral">
             <Layers3 size={13} /> 今後の計画

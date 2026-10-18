@@ -26,6 +26,7 @@ import {
   type ExerciseAttempt,
 } from "@/lib/progress";
 import { useLearning } from "@/components/learning-provider";
+import { SpeakButton } from "@/components/speech-practice";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -327,7 +328,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <p>
                 カードを選んで、文字・IPA・意味を確かめましょう。
                 <br />
-                この段階では、音声再生ではなく表記を使って比較します。
+                文字の形と音の仕組みを、表記で比較します。
               </p>
             </div>
             <div
@@ -365,9 +366,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <div className="ipa">{explored.ipa}</div>
               <h3>{explored.meaning}</h3>
               <p>{explored.note}</p>
+              {["chapter-4", "chapter-5"].includes(lesson.chapterId) && (
+                <SpeakButton key={explored.id} text={explored.thai} />
+              )}
             </div>
             <p className="explore-disclaimer">
-              音声・発音の採点機能は、後続フェーズで追加予定です。
+              録音音声と発音の自動採点は未実装です。合成音声は声によって読み方が異なり、発音の監修は未完了です。
             </p>
             <div className="lesson-actions">
               <Button variant="ghost" onClick={() => goToStage(0)}>

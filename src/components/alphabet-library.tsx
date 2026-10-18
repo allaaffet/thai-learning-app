@@ -39,7 +39,7 @@ function SourceNotice({
     <div id={all ? "content-sources" : undefined} className="source-note">
       <strong>教材案・専門家監修前</strong>
       <p>
-        Unicode資料との照合は文字の識別・名前に限ります。発音・語義・用例は専門家による検証前です。音声教材は未収録です。
+        Unicode資料との照合は文字の識別・名前に限ります。発音・語義・用例は専門家による検証前です。録音音声は未収録です。
       </p>
       <details>
         <summary>出典と確認範囲を見る</summary>

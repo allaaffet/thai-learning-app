@@ -14,6 +14,7 @@ import {
   PencilLine,
   Route,
   Sparkles,
+  Waves,
 } from "lucide-react";
 import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
@@ -31,6 +32,12 @@ const navigation = [
     icon: BookOpen,
   },
   { href: "/writing", label: "書き取り練習", mobile: "書く", icon: PencilLine },
+  {
+    href: "/pronunciation",
+    label: "発音・声調ラボ",
+    mobile: "発音",
+    icon: Waves,
+  },
   {
     href: "/progress",
     label: "学習の記録",
@@ -156,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               学ぶ楽しさを、毎日に。
             </span>
             <span>
-              <Leaf size={13} /> Phase 2 · ローカル保存
+              <Leaf size={13} /> Phase 3 · ローカル保存
             </span>
           </footer>
         </main>

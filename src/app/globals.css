@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./phase3.css";
+@import "./speech-practice.css";
 
 /* Limit the selectable faces to Thai glyphs, preserving Japanese and IPA. */
 @font-face {
@@ -2286,7 +2288,7 @@ a.lesson-card:hover {
   }
   .mobile-nav {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     position: fixed;
     left: 0;
     right: 0;

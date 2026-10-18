@@ -11,6 +11,7 @@ import {
   getCourseLesson,
 } from "./course";
 import { phaseTwoChapters, phaseTwoLessons } from "./phase-two";
+import { phaseThreeChapters, phaseThreeLessons } from "./phase-three";
 import {
   completeLesson,
   createEmptyProgress,
@@ -36,18 +37,20 @@ function learnedByLesson(id: string, path: string[] = []): Set<string> {
   ]);
 }
 
-describe("Phase 1とPhase 2の教材統合", () => {
-  it("既存6レッスンのID・順序・内容を保ったまま8レッスンを追加する", () => {
-    expect(courseLessons).toHaveLength(14);
+describe("Phase 1・2・3の教材統合", () => {
+  it("既存14レッスンを保ったまま声調8レッスンを追加する", () => {
+    expect(courseLessons).toHaveLength(22);
     expect(courseLessons.slice(0, 6)).toEqual(lessons);
-    expect(courseLessons.slice(6)).toEqual(phaseTwoLessons);
+    expect(courseLessons.slice(6, 14)).toEqual(phaseTwoLessons);
+    expect(courseLessons.slice(14)).toEqual(phaseThreeLessons);
     expect(courseChapters[0]).toEqual(chapter);
-    expect(courseChapters.slice(1)).toEqual(phaseTwoChapters);
+    expect(courseChapters.slice(1, 3)).toEqual(phaseTwoChapters);
+    expect(courseChapters.slice(3)).toEqual(phaseThreeChapters);
     expect(
       courseChapters.map((entry) => getChapterLessons(entry.id).length),
-    ).toEqual([6, 5, 3]);
+    ).toEqual([6, 5, 3, 4, 4]);
     expect(courseLessons.reduce((total, lesson) => total + lesson.xp, 0)).toBe(
-      570,
+      890,
     );
     expect(
       phaseTwoLessons.reduce((total, lesson) => total + lesson.xp, 0),
@@ -60,7 +63,7 @@ describe("Phase 1とPhase 2の教材統合", () => {
       courseParts
         .filter((part) => part.status === "available")
         .map((part) => part.id),
-    ).toEqual(["part-1", "part-2"]);
+    ).toEqual(["part-1", "part-2", "part-3"]);
     for (const part of courseParts) {
       for (const chapterId of part.chapterIds) {
         expect(getCourseChapter(chapterId)?.partId).toBe(part.id);
@@ -194,7 +197,7 @@ describe("Phase 1とPhase 2の教材統合", () => {
     const exercises = phaseTwoLessons.flatMap((lesson) => lesson.exercises);
     expect(exercises).toHaveLength(40);
     expect(courseLessons.flatMap((lesson) => lesson.exercises)).toHaveLength(
-      70,
+      110,
     );
     for (const lesson of phaseTwoLessons) {
       expect(lesson.objectives.length).toBeGreaterThanOrEqual(3);
@@ -222,7 +225,7 @@ describe("Phase 1とPhase 2の教材統合", () => {
     }
   });
 
-  it("既存の完了記録から第2章へ進み、14件を完了してもXPを重複加算しない", () => {
+  it("既存の完了記録から第2章へ進み、22件を完了してもXPを重複加算しない", () => {
     let progress = createEmptyProgress();
     expect(
       phaseTwoLessons.every((lesson) => !isLessonUnlocked(progress, lesson)),
@@ -244,8 +247,8 @@ describe("Phase 1とPhase 2の教材統合", () => {
         );
       }
     }
-    expect(Object.keys(progress.lessons)).toHaveLength(14);
-    expect(getTotalXp(progress)).toBe(570);
+    expect(Object.keys(progress.lessons)).toHaveLength(22);
+    expect(getTotalXp(progress)).toBe(890);
     expect(getNextLesson(progress, courseLessons)).toBeUndefined();
     for (const lesson of phaseTwoLessons) {
       const result = completeLesson(progress, lesson, {
@@ -257,6 +260,6 @@ describe("Phase 1とPhase 2の教材統合", () => {
       expect(result.earnedXp).toBe(0);
       progress = result.progress;
     }
-    expect(getTotalXp(progress)).toBe(570);
+    expect(getTotalXp(progress)).toBe(890);
   });
 });

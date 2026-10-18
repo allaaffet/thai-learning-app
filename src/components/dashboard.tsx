@@ -289,6 +289,9 @@ export function Dashboard() {
             <span className="note-foot">
               <Leaf size={13} /> ハートや時間制限はありません
             </span>
+            <Link href="/pronunciation" className="text-link mt-4">
+              声調の仕組みをラボで確かめる <ArrowRight size={15} />
+            </Link>
           </div>
         </div>
       </section>

@@ -1,0 +1,153 @@
+.speech-practice {
+  padding: 28px;
+}
+.speech-practice-heading {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  color: var(--forest);
+}
+.speech-practice-heading > div {
+  flex: 1;
+}
+.speech-practice-heading h2 {
+  font-size: 19px;
+  font-weight: 650;
+  margin-top: 5px;
+  line-height: 1.8;
+}
+.speech-disclosure {
+  color: #657362;
+  background: #f3f6ed;
+  border-radius: 10px;
+  padding: 15px 18px;
+  margin-top: 20px;
+  font-size: 12px;
+  line-height: 2;
+}
+.speech-voice {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+.speech-question {
+  display: flex;
+  align-items: start;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 25px;
+}
+.speech-question h3 {
+  font-weight: 600;
+  font-size: 16px;
+}
+.speech-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+.speech-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  padding: 0;
+}
+.speech-choices label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.speech-choices label:has(input:checked) {
+  background: var(--sage);
+  border-color: var(--forest);
+}
+.speech-choices input {
+  accent-color: var(--forest);
+  min-width: 16px;
+  min-height: 16px;
+}
+.speech-choices .thai {
+  font-size: 29px;
+  line-height: 1.9;
+}
+.speech-feedback {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: #faf4e7;
+  font-size: 13px;
+  line-height: 2;
+}
+.speech-feedback.is-correct {
+  background: var(--sage);
+  color: var(--forest);
+}
+.speech-feedback .thai {
+  font-size: 24px;
+}
+.speech-unavailable {
+  padding: 16px 18px;
+  background: #faf4e7;
+  border-radius: 10px;
+  color: #795e31;
+  font-size: 12px;
+  line-height: 2;
+  margin-top: 18px;
+}
+.speech-inline {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.speech-inline small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.speech-inline p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.9;
+  flex-basis: 100%;
+}
+.speech-complete {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: start;
+  margin-top: 22px;
+  line-height: 1.9;
+}
+@media (max-width: 600px) {
+  .speech-practice {
+    padding: 22px 18px;
+  }
+  .speech-practice-heading {
+    flex-wrap: wrap;
+  }
+  .speech-practice-heading .badge {
+    margin-left: 37px;
+  }
+  .speech-practice-heading h2 {
+    font-size: 16px;
+  }
+  .speech-choices {
+    gap: 7px;
+  }
+  .speech-choices label {
+    gap: 6px;
+    padding: 12px 6px;
+  }
+  .speech-choices .thai {
+    font-size: 26px;
+  }
+}
