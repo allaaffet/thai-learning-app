@@ -11,7 +11,11 @@
 | テスト | Vitest / 必要なReact Testing Library / Playwright | ロジックと実際の学習フローを検証する                 |
 | 配信   | Next.js対応環境、将来Vercel                       | Phase 1では外部DB・認証・有料APIを必要としない       |
 
-Thaiと日本語のフォントは `@fontsource-variable/noto-sans-thai` と `@fontsource-variable/noto-sans-jp` をnpmから導入し、アプリの静的ファイルとして自己配信する。描画時の外部フォントAPIへの依存はない。ライセンスは `public/licenses/` に同梱する。
+Thaiは `@fontsource-variable/noto-sans-thai-looped`（標準・ループあり）と `@fontsource-variable/noto-sans-thai`（ループなし）、日本語は `@fontsource-variable/noto-sans-jp` をnpmから導入し、アプリの静的ファイルとして自己配信する。描画時の外部フォントAPIへの依存はない。ライセンスは `public/licenses/` に同梱する。
+
+`ThaiFontToggle` が共通ヘッダーで字体を切り替える。`html[data-thai-font]` とCSS変数 `--font-thai` を使い、明示したThai要素と日本語解説に混在するThai文字へ適用する。Thaiフォントの `@font-face` をタイ文字のUnicode範囲に限定することで、日本語・Latin・IPAの字体は既存のフォールバックで維持する。フォントファイルはCSSからnpmパッケージ内のWOFF2を参照し、ビルド時に配信用資産へ取り込む。
+
+選択は進捗とは別の `localStorage` キー `thai-learning.thai-font.v1` に `looped` / `loopless` を保存する。初期値は標準。読み込みはhydration後に行い、無効な値は標準に戻す。保存を拒否された場合もその画面内での切替は継続でき、保存できない旨を表示する。`storage` イベントで別タブの選択変更も反映する。
 
 ## 責務の分離
 

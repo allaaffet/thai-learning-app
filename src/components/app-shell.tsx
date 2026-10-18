@@ -18,6 +18,7 @@ import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
 import { lessons } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
+import { ThaiFontToggle } from "@/components/thai-font-toggle";
 
 const navigation = [
   { href: "/", label: "ホーム", icon: House },
@@ -122,6 +123,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="status-dot" />
             日本語で学ぶ、タイ語の基礎
           </span>
+          <ThaiFontToggle />
           <div className="topbar-stats">
             <span title="連続学習日数">
               <Flame size={17} />

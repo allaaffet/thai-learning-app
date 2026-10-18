@@ -1,13 +1,35 @@
 @import "tailwindcss";
 
+/* Limit the selectable faces to Thai glyphs, preserving Japanese and IPA. */
+@font-face {
+  font-family: "Noto Sans Thai Looped Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/noto-sans-thai-looped/files/noto-sans-thai-looped-thai-wght-normal.woff2")
+    format("woff2");
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Sans Thai Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../../node_modules/@fontsource-variable/noto-sans-thai/files/noto-sans-thai-thai-wght-normal.woff2")
+    format("woff2");
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+
 @theme inline {
-  --font-sans: "Noto Sans JP Variable", "Noto Sans Thai Variable", sans-serif;
+  --font-sans: var(--font-thai), "Noto Sans JP Variable", sans-serif;
   --color-primary: #285b46;
   --color-muted: #6f7974;
   --color-border: #e5e9e5;
 }
 
 :root {
+  --font-thai: "Noto Sans Thai Looped Variable";
   --forest: #285b46;
   --forest-dark: #204935;
   --sage: #eaf2eb;
@@ -15,6 +37,9 @@
   --muted: #77817b;
   --line: #e6eae6;
   --page: #f7f8f6;
+}
+:root[data-thai-font="loopless"] {
+  --font-thai: "Noto Sans Thai Variable";
 }
 * {
   box-sizing: border-box;
@@ -26,7 +51,7 @@ body {
   margin: 0;
   color: var(--ink);
   background: var(--page);
-  font-family: "Noto Sans JP Variable", "Noto Sans Thai Variable", sans-serif;
+  font-family: var(--font-thai), "Noto Sans JP Variable", sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
@@ -72,7 +97,7 @@ svg {
 }
 .thai,
 [lang="th"] {
-  font-family: "Noto Sans Thai Variable", "Noto Sans JP Variable", sans-serif;
+  font-family: var(--font-thai), "Noto Sans JP Variable", sans-serif;
   line-height: 1.8;
 }
 .muted {
@@ -250,13 +275,82 @@ svg {
   margin-left: 238px;
 }
 .topbar {
-  height: 77px;
+  min-height: 77px;
   border-bottom: 1px solid var(--line);
   background: #ffffffb3;
-  padding: 0 44px;
+  padding: 12px 44px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
+}
+.font-preference {
+  max-width: 310px;
+}
+.font-preference-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+}
+.font-preference-label {
+  font-size: 10px;
+  color: #677961;
+  margin-right: 5px;
+  white-space: nowrap;
+}
+.font-preference-option {
+  font-size: 10px;
+  color: #7c8875;
+  white-space: nowrap;
+}
+.font-preference-option.active {
+  font-weight: 650;
+  color: #285b46;
+}
+.font-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  flex-shrink: 0;
+}
+.font-switch-track {
+  display: flex;
+  align-items: center;
+  width: 38px;
+  height: 23px;
+  border-radius: 20px;
+  padding: 3px;
+  border: 1px solid #b1c1a7;
+  background: #e5ecdf;
+  transition: background 0.15s;
+}
+.font-switch-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px #304a2c30;
+  transition: transform 0.15s;
+}
+.font-switch[aria-checked="true"] .font-switch-track {
+  background: #285b46;
+  border-color: #285b46;
+}
+.font-switch[aria-checked="true"] .font-switch-thumb {
+  transform: translateX(15px);
+}
+.font-preference-notice {
+  color: #805a2e;
+  font-size: 10px;
+  line-height: 1.8;
+  padding-bottom: 5px;
 }
 .topbar-label {
   font-size: 10px;
@@ -1445,7 +1539,7 @@ a.lesson-card:hover {
   line-height: 2.05;
 }
 .ipa {
-  font-family: "Noto Sans Thai Variable", "Noto Sans JP Variable", sans-serif;
+  font-family: var(--font-thai), "Noto Sans JP Variable", sans-serif;
   color: #9aa88b;
   font-size: 12px;
   letter-spacing: 0.3px;
@@ -1650,7 +1744,7 @@ a.lesson-card:hover {
   overflow-wrap: anywhere;
 }
 .option-label.has-thai {
-  font-family: "Noto Sans Thai Variable", "Noto Sans JP Variable", sans-serif;
+  font-family: var(--font-thai), "Noto Sans JP Variable", sans-serif;
   font-size: 21px;
   line-height: 2;
 }
@@ -1840,7 +1934,7 @@ a.lesson-card:hover {
     padding: 30px 28px 0;
   }
   .topbar {
-    padding: 0 28px;
+    padding: 12px 28px;
   }
   .dashboard-hero-grid {
     grid-template-columns: minmax(0, 1fr) 213px;
@@ -1940,9 +2034,30 @@ a.lesson-card:hover {
     margin-left: 0;
   }
   .topbar {
-    height: 69px;
-    padding: 0 22px;
+    min-height: 112px;
+    padding: 13px 22px 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 5px;
     position: relative;
+  }
+  .font-preference {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    max-width: none;
+  }
+  .font-preference-control {
+    justify-content: flex-end;
+  }
+  .font-preference-label {
+    margin-right: auto;
+  }
+  .font-preference-notice {
+    text-align: left;
+  }
+  .topbar-stats {
+    grid-column: 2;
+    grid-row: 1;
   }
   .topbar-label {
     display: none;
@@ -2426,7 +2541,7 @@ a.lesson-card:hover {
     padding-right: 16px;
   }
   .topbar {
-    padding: 0 16px;
+    padding: 13px 16px 10px;
   }
   .topbar-stats {
     gap: 10px;

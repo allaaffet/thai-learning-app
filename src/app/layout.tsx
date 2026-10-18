@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import "@fontsource-variable/noto-sans-thai";
 import "@fontsource-variable/noto-sans-jp";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
@@ -20,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
+    <html lang="ja" data-thai-font="looped">
       <body>
         <LearningProvider>
           <AppShell>{children}</AppShell>

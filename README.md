@@ -13,6 +13,7 @@
 - 第1章の10子音を参照できるタイ文字ノート、学習の記録。
 - ブラウザ内への進捗保存、再読み込み後の復元、保存失敗のお知らせ。
 - PC・タブレット・スマートフォン、キーボード操作、ローカル配信のThai対応フォント。
+- 画面上部の「タイ語の字体」で、標準（ループあり）とループなしを切り替え。選択はこのブラウザに保存されます。
 
 **教材は専門家レビュー前の教材案です。** Unicode公式資料による文字名・コード等の限定照合と、未検証のIPA・声調・語義を区別しています。音声、筆順、一般的な声調判定、SRS、クラウド同期は未実装です。確認範囲は [教材の出典](docs/CONTENT_SOURCES.md) を参照してください。
 
@@ -85,7 +86,7 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:e2e
 
 ## 構成と資料
 
-2026-10-18の最終検証では、lint・型チェック・本番ビルド、ユニットテスト58件、PC/モバイルのE2Eテスト14件が成功しました。全6レッスン・全30問の学習完了も確認済みです。ブラウザの確認範囲と開発用依存の既知事項は [検証結果](docs/VALIDATION.md) を参照してください。
+2026-10-18の最終検証では、lint・型チェック・本番ビルド、ユニットテスト58件、PC/モバイルのE2Eテスト計26件（学習14件・フォント切替12件）が成功しました。全6レッスン・全30問の学習完了も確認済みです。ブラウザの確認範囲と開発用依存の既知事項は [検証結果](docs/VALIDATION.md) を参照してください。
 
 Next.js App Router / React / TypeScript / Tailwind CSS / shadcn/ui方式のローカルUI部品 / Vitest / Playwright。
 
@@ -100,4 +101,6 @@ Next.js App Router / React / TypeScript / Tailwind CSS / shadcn/ui方式のロ�
 
 教材は `src/data/curriculum.ts`、型は `src/lib/content-types.ts`、保存と進捗は `src/lib/progress.ts` にあります。UIへ教材本文を埋め込まず、出典IDと確認状況を持たせています。一般的な声調判定エンジンはPhase 3で独立モジュールとして実装する予定です。
 
-日本語・ThaiフォントはNoto Sans JP / Noto Sans Thai（SIL Open Font License）をnpmパッケージから自己配信し、Google Fonts APIを利用しません。[フォントのライセンス](public/licenses/) を同梱しています。アプリの公開デプロイは今回行っていません。
+日本語フォントはNoto Sans JP、Thaiは標準（ループあり）のNoto Sans Thai LoopedとループなしのNoto Sans Thaiを使います（SIL Open Font License）。画面上部のスイッチはオフが標準、オンがループなしで、文字ノート・解説・問題のタイ語へ共通で反映します。字体だけの変更で、教材の綴りやIPAは変えません。保存先を使用できない場合も、その画面では切り替えられます。
+
+フォントはnpmパッケージから自己配信し、Google Fonts APIを利用しません。[フォントのライセンス](public/licenses/) を同梱しています。アプリの公開デプロイは今回行っていません。
