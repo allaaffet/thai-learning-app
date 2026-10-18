@@ -1,3 +1,5 @@
+import { audioFocus, type AudioFocus } from "./audio-focus";
+
 export type BrowserRecognitionStatus = "listening" | "idle";
 
 export interface BrowserRecognitionCallbacks {
@@ -31,6 +33,7 @@ interface RecognitionAdapter {
 interface RecognitionRun {
   recognition: RecognitionAdapter;
   timeout: ReturnType<typeof setTimeout> | undefined;
+  releaseFocus: () => void;
 }
 
 const timeoutMilliseconds = 9_000;
@@ -147,6 +150,7 @@ function recognitionErrorMessage(event: unknown): string {
  */
 export function createBrowserRecognitionSession(
   callbacks: BrowserRecognitionCallbacks,
+  focus: AudioFocus = audioFocus,
 ): BrowserRecognitionSession | undefined {
   const Constructor = recognitionConstructor();
   if (!Constructor) return undefined;
@@ -186,6 +190,7 @@ export function createBrowserRecognitionSession(
         }
       }
     }
+    run.releaseFocus();
     setStatus("idle");
   }
 
@@ -198,6 +203,7 @@ export function createBrowserRecognitionSession(
   return {
     start() {
       if (disposed || activeRun) return;
+      const releaseFocus = focus.acquire();
       let recognition: RecognitionAdapter;
       try {
         const candidate: unknown = Reflect.construct(Constructor, []);
@@ -209,13 +215,18 @@ export function createBrowserRecognitionSession(
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
       } catch {
+        releaseFocus();
         callbacks.onError(
           "このブラウザでは音声認識を開始できません。別の対応ブラウザを使うか、文字入力で回答してください。",
         );
         return;
       }
 
-      const run: RecognitionRun = { recognition, timeout: undefined };
+      const run: RecognitionRun = {
+        recognition,
+        timeout: undefined,
+        releaseFocus,
+      };
       activeRun = run;
       recognition.onstart = () => {
         if (isCurrent(run)) setStatus("listening");

@@ -14,6 +14,7 @@ import { getDueCards, type ReviewGrade } from "@/lib/review";
 import { useReview } from "@/components/review-provider";
 import { SpeakButton } from "@/components/speech-practice";
 import { Button } from "@/components/ui/button";
+import { useSoundEffects } from "@/components/sound-effects-provider";
 
 interface ReviewSession {
   ids: string[];
@@ -42,6 +43,8 @@ function formatDate(value: string) {
 
 export function ReviewPage() {
   const { state, ready, storageMessage, rateCard } = useReview();
+  const { playEffect } = useSoundEffects();
+  const soundedSession = useRef<string | null>(null);
   const [now, setNow] = useState<Date | null>(null);
   const [session, setSession] = useState<ReviewSession | null>(null);
   const submitted = useRef(false);
@@ -143,9 +146,13 @@ export function ReviewPage() {
     submitted.current = false;
     setNotice("");
     setNow(new Date());
-    if (session.index >= session.ids.length - 1)
+    if (session.index >= session.ids.length - 1) {
+      if (session.reviewed > 0 && soundedSession.current !== session.id) {
+        soundedSession.current = session.id;
+        playEffect("review-complete");
+      }
       setSession({ ...session, finished: true });
-    else {
+    } else {
       setSession({
         ...session,
         index: session.index + 1,

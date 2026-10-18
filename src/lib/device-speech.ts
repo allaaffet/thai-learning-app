@@ -1,3 +1,5 @@
+import { audioFocus, type AudioFocus } from "./audio-focus";
+
 /** Thai speech is an optional device capability, never a native recording. */
 export interface SpeechVoice {
   name: string;
@@ -45,12 +47,16 @@ export function selectThaiVoice(
 }
 
 /** Own playback by component: navigation cancels only that component's voice. */
-export function createSpeechController(backend: SpeechBackend) {
+export function createSpeechController(
+  backend: SpeechBackend,
+  focus: AudioFocus = audioFocus,
+) {
   let active:
     | {
         owner: string;
         token: symbol;
         callbacks: SpeechCallbacks;
+        releaseFocus: () => void;
         timer?: ReturnType<typeof setTimeout>;
       }
     | undefined;
@@ -66,6 +72,7 @@ export function createSpeechController(backend: SpeechBackend) {
         /* The session is already invalidated. */
       }
     }
+    previous.releaseFocus();
     if (kind === "error") previous.callbacks.error(message);
     else previous.callbacks[kind]();
   }
@@ -83,7 +90,7 @@ export function createSpeechController(backend: SpeechBackend) {
       }
       finish("cancel");
       const token = Symbol(owner);
-      active = { owner, token, callbacks };
+      active = { owner, token, callbacks, releaseFocus: focus.acquire() };
       active.timer = setTimeout(() => {
         if (active?.token === token)
           finish(

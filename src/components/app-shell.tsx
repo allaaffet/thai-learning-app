@@ -25,6 +25,7 @@ import { getStreak, getTotalXp } from "@/lib/progress";
 import { courseLessons as lessons } from "@/data/course";
 import { cn } from "@/lib/utils";
 import { ThaiFontToggle } from "@/components/thai-font-toggle";
+import { SoundSettings } from "@/components/sound-settings";
 
 const navigation = [
   { href: "/", label: "ホーム", icon: House },
@@ -169,7 +170,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="status-dot" />
             日本語で学ぶ、タイ語の基礎
           </span>
-          <ThaiFontToggle />
+          <div className="topbar-controls">
+            <ThaiFontToggle />
+            <SoundSettings />
+          </div>
           <div className="topbar-stats">
             <span title="連続学習日数">
               <Flame size={17} />

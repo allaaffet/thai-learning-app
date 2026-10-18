@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Square, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { audioFocus } from "@/lib/audio-focus";
 import {
   createMicrophoneRecorder,
   getBrowserMicrophoneBackend,
@@ -24,24 +25,33 @@ function RecorderSurface({
 }: Omit<LessonRecorderProps, "resetKey">) {
   const controller = useRef<MicrophoneRecorder | undefined>(undefined);
   const player = useRef<HTMLAudioElement | null>(null);
+  const playbackRelease = useRef<(() => void) | undefined>(undefined);
   const callbacks = useRef({ onRecordingChange, beforeStart });
   const [state, setState] = useState<RecordingSnapshot>({
     status: "idle",
     message: "自分の声を録音し、見本と聞き比べられます（最大20秒）。",
   });
-  function pausePlayback() {
+  const releasePlayback = useCallback(() => {
+    playbackRelease.current?.();
+    playbackRelease.current = undefined;
+  }, []);
+  const pausePlayback = useCallback(() => {
     player.current?.pause();
-  }
+    releasePlayback();
+  }, [releasePlayback]);
   useEffect(() => {
     callbacks.current = { onRecordingChange, beforeStart };
   }, [onRecordingChange, beforeStart]);
   useEffect(() => {
     const audio = player.current;
-    return () => audio?.pause();
-  }, [state.audioUrl]);
+    return () => {
+      audio?.pause();
+      releasePlayback();
+    };
+  }, [state.audioUrl, releasePlayback]);
   useEffect(() => {
     const leavePage = () => {
-      player.current?.pause();
+      pausePlayback();
       controller.current?.reset();
     };
     window.addEventListener("pagehide", leavePage);
@@ -51,7 +61,7 @@ function RecorderSurface({
       controller.current?.dispose();
       callbacks.current.onRecordingChange?.(false);
     };
-  }, []);
+  }, [pausePlayback]);
 
   function start() {
     if (
@@ -135,13 +145,22 @@ function RecorderSurface({
             src={state.audioUrl}
             aria-label="自分の録音"
             className="w-full max-w-full"
-            onError={() =>
+            onPlay={(event) => {
+              // The parent can reject playback during microphone capture.
+              if (event.currentTarget.paused) return;
+              releasePlayback();
+              playbackRelease.current = audioFocus.acquire();
+            }}
+            onPause={releasePlayback}
+            onEnded={releasePlayback}
+            onError={() => {
+              releasePlayback();
               setState((current) => ({
                 ...current,
                 message:
                   "この録音を再生できませんでした。録音し直すか、別のブラウザでお試しください。",
-              }))
-            }
+              }));
+            }}
           />
           <Button
             type="button"

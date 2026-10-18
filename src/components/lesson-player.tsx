@@ -33,6 +33,7 @@ import { getLessonOutputTask } from "@/data/lesson-output";
 import { isThaiSpeechText } from "@/lib/device-speech";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSoundEffects } from "@/components/sound-effects-provider";
 
 const stages = [
   { label: "理解する", english: "LEARN" },
@@ -43,6 +44,8 @@ const stages = [
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const { progress, ready, finishLesson, storageMessage } = useLearning();
+  const { playEffect } = useSoundEffects();
+  const committedQuestions = useRef(new Set<string>());
   const [stage, setStage] = useState(0);
   const [captureActive, setCaptureActive] = useState(false);
   const [exploreId, setExploreId] = useState(lesson.explore[0].id);
@@ -128,7 +131,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }
 
   function checkAnswer() {
-    if (!pendingGrade || answered) return;
+    if (
+      !pendingGrade ||
+      answered ||
+      committedQuestions.current.has(question.id)
+    )
+      return;
+    committedQuestions.current.add(question.id);
+    playEffect(pendingGrade.correct ? "correct" : "incorrect");
     setAnswers((previous) => {
       // Keep the first committed answer, including events arriving in one render.
       if (previous.some((answer) => answer.exerciseId === question.id))
@@ -156,6 +166,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       });
       saved.current = true;
       setSavedResult(result);
+      if (result.passed) playEffect("lesson-complete");
       setErrorMessage(null);
       return result;
     } catch (error) {
@@ -181,6 +192,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }
 
   function retryQuiz() {
+    committedQuestions.current.clear();
     setQuestionIndex(0);
     setResponse(null);
     setAnswers([]);

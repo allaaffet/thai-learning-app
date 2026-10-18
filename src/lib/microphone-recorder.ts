@@ -1,3 +1,5 @@
+import { audioFocus, type AudioFocus } from "./audio-focus";
+
 /** A short, in-memory recording. No browser storage, upload, or speech scoring. */
 export const MAX_RECORDING_SECONDS = 20;
 export const MAX_RECORDING_BYTES = 5 * 1024 * 1024;
@@ -94,6 +96,7 @@ function stopTracks(stream: MicrophoneStream) {
 export function createMicrophoneRecorder(
   backend: MicrophoneBackend,
   onChange: (snapshot: RecordingSnapshot) => void,
+  focus: AudioFocus = audioFocus,
 ) {
   interface Session {
     token: symbol;
@@ -103,6 +106,7 @@ export function createMicrophoneRecorder(
     bytes: number;
     tracksStopped: boolean;
     automatic: boolean;
+    releaseFocus: () => void;
     durationTimer?: ReturnType<typeof setTimeout>;
     stopTimer?: ReturnType<typeof setTimeout>;
   }
@@ -146,6 +150,7 @@ export function createMicrophoneRecorder(
     }
     closeTracks(current);
     current.chunks = [];
+    current.releaseFocus();
   }
   function active(current: Session) {
     return !disposed && session?.token === current.token;
@@ -225,6 +230,7 @@ export function createMicrophoneRecorder(
         bytes: 0,
         tracksStopped: false,
         automatic: false,
+        releaseFocus: focus.acquire(),
       };
       session = current;
       emit({

@@ -3,6 +3,7 @@
 @import "./speech-practice.css";
 @import "./lesson-output.css";
 @import "./phase4.css";
+@import "./sound-effects.css";
 
 /* Limit the selectable faces to Thai glyphs, preserving Japanese and IPA. */
 @font-face {

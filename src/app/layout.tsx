@@ -5,6 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
 import { ReviewProvider } from "@/components/review-provider";
 import { vocabularyEntries } from "@/data/language";
+import { SoundEffectsProvider } from "@/components/sound-effects-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -27,7 +28,9 @@ export default function RootLayout({
           <ReviewProvider
             vocabularyIds={vocabularyEntries.map((entry) => entry.id)}
           >
-            <AppShell>{children}</AppShell>
+            <SoundEffectsProvider>
+              <AppShell>{children}</AppShell>
+            </SoundEffectsProvider>
           </ReviewProvider>
         </LearningProvider>
       </body>
