@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createSpeechController,
+  isThaiSpeechText,
   selectThaiVoice,
   type SpeechBackend,
   type SpeechCallbacks,
@@ -48,6 +49,32 @@ function fixture() {
 afterEach(() => vi.useRealTimers());
 
 describe("端末のタイ語合成音声", () => {
+  it("例語の音声を綴りの模式図や母音のプレースホルダーに付けない", () => {
+    expect(isThaiSpeechText("ป้า")).toBe(true);
+    expect(isThaiSpeechText("กา ขา")).toBe(true);
+    for (const text of [
+      "-า",
+      "ก + า → กา",
+      "IPA /kaː/",
+      "",
+      " ี",
+      "ก".repeat(201),
+    ]) {
+      expect(isThaiSpeechText(text)).toBe(false);
+    }
+  });
+  it("マイク開始時は見本の再生を中断し、遅れた完了を無視する", () => {
+    const f = fixture();
+    const cb = f.callbacks();
+    f.controller.play("lesson-example", "กา", thai, cb);
+    f.controller.stopAll();
+    expect(cb.cancel).toHaveBeenCalledOnce();
+    expect(f.backend.cancel).toHaveBeenCalledOnce();
+    f.events[0].end();
+    expect(cb.complete).not.toHaveBeenCalled();
+    f.controller.stopAll();
+    expect(f.backend.cancel).toHaveBeenCalledOnce();
+  });
   it("日本語の既定音声を代用せず、実際に見つかったタイ語音声だけを選ぶ", () => {
     expect(selectThaiVoice([japanese])).toBeUndefined();
     expect(selectThaiVoice([])).toBeUndefined();

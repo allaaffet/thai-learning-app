@@ -73,9 +73,15 @@ const voiceUnavailable =
 export function SpeakButton({
   text,
   label = "合成音声で確認",
+  disabled = false,
+  compact = false,
+  beforePlay,
 }: {
   text: string;
   label?: string;
+  disabled?: boolean;
+  compact?: boolean;
+  beforePlay?: () => void;
 }) {
   const speech = useThaiSpeech();
   const stop = speech.stop;
@@ -86,17 +92,24 @@ export function SpeakButton({
         type="button"
         variant="outline"
         size="sm"
-        disabled={speech.status !== "ready"}
-        onClick={() => (speech.playing ? speech.stop() : speech.play(text))}
+        disabled={disabled || speech.status !== "ready"}
+        title={speech.status === "unavailable" ? voiceUnavailable : undefined}
+        onClick={() => {
+          if (speech.playing) speech.stop();
+          else {
+            beforePlay?.();
+            speech.play(text);
+          }
+        }}
       >
         {speech.playing ? <Square size={15} /> : <Volume2 size={16} />}
         {speech.playing ? "読み上げを停止" : label}
       </Button>
-      <small>端末の合成音声（未監修）</small>
-      {speech.status === "checking" && (
+      {!compact && <small>端末の合成音声（未監修）</small>}
+      {!compact && speech.status === "checking" && (
         <p role="status">タイ語の音声を確認中…</p>
       )}
-      {speech.status === "unavailable" && (
+      {!compact && speech.status === "unavailable" && (
         <p role="status">{voiceUnavailable}</p>
       )}
       {speech.message && <p role="status">{speech.message}</p>}

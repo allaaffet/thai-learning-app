@@ -24,6 +24,15 @@ export interface SpeechCallbacks {
   error: (message: string) => void;
 }
 
+/** Spelling diagrams and placeholders must not be read as model words. */
+export function isThaiSpeechText(text: string): boolean {
+  return (
+    text.length <= 200 &&
+    /[\u0e01-\u0e2e]/u.test(text) &&
+    /^[\u0e01-\u0e3a\u0e40-\u0e4e\s]+$/u.test(text)
+  );
+}
+
 export function isThaiVoice(voice: SpeechVoice): boolean {
   const lang = voice.lang.toLowerCase().replaceAll("_", "-");
   return lang === "th" || lang.startsWith("th-");
@@ -105,6 +114,10 @@ export function createSpeechController(backend: SpeechBackend) {
     },
     stop(owner: string) {
       if (active?.owner === owner) finish("cancel");
+    },
+    /** Cancel this app's model playback before opening a microphone. */
+    stopAll() {
+      finish("cancel");
     },
   };
 }

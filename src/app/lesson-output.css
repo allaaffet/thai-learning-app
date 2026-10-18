@@ -1,0 +1,126 @@
+.lesson-output {
+  margin-top: 30px;
+  padding: clamp(18px, 4vw, 30px);
+}
+.lesson-output > p {
+  margin-top: 12px;
+  line-height: 1.9;
+}
+.output-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.output-title h2 {
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.output-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0;
+}
+.output-body {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.output-body p {
+  line-height: 1.85;
+}
+.output-prompt,
+.output-recognition h3 {
+  font-weight: 600;
+}
+.output-hint {
+  font-size: 13px;
+  line-height: 1.9;
+}
+.output-hint summary {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.output-hint p {
+  margin-top: 10px;
+}
+.output-body form {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.output-body label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.output-input {
+  display: block;
+  width: min(100%, 440px);
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: white;
+  font-size: 28px;
+  line-height: 2;
+  color: var(--ink);
+}
+.output-input:focus-visible {
+  outline: 3px solid var(--forest);
+  outline-offset: 3px;
+}
+.output-help {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.85;
+}
+.output-model {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.output-model strong {
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 2;
+  overflow-wrap: anywhere;
+}
+.output-model .ipa {
+  font-size: 16px;
+}
+.output-feedback,
+.output-recognition {
+  padding: 18px;
+  background: var(--page);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.output-feedback.correct {
+  border-color: #b9d6c6;
+  background: #f1f7f3;
+}
+.output-feedback .thai {
+  line-height: 2;
+}
+.output-recognition {
+  background: transparent;
+}
+@media (max-width: 480px) {
+  .output-modes .button {
+    flex: 1;
+    padding-inline: 10px;
+  }
+  .output-recognition,
+  .output-feedback {
+    padding: 14px;
+  }
+}

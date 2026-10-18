@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./phase3.css";
 @import "./speech-practice.css";
+@import "./lesson-output.css";
 
 /* Limit the selectable faces to Thai glyphs, preserving Japanese and IPA. */
 @font-face {

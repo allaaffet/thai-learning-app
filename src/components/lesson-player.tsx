@@ -27,6 +27,9 @@ import {
 } from "@/lib/progress";
 import { useLearning } from "@/components/learning-provider";
 import { SpeakButton } from "@/components/speech-practice";
+import { LessonOutputPractice } from "@/components/lesson-output-practice";
+import { getLessonOutputTask } from "@/data/lesson-output";
+import { isThaiSpeechText } from "@/lib/device-speech";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +43,7 @@ const stages = [
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const { progress, ready, finishLesson, storageMessage } = useLearning();
   const [stage, setStage] = useState(0);
+  const [captureActive, setCaptureActive] = useState(false);
   const [exploreId, setExploreId] = useState(lesson.explore[0].id);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -109,6 +113,11 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const completedSession = savedResult?.passed === true;
   const nextLesson = getNextLesson(progress, lessons);
   const completionXp = progress.lessons[lesson.id]?.completedAt ? 0 : lesson.xp;
+  const outputTask = getLessonOutputTask(lesson.id);
+
+  function pauseRecordedAudio() {
+    panel.current?.querySelectorAll("audio").forEach((audio) => audio.pause());
+  }
 
   function goToStage(index: number) {
     if (index === 3 && answers.length === lesson.exercises.length && !passed)
@@ -281,6 +290,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 ))}
               </ul>
             </section>
+            <p className="explore-disclaimer">
+              例語の再生には端末のタイ語合成音声（未監修）を使います。録音教材ではなく、読み方・声調の自然さは未検証です。タイ語の声がない端末では再生できません。音声提供元への通信が発生する場合があります。
+            </p>
             {lesson.blocks.map((block) => (
               <section className="learning-block surface" key={block.id}>
                 <h2>{block.title}</h2>
@@ -298,6 +310,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                         <div className="meaning">{example.meaning}</div>
                         {example.note && (
                           <p className="example-note">{example.note}</p>
+                        )}
+                        {isThaiSpeechText(example.thai) && (
+                          <SpeakButton text={example.thai} compact />
                         )}
                       </div>
                     ))}
@@ -328,7 +343,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <p>
                 カードを選んで、文字・IPA・意味を確かめましょう。
                 <br />
-                文字の形と音の仕組みを、表記で比較します。
+                文字の形と音の仕組みを比較し、対応端末では合成音声も確認できます。
               </p>
             </div>
             <div
@@ -366,13 +381,29 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <div className="ipa">{explored.ipa}</div>
               <h3>{explored.meaning}</h3>
               <p>{explored.note}</p>
-              {["chapter-4", "chapter-5"].includes(lesson.chapterId) && (
-                <SpeakButton key={explored.id} text={explored.thai} />
+              {isThaiSpeechText(explored.thai) ? (
+                <SpeakButton
+                  key={explored.id}
+                  text={explored.thai}
+                  disabled={captureActive}
+                  beforePlay={pauseRecordedAudio}
+                />
+              ) : (
+                <p className="output-help">
+                  これは綴りの模式表記です。下の語の練習で音声を確認できます。
+                </p>
               )}
             </div>
             <p className="explore-disclaimer">
-              録音音声と発音の自動採点は未実装です。合成音声は声によって読み方が異なり、発音の監修は未完了です。
+              見本は端末の合成音声（未監修）です。声によって読み方が異なります。音声提供元への通信が発生する場合があります。発音・声調の自動採点は行いません。
             </p>
+            {outputTask && (
+              <LessonOutputPractice
+                key={outputTask.id}
+                task={outputTask}
+                onCaptureChange={setCaptureActive}
+              />
+            )}
             <div className="lesson-actions">
               <Button variant="ghost" onClick={() => goToStage(0)}>
                 <ArrowLeft size={15} /> 解説を読み直す
