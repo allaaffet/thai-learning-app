@@ -20,8 +20,10 @@
 
 Node.js **24 LTS**（検証版24.19.0）とnpmを使います。`.node-version` に版を記載しています。依存関係は `package-lock.json` で固定しています。
 
+現在のMVPは `codex/phase-1-mvp` ブランチにあります。
+
 ```bash
-git clone https://github.com/allaaffet/thai-learning-app.git
+git clone --branch codex/phase-1-mvp https://github.com/allaaffet/thai-learning-app.git
 cd thai-learning-app
 npm ci
 npm run dev
