@@ -1,5 +1,6 @@
 import { getCourseLesson } from "@/data/course";
 import { syllableEntries } from "@/data/syllables";
+import { getVocabularyEntry } from "@/data/language";
 
 /** 任意練習用。既存Lessonの採点・前提・XPには加算しない。 */
 export interface LessonOutputTask {
@@ -42,6 +43,87 @@ function outputTask(
  * 問題文・ヒントに正答のThai文字列を含めず、回答後に理由を示す。
  * 正しい綴りの確認と、発音の正しさの評価は別に扱う。
  */
+const phaseFourOutputTasks = [
+  {
+    lessonId: "basic-word-order",
+    wordId: "eat",
+    prompt: "短い文で使った『食べる』を、タイ文字で入力してください。",
+    hint: "初頭は無気音 /k/、短い /i/、末尾は /n/ です。",
+    explanation:
+      "กิน は『食べる』という動詞です。基本の文では主語の後、目的語の前に置きます。初頭・母音・末子音を一つの音節として読みます。",
+  },
+  {
+    lessonId: "pronouns-politeness",
+    wordId: "you",
+    prompt:
+      "このレッスンで学んだ、丁寧に相手を指す『あなた』を入力してください。",
+    hint: "有気音 /kʰ/ に、短い /u/ と末子音 /n/ が続きます。",
+    explanation:
+      "คุณ は相手を指す代名詞として使えます。呼び方は関係や状況によって変わり、会話では名前・親族呼称等を使うこともあります。",
+  },
+  {
+    lessonId: "predicates-negation",
+    wordId: "not",
+    prompt: "動詞や形容詞の前に置く、基本の否定語を入力してください。",
+    hint: "母音の綴りが子音より前にあり、読みは /maj˥˩/ です。",
+    explanation:
+      "ไม่ を動詞や形容詞の前に置き、否定します。名詞を『〜ではない』と否定する形とは分けて考えます。無記号の疑問詞と同じ意味ではありません。",
+  },
+  {
+    lessonId: "basic-questions",
+    wordId: "question-particle",
+    prompt:
+      "文末に加えて『〜ですか』と尋ねる、基本の疑問の語を入力してください。",
+    hint: "上昇調の /maj/ です。前に書く母音と先行子音を忘れずに。",
+    explanation:
+      "ไหม は、この課で扱う『はい・いいえ』で答えられる疑問に使います。何を尋ねるかが決まった疑問詞の文へ、機械的に重ねて付ける語ではありません。",
+  },
+  {
+    lessonId: "numbers-classifiers",
+    wordId: "book-classifier",
+    prompt: "本を数えるとき、数の後に使う類別詞を入力してください。",
+    hint: "この課の『本2冊』に使った、下降調 /lem/ の語です。",
+    explanation:
+      "เล่ม は本などを数える類別詞です。この課の基本形は『名詞＋数＋類別詞』で、日本語の『2冊の本』とは並び方が異なります。",
+  },
+  {
+    lessonId: "time-aspect",
+    wordId: "already",
+    prompt:
+      "『もう〜した』などの完了・変化を文脈とともに表す語を入力してください。",
+    hint: "高調の /lɛːw/。長い母音と末尾 /w/ の組み合わせです。",
+    explanation:
+      "แล้ว は完了・変化などを示します。日本語の過去形に一対一で対応する記号ではなく、いつの出来事かは時の表現や文脈も合わせて理解します。",
+  },
+  {
+    lessonId: "requests-modals",
+    wordId: "request",
+    prompt:
+      "『水をください』のように物を求める例文で、最初に使った依頼の語を入力してください。",
+    hint: "有気音 /kʰ/ と長い /ɔː/。上昇調で読む1音節の語です。",
+    explanation:
+      "ขอ を使う依頼を学びました。物を求める場面でも、文末の丁寧詞や状況に合う言い方を合わせて考えます。欲求を述べる語とは使い方が異なります。",
+  },
+  {
+    lessonId: "comparisons-connectors",
+    wordId: "than",
+    prompt:
+      "『AはBより大きい』の基本形で、比較対象の前に置く語を入力してください。",
+    hint: "初頭は子音連続 /kw/。長母音 /aː/ に低調が付きます。",
+    explanation:
+      "กว่า は、この課の基本比較『A＋形容詞＋比較の語＋B』で使います。日本語の『Bより』のように比較対象の後ろへ置く形とは異なります。",
+  },
+].map(({ wordId, ...task }) => {
+  const entry = getVocabularyEntry(wordId);
+  if (!entry) throw new Error(`任意練習の語彙がありません: ${wordId}`);
+  return outputTask({
+    ...task,
+    target: entry.thai,
+    ipa: entry.ipa,
+    meaning: entry.meaning,
+  });
+});
+
 export const lessonOutputTasks: LessonOutputTask[] = [
   outputTask({
     lessonId: "sounds-and-letters",
@@ -275,6 +357,7 @@ export const lessonOutputTasks: LessonOutputTask[] = [
     explanation:
       "限定的な อ นำ の語で、ย の音節を中子音の規則で扱います。่（マイエーク）があるので低調です。先頭の อ は独立した別音節にせず、この型をすべての อ 始まりへ一般化しません。",
   }),
+  ...phaseFourOutputTasks,
 ];
 
 export function getLessonOutputTask(lessonId: string) {

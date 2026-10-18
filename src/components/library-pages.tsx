@@ -23,6 +23,7 @@ import {
 import { useLearning } from "@/components/learning-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { StudyInsights } from "@/components/study-insights";
 
 export function ProgressPage() {
   const { progress, ready, storageMessage } = useLearning();
@@ -146,6 +147,7 @@ export function ProgressPage() {
         </Card>
       )}
 
+      <StudyInsights />
       <section aria-labelledby="lesson-progress-heading">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>

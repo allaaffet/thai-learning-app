@@ -22,6 +22,7 @@ import {
 } from "@/data/course";
 import { useLearning } from "@/components/learning-provider";
 import { LessonCard } from "@/components/lesson-card";
+import { ReviewSummary } from "@/components/review-summary";
 import { Button } from "@/components/ui/button";
 import { getNextLesson, getStreak, getTotalXp } from "@/lib/progress";
 
@@ -222,6 +223,7 @@ export function Dashboard() {
         </div>
       </section>
 
+      <ReviewSummary />
       <section className="chapter-section">
         <div className="section-heading">
           <div>

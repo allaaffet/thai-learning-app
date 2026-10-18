@@ -3,6 +3,8 @@ import "@fontsource-variable/noto-sans-jp";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
+import { ReviewProvider } from "@/components/review-provider";
+import { vocabularyEntries } from "@/data/language";
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +24,11 @@ export default function RootLayout({
     <html lang="ja" data-thai-font="looped">
       <body>
         <LearningProvider>
-          <AppShell>{children}</AppShell>
+          <ReviewProvider
+            vocabularyIds={vocabularyEntries.map((entry) => entry.id)}
+          >
+            <AppShell>{children}</AppShell>
+          </ReviewProvider>
         </LearningProvider>
       </body>
     </html>

@@ -53,7 +53,16 @@ interface ExerciseBase {
 /** 形式を判別して renderer を追加できる discriminated union。 */
 export type Exercise =
   | (ExerciseBase & { type: "multiple-choice" })
-  | (ExerciseBase & { type: "character-recognition" });
+  | (ExerciseBase & { type: "character-recognition" })
+  | (ExerciseBase & {
+      type: "fill-in-the-blank";
+      acceptedAnswers: readonly string[];
+    })
+  | (ExerciseBase & {
+      type: "word-ordering";
+      tokens: ExerciseOption[];
+      answerOrder: readonly string[];
+    });
 
 export interface Lesson {
   id: string;

@@ -7,10 +7,16 @@ License: Creative Commons Attribution-ShareAlike 3.0 Unported
 https://creativecommons.org/licenses/by-sa/3.0/
 Legal code: https://creativecommons.org/licenses/by-sa/3.0/legalcode
 
-Scope: 30 word/IPA reference excerpts identified in docs/PHASE3_SOURCES.md
-and the corresponding source references in src/data/syllables.ts.
+Scope: the 30 word/IPA reference excerpts identified in docs/PHASE3_SOURCES.md
+and the 40 vocabulary entries identified in docs/PHASE4_SOURCES.md. Some words
+appear in both sets. Corresponding references are in src/data/syllables.ts
+and src/data/language.ts.
 Changes: removed segmentation spaces and enclosed IPA in slashes; retained
 one long-vowel variant for ข้าว while noting the source's short variant.
+Phase 4 additionally changes the tied affricate t͡ɕ to tɕ for consistency with
+the app's notation, and selects the falling-tone variant of ค่ะ. Sentence IPA
+is assembled from these word excerpts for teaching; connected speech is not
+represented, and independently composed sentences have not been source-checked.
 The source corpus is not bundled in full. These IPA excerpts retain CC BY-SA 3.0.
 Japanese explanations, UI, and rule implementation were independently authored.
 Source checking is not expert review or a guarantee of pronunciation quality.

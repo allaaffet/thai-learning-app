@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,7 +16,6 @@ import {
   Sparkles,
   Target,
   Trophy,
-  X,
 } from "lucide-react";
 import { courseLessons as lessons, getCourseChapter } from "@/data/course";
 import type { Lesson } from "@/lib/content-types";
@@ -28,6 +27,8 @@ import {
 import { useLearning } from "@/components/learning-provider";
 import { SpeakButton } from "@/components/speech-practice";
 import { LessonOutputPractice } from "@/components/lesson-output-practice";
+import { ExerciseInput } from "@/components/exercise-input";
+import { gradeExercise, type ExerciseResponse } from "@/lib/exercise-grading";
 import { getLessonOutputTask } from "@/data/lesson-output";
 import { isThaiSpeechText } from "@/lib/device-speech";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [captureActive, setCaptureActive] = useState(false);
   const [exploreId, setExploreId] = useState(lesson.explore[0].id);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [response, setResponse] = useState<ExerciseResponse | null>(null);
   const [answers, setAnswers] = useState<ExerciseAttempt[]>([]);
   const [savedResult, setSavedResult] = useState<{
     passed: boolean;
@@ -114,6 +115,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const nextLesson = getNextLesson(progress, lessons);
   const completionXp = progress.lessons[lesson.id]?.completedAt ? 0 : lesson.xp;
   const outputTask = getLessonOutputTask(lesson.id);
+  const pendingGrade = gradeExercise(question, response);
 
   function pauseRecordedAudio() {
     panel.current?.querySelectorAll("audio").forEach((audio) => audio.pause());
@@ -126,17 +128,22 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }
 
   function checkAnswer() {
-    if (!selectedOption || answered) return;
-    setAnswers((previous) => [
-      ...previous,
-      {
-        exerciseId: question.id,
-        lessonId: lesson.id,
-        selectedOptionId: selectedOption,
-        correct: selectedOption === question.answerId,
-        attemptedAt: new Date().toISOString(),
-      },
-    ]);
+    if (!pendingGrade || answered) return;
+    setAnswers((previous) => {
+      // Keep the first committed answer, including events arriving in one render.
+      if (previous.some((answer) => answer.exerciseId === question.id))
+        return previous;
+      return [
+        ...previous,
+        {
+          exerciseId: question.id,
+          lessonId: lesson.id,
+          selectedOptionId: pendingGrade.selectedOptionId,
+          correct: pendingGrade.correct,
+          attemptedAt: new Date().toISOString(),
+        },
+      ];
+    });
   }
 
   function recordResult() {
@@ -169,49 +176,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       goToStage(3);
     } else {
       setQuestionIndex((index) => index + 1);
-      setSelectedOption(null);
+      setResponse(null);
     }
   }
 
   function retryQuiz() {
     setQuestionIndex(0);
-    setSelectedOption(null);
+    setResponse(null);
     setAnswers([]);
     setSavedResult(null);
     setErrorMessage(null);
     saved.current = false;
     goToStage(2);
-  }
-
-  function handleRadioKeys(event: KeyboardEvent<HTMLDivElement>) {
-    if (
-      answered ||
-      ![
-        "ArrowRight",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowUp",
-        "Home",
-        "End",
-      ].includes(event.key)
-    )
-      return;
-    event.preventDefault();
-    const current = question.options.findIndex(
-      (option) => option.id === selectedOption,
-    );
-    const direction = ["ArrowRight", "ArrowDown"].includes(event.key) ? 1 : -1;
-    const index =
-      event.key === "Home"
-        ? 0
-        : event.key === "End"
-          ? question.options.length - 1
-          : (current + direction + question.options.length) %
-            question.options.length;
-    setSelectedOption(question.options[index].id);
-    event.currentTarget
-      .querySelectorAll<HTMLButtonElement>("[role=radio]")
-      [index]?.focus();
   }
 
   return (
@@ -442,7 +418,11 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <BookOpen size={13} />
               {question.type === "character-recognition"
                 ? "文字を見分けよう"
-                : "仕組みを確かめよう"}{" "}
+                : question.type === "fill-in-the-blank"
+                  ? "空欄を埋めよう"
+                  : question.type === "word-ordering"
+                    ? "語句を並べよう"
+                    : "仕組みを確かめよう"}{" "}
               <span className="separator">·</span> 難易度 {question.difficulty}
             </p>
             <h2
@@ -453,60 +433,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
             >
               {question.prompt}
             </h2>
-            <div
-              className="quiz-options"
-              role="radiogroup"
-              aria-labelledby="exercise-prompt"
-              onKeyDown={handleRadioKeys}
-            >
-              {question.options.map((option, index) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  role="radio"
-                  aria-label={option.label}
-                  aria-checked={selectedOption === option.id}
-                  disabled={Boolean(answered)}
-                  tabIndex={
-                    selectedOption === option.id ||
-                    (!selectedOption && index === 0)
-                      ? 0
-                      : -1
-                  }
-                  onClick={() => setSelectedOption(option.id)}
-                  className={cn(
-                    "quiz-option",
-                    selectedOption === option.id && "selected",
-                    answered && option.id === question.answerId && "correct",
-                    answered &&
-                      option.id === answered.selectedOptionId &&
-                      !answered.correct &&
-                      "incorrect",
-                  )}
-                >
-                  <span className="option-key">
-                    {answered && option.id === question.answerId ? (
-                      <Check size={14} />
-                    ) : answered &&
-                      option.id === answered.selectedOptionId &&
-                      !answered.correct ? (
-                      <X size={14} />
-                    ) : (
-                      String.fromCharCode(65 + index)
-                    )}
-                  </span>
-                  <span
-                    className={cn(
-                      "option-label",
-                      /[\u0e00-\u0e7f]/.test(option.label) && "has-thai",
-                    )}
-                  >
-                    {option.label}
-                    {option.detail && <small>{option.detail}</small>}
-                  </span>
-                </button>
-              ))}
-            </div>
+            <ExerciseInput
+              key={question.id}
+              exercise={question}
+              response={response}
+              onChange={setResponse}
+              disabled={Boolean(answered)}
+              answeredCorrect={answered?.correct}
+            />
             {answered && (
               <div
                 role="status"
@@ -547,7 +481,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                   <ArrowRight size={15} />
                 </Button>
               ) : (
-                <Button disabled={!selectedOption} onClick={checkAnswer}>
+                <Button disabled={!pendingGrade} onClick={checkAnswer}>
                   答えを確認
                   <Check size={15} />
                 </Button>

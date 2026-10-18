@@ -150,7 +150,7 @@ test("既存14レッスンの記録を保ち、発音・声調の追加8レッ�
   test.setTimeout(150_000);
   expect(priorLessons).toHaveLength(14);
   expect(phaseThreeLessons).toHaveLength(8);
-  expect(courseLessons).toHaveLength(22);
+  expect(courseLessons).toHaveLength(30);
   const originalProgress = completedPriorCourse();
   expect(isLearningProgress(originalProgress)).toBe(true);
   expect(originalProgress.attempts).toHaveLength(70);
@@ -195,10 +195,8 @@ test("既存14レッスンの記録を保ち、発音・声調の追加8レッ�
     } else {
       await expect(
         page.getByRole("link", { name: "次のレッスンへ", exact: true }),
-      ).toHaveCount(0);
-      await page
-        .getByRole("link", { name: "ロードマップに戻る", exact: true })
-        .click();
+      ).toHaveAttribute("href", `/lessons/${courseLessons[22].id}`);
+      await page.goto("/roadmap");
     }
   }
 
@@ -215,7 +213,7 @@ test("既存14レッスンの記録を保ち、発音・声調の追加8レッ�
     expect(restored.lessons[lesson.id]).toEqual(
       originalProgress.lessons[lesson.id],
     );
-  for (const lesson of courseLessons)
+  for (const lesson of [...priorLessons, ...phaseThreeLessons])
     await expect(page.getByTestId(`lesson-card-${lesson.id}`)).toContainText(
       "完了",
     );

@@ -20,12 +20,12 @@ function learnedText(lessonId: string, seen = new Set<string>()): string {
 }
 
 describe("各レッスンの任意の文字入力練習", () => {
-  it("全22レッスンを一度ずつ対象にし、未登録のIDには問題を返さない", () => {
-    expect(lessonOutputTasks).toHaveLength(22);
+  it("全30レッスンを一度ずつ対象にし、未登録のIDには問題を返さない", () => {
+    expect(lessonOutputTasks).toHaveLength(30);
     expect(lessonOutputTasks.map((task) => task.lessonId)).toEqual(
       courseLessons.map((lesson) => lesson.id),
     );
-    expect(new Set(lessonOutputTasks.map((task) => task.id)).size).toBe(22);
+    expect(new Set(lessonOutputTasks.map((task) => task.id)).size).toBe(30);
     expect(getLessonOutputTask("not-a-lesson")).toBeUndefined();
     expect(getLessonOutputTask("sounds-and-letters")?.target).toBe("มา");
     expect(getLessonOutputTask("tone-reading-review")?.target).toBe("อย่า");

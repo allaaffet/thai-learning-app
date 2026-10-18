@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
@@ -15,6 +16,9 @@ import {
   Route,
   Sparkles,
   Waves,
+  BookText,
+  Languages,
+  RotateCcw,
 } from "lucide-react";
 import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
@@ -39,6 +43,24 @@ const navigation = [
     icon: Waves,
   },
   {
+    href: "/vocabulary",
+    label: "単語帳",
+    mobile: "単語",
+    icon: Languages,
+  },
+  {
+    href: "/grammar",
+    label: "文法リファレンス",
+    mobile: "文法",
+    icon: BookText,
+  },
+  {
+    href: "/review",
+    label: "単語の復習",
+    mobile: "復習",
+    icon: RotateCcw,
+  },
+  {
     href: "/progress",
     label: "学習の記録",
     mobile: "記録",
@@ -48,6 +70,21 @@ const navigation = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const mobileNavigation = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = mobileNavigation.current;
+    const active = nav?.querySelector<HTMLAnchorElement>("a.active");
+    if (!nav || !active || nav.clientWidth === 0) return;
+    if (
+      active.offsetLeft < nav.scrollLeft ||
+      active.offsetLeft + active.offsetWidth > nav.scrollLeft + nav.clientWidth
+    ) {
+      nav.scrollLeft = Math.max(
+        0,
+        active.offsetLeft - nav.clientWidth / 2 + active.offsetWidth / 2,
+      );
+    }
+  }, [pathname]);
   const { progress, ready, storageMessage } = useLearning();
   const completed = lessons.filter(
     (lesson) => progress.lessons[lesson.id]?.completedAt,
@@ -163,12 +200,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               学ぶ楽しさを、毎日に。
             </span>
             <span>
-              <Leaf size={13} /> Phase 3 · ローカル保存
+              <Leaf size={13} /> Phase 4 · ローカル保存
             </span>
           </footer>
         </main>
       </div>
-      <nav className="mobile-nav" aria-label="モバイルナビゲーション">
+      <nav
+        ref={mobileNavigation}
+        className="mobile-nav"
+        aria-label="モバイルナビゲーション"
+      >
         {navigation.map(({ href, label, mobile, icon: Icon }) => (
           <Link
             key={href}

@@ -11,7 +11,7 @@ function choice(
   answerIndex: number,
   explanation: string,
   relatedConcepts: string[],
-  type: Exercise["type"] = "multiple-choice",
+  type: "multiple-choice" | "character-recognition" = "multiple-choice",
   difficulty: 1 | 2 | 3 = 1,
 ): Exercise {
   return {
