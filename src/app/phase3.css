@@ -22,12 +22,12 @@
   background: var(--sage);
   padding: 5px 9px;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   white-space: nowrap;
 }
 .pronunciation-explorer h2,
 .pronunciation-comparison h2 {
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.8;
 }
@@ -39,7 +39,7 @@
   flex-direction: column;
   gap: 8px;
   margin-top: 23px;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
 }
 .pronunciation-field select,
@@ -53,14 +53,14 @@
   padding: 9px 34px 9px 12px;
   font: inherit;
   font-weight: 400;
-  font-size: 14px;
+  font-size: var(--text-body);
 }
 .pronunciation-search {
   margin-top: 18px;
 }
 .pronunciation-search > label {
   display: block;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -88,7 +88,7 @@
   outline-offset: 2px;
   background: transparent;
   color: var(--ink);
-  font-size: 15px;
+  font-size: 1.0625rem;
 }
 .pronunciation-search .button {
   min-width: 112px;
@@ -108,7 +108,7 @@
 }
 .pronunciation-word > div {
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 1.9;
   overflow-wrap: anywhere;
 }
@@ -130,7 +130,7 @@
   min-width: 0;
 }
 .pronunciation-decomposition dt {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #748075;
 }
 .pronunciation-decomposition dd {
@@ -141,7 +141,7 @@
   overflow-wrap: anywhere;
 }
 .pronunciation-decomposition-note {
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.95;
   color: var(--muted);
   margin-top: 10px;
@@ -150,7 +150,7 @@
   border-left: 3px solid #d9b97a;
   background: #faf7ef;
   padding: 12px 14px;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
   margin-top: 17px;
 }
@@ -179,7 +179,7 @@
 }
 .pronunciation-tone-answer p:last-child {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
   margin-top: 5px;
 }
 .pronunciation-tone-answer > .tone-contour {
@@ -195,7 +195,7 @@
 .pronunciation-result-tags > span {
   padding: 5px 10px;
   color: var(--forest);
-  font-size: 10px;
+  font-size: var(--text-caption);
   background: var(--sage);
   border-radius: 5px;
 }
@@ -211,7 +211,7 @@
   display: flex;
   align-items: flex-start;
   gap: 11px;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.95;
 }
 .pronunciation-rule-steps li > span {
@@ -224,23 +224,23 @@
   background: #edf2eb;
   color: #667d62;
   border-radius: 50%;
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin-top: 1px;
 }
 .pronunciation-sources {
   margin-top: 22px;
 }
 .pronunciation-sources > summary {
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .pronunciation-sources p {
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.9;
   margin-top: 10px;
   overflow-wrap: anywhere;
 }
 .pronunciation-section-copy {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: var(--muted);
   margin-top: 8px;
   line-height: 1.9;
@@ -262,7 +262,7 @@
   background: #fff;
   border-radius: 8px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .pronunciation-tone-option.active {
   border-color: #739881;
@@ -287,7 +287,7 @@
 }
 .tone-contour-label {
   fill: #819080;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .tone-contour-line {
   stroke: #467b58;
@@ -314,7 +314,7 @@
   color: var(--forest);
 }
 .pronunciation-tone-title h3 {
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 700;
 }
 .pronunciation-tone-title > span {
@@ -326,12 +326,12 @@
   margin: 7px auto 9px;
 }
 .pronunciation-selected-tone > p {
-  font-size: 12px;
+  font-size: var(--text-small);
 }
 .pronunciation-selected-tone > small {
   display: block;
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin-top: 9px;
 }
 .pronunciation-example-link {
@@ -354,16 +354,16 @@
 }
 .pronunciation-example-link > span:nth-child(2) {
   flex: 1;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.8;
 }
 .pronunciation-example-link small {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: var(--muted);
 }
 .pronunciation-chart-note {
   color: var(--muted);
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.95;
   margin-top: 17px;
 }
@@ -377,12 +377,12 @@
   color: #786137;
 }
 .pronunciation-unknown h3 {
-  font-size: 14px;
+  font-size: var(--text-body);
   font-weight: 650;
 }
 .pronunciation-unknown p,
 .pronunciation-unknown li {
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.95;
   margin-top: 8px;
 }
@@ -390,7 +390,7 @@
   margin-top: 27px;
 }
 .pronunciation-manual > summary {
-  font-size: 14px;
+  font-size: var(--text-body);
   font-weight: 650;
   color: var(--forest);
   list-style-position: outside;
@@ -403,7 +403,7 @@
 }
 .pronunciation-manual-intro {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.95;
   margin-top: 19px;
   max-width: 760px;
@@ -419,11 +419,11 @@
   flex-direction: column;
   gap: 9px;
   min-width: 0;
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 600;
 }
 .pronunciation-manual-fields select {
-  font-size: 12px;
+  font-size: var(--text-small);
 }
 .pronunciation-manual-result {
   max-width: 680px;
@@ -445,11 +445,11 @@
   min-width: 0;
 }
 .pronunciation-next-note h2 {
-  font-size: 14px;
+  font-size: var(--text-body);
   font-weight: 650;
 }
 .pronunciation-next-note p {
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.9;
   color: var(--muted);
   margin-top: 8px;
@@ -476,16 +476,16 @@
   }
   .pronunciation-explorer h2,
   .pronunciation-comparison h2 {
-    font-size: 16px;
+    font-size: 1.125rem;
   }
   .pronunciation-section-heading {
     gap: 7px;
   }
   .pronunciation-section-heading .eyebrow {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .pronunciation-small-tag {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .pronunciation-search > div {
     flex-wrap: wrap;

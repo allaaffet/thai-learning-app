@@ -1,0 +1,243 @@
+@import "./visual-home.css";
+@import "./visual-lesson.css";
+@import "./visual-reference.css";
+@import "./visual-progress.css";
+
+/* Shared reading sizes. Rem values preserve the browser's text-size preference. */
+:root {
+  --text-body: 1rem;
+  --text-learning: 1.125rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+}
+
+html {
+  font-size: 100%;
+}
+body {
+  font-size: var(--text-body);
+  line-height: 1.75;
+}
+.button {
+  font-size: var(--text-body);
+  line-height: 1.5;
+  white-space: normal;
+  text-align: center;
+}
+.button-sm {
+  font-size: var(--text-small);
+}
+input,
+select,
+textarea {
+  font-size: var(--text-body);
+}
+.language-search input,
+.language-filter select,
+.grammar-navigation .language-search input,
+.pronunciation-search-input input,
+.pronunciation-field select,
+.pronunciation-manual-fields select {
+  font-size: var(--text-body);
+}
+.page-description {
+  font-size: var(--text-body);
+  max-width: 46rem;
+}
+.text-link {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.section-heading p:not(.eyebrow) {
+  font-size: var(--text-small);
+}
+.section-heading,
+.page-header,
+.lesson-heading,
+.lesson-actions {
+  min-width: 0;
+}
+.section-heading h2,
+.lesson-heading h1 {
+  overflow-wrap: anywhere;
+}
+.learning-block > p,
+.lesson-explanation-details > div > p,
+.quiz-feedback p,
+.review-mistakes article p,
+.explore-detail > p,
+.grammar-explanation p {
+  font-size: var(--text-learning);
+  line-height: 1.95;
+}
+.example-pronunciation,
+.example-meaning,
+.rule-callout,
+.objective-card li,
+.review-summary li {
+  font-size: var(--text-body);
+}
+.option-label {
+  font-size: var(--text-learning);
+}
+.quiz-options,
+.grammar-segments,
+.language-toolbar {
+  min-width: 0;
+}
+.discovery-grid > *,
+.lesson-step,
+.lesson-step > span {
+  min-width: 0;
+}
+.discovery-equation {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.lesson-steps {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.lesson-step {
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+.quiz-option,
+.quiz-option > span,
+.grammar-segments > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.nav-link {
+  min-height: 48px;
+}
+.nav-caption {
+  margin-top: 32px;
+  letter-spacing: 0.05em;
+}
+.sidebar-course {
+  padding: 22px 18px;
+}
+.sidebar-course-heading {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: var(--text-small);
+  color: var(--forest);
+}
+.sidebar-course-value {
+  display: block;
+  margin-block: 12px;
+  font-size: 30px;
+  color: var(--forest);
+  line-height: 1.5;
+}
+.sidebar-course-value small {
+  color: var(--muted);
+  font-size: var(--text-small);
+  font-weight: 400;
+}
+.sidebar-course .track {
+  height: 7px;
+}
+.page-footer {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+summary {
+  line-height: 1.75;
+  min-height: 44px;
+  padding-block: 8px;
+}
+.sound-settings-dialog p,
+.sound-settings-volume {
+  font-size: var(--text-body);
+}
+.sound-settings-dialog .sound-settings-note {
+  font-size: var(--text-small);
+}
+
+@media (max-width: 1100px) {
+  .pronunciation-lab-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .topbar {
+    gap: 12px;
+  }
+  .topbar-controls {
+    flex-wrap: wrap;
+  }
+  .grammar-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .grammar-navigation {
+    position: static;
+  }
+  .grammar-navigation ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+}
+@media (max-width: 760px) {
+  .topbar {
+    column-gap: 10px;
+  }
+  .font-preference-control {
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .font-preference-label {
+    margin-right: auto;
+  }
+  .font-preference-control .font-switch {
+    flex-shrink: 0;
+  }
+  .font-preference-control {
+    justify-content: flex-start;
+  }
+  .topbar-controls {
+    padding-block: 4px;
+  }
+  .topbar-controls .sound-settings-trigger {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .topbar-stats {
+    gap: 9px;
+  }
+  .topbar-stats > span {
+    gap: 3px;
+  }
+  .topbar-stats .stat-unit {
+    font-size: var(--text-caption);
+  }
+  .lesson-step strong {
+    font-size: var(--text-small);
+  }
+  .lesson-step small {
+    display: none;
+  }
+  .chapter-count {
+    white-space: normal;
+  }
+  .alphabet-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .vowel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .library-tabs {
+    flex-wrap: wrap;
+  }
+  .discovery-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

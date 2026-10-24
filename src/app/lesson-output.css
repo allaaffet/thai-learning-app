@@ -37,7 +37,7 @@
   font-weight: 600;
 }
 .output-hint {
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 1.9;
 }
 .output-hint summary {
@@ -54,7 +54,7 @@
   gap: 12px;
 }
 .output-body label {
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 600;
 }
 .output-input {
@@ -74,7 +74,7 @@
   outline-offset: 3px;
 }
 .output-help {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: var(--muted);
   line-height: 1.85;
 }
@@ -91,7 +91,7 @@
   overflow-wrap: anywhere;
 }
 .output-model .ipa {
-  font-size: 16px;
+  font-size: 1.125rem;
 }
 .output-feedback,
 .output-recognition {

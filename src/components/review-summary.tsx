@@ -37,27 +37,33 @@ export function ReviewSummary() {
       className="surface phase4-review-summary"
       aria-label="今日の単語復習"
     >
-      <div>
-        <p className="eyebrow">A LITTLE, AGAIN</p>
-        <h2>
-          <RotateCcw size={20} aria-hidden="true" />
-          今日の復習
-        </h2>
-        <p>
-          {stats
-            ? `${stats.dueCount}語が復習のタイミングです。登録した単語は${stats.totalCards}語。`
-            : "復習予定を読み込み中…"}
-        </p>
-        <p className="muted text-sm">
-          思い出すたび、少しずつ。自己評価の復習はXPと分けて記録します。
-        </p>
+      <div className="review-summary-overview">
+        <span className="review-summary-icon" aria-hidden="true">
+          <RotateCcw size={29} />
+        </span>
+        <div>
+          <h2>今日の復習</h2>
+          <p className="review-count" aria-live="polite">
+            {stats ? (
+              <>
+                <strong>{stats.dueCount}</strong>
+                <span>語の復習待ち</span>
+              </>
+            ) : (
+              "復習予定を読み込み中…"
+            )}
+          </p>
+          <p className="review-summary-meta">
+            登録 {stats ? stats.totalCards : "–"}語 · 自己評価・XP対象外
+          </p>
+        </div>
         {storageMessage && (
           <p role="status" className="storage-notice">
             {storageMessage}
           </p>
         )}
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="review-summary-actions">
         <Button asChild variant={stats?.dueCount ? "default" : "outline"}>
           <Link href="/review">
             単語を復習する

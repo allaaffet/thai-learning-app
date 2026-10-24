@@ -4,11 +4,19 @@ import {
   BookOpen,
   Check,
   ChevronDown,
+  Eye,
   Flag,
   Layers3,
   LockKeyhole,
+  PencilLine,
+  RotateCcw,
 } from "lucide-react";
-import { courseParts, courseChapters, getChapterLessons } from "@/data/course";
+import {
+  courseParts,
+  courseChapters,
+  courseLessons,
+  getChapterLessons,
+} from "@/data/course";
 import { useLearning } from "@/components/learning-provider";
 import { LessonCard } from "@/components/lesson-card";
 
@@ -17,25 +25,35 @@ export function Roadmap() {
   return (
     <>
       <div className="page-header">
-        <p className="eyebrow">LEARNING ROADMAP</p>
         <h1 className="page-title">学びの道のり</h1>
         <p className="page-description">
-          音と文字から、ことばの仕組みへ。一歩ずつ、つながるカリキュラム。
+          {courseChapters.length}章・{courseLessons.length}
+          レッスン。音と文字から、日常のことばへ。
         </p>
       </div>
-      <div className="roadmap-flow">
-        <span>
-          <BookOpen size={15} /> 理解する
-        </span>
-        <span>→</span>
-        <span>確認する</span>
-        <span>→</span>
-        <span>練習する</span>
-        <span>→</span>
-        <span>振り返る</span>
-      </div>
+      <ol
+        className="roadmap-flow visual-learning-flow"
+        aria-label="レッスンの進め方"
+      >
+        {[
+          { label: "理解する", Icon: BookOpen },
+          { label: "確認する", Icon: Eye },
+          { label: "練習する", Icon: PencilLine },
+          { label: "振り返る", Icon: RotateCcw },
+        ].map(({ label, Icon }, index) => (
+          <li key={label}>
+            <span className="flow-icon">
+              <Icon size={23} aria-hidden="true" />
+            </span>
+            <span>{label}</span>
+            <span className="flow-step" aria-hidden="true">
+              {index + 1}
+            </span>
+          </li>
+        ))}
+      </ol>
       <p className="roadmap-help">
-        5問中4問以上の正解で次のレッスンが開きます。完了したレッスンはいつでも復習できます。
+        5問中4問以上で次へ。完了したレッスンはいつでも復習できます。
       </p>
       {courseParts
         .filter((part) => part.status === "available")
@@ -50,11 +68,15 @@ export function Roadmap() {
                 <Flag size={26} />
               </div>
               <div>
-                <span className="eyebrow">
-                  PART {String(part.number).padStart(2, "0")}
-                </span>
+                <span className="eyebrow">第{part.number}部</span>
                 <h2 id={`heading-${part.id}`}>{part.title}</h2>
-                <p>{part.description}</p>
+                <details className="course-description">
+                  <summary>
+                    この部で学ぶこと{" "}
+                    <ChevronDown size={15} aria-hidden="true" />
+                  </summary>
+                  <p>{part.description}</p>
+                </details>
               </div>
               <span className="badge">教材を収録</span>
             </div>
@@ -73,17 +95,52 @@ export function Roadmap() {
                   >
                     <div className="section-heading">
                       <div>
-                        <p className="eyebrow">
-                          CHAPTER {String(chapter.number).padStart(2, "0")}
-                        </p>
+                        <p className="eyebrow">第{chapter.number}章</p>
                         <h2 id={`heading-${chapter.id}`}>{chapter.title}</h2>
-                        <p>{chapter.description}</p>
                       </div>
                       <span className="chapter-count">
                         <Check size={16} /> {ready ? completed : "–"} /{" "}
                         {lessons.length} 完了
                       </span>
                     </div>
+                    <div
+                      className="chapter-milestones"
+                      role="progressbar"
+                      aria-label={`${chapter.title}の進捗`}
+                      aria-valuemin={0}
+                      aria-valuemax={lessons.length}
+                      aria-valuenow={ready ? completed : 0}
+                      aria-valuetext={
+                        ready
+                          ? `${lessons.length}レッスン中${completed}レッスン完了`
+                          : "進捗を読み込み中"
+                      }
+                    >
+                      {lessons.map((lesson, index) => (
+                        <span
+                          key={lesson.id}
+                          className={
+                            progress.lessons[lesson.id]?.completedAt
+                              ? "is-complete"
+                              : ""
+                          }
+                          aria-hidden="true"
+                        >
+                          {progress.lessons[lesson.id]?.completedAt ? (
+                            <Check size={16} />
+                          ) : (
+                            index + 1
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                    <details className="course-description chapter-description">
+                      <summary>
+                        この章で学ぶこと{" "}
+                        <ChevronDown size={15} aria-hidden="true" />
+                      </summary>
+                      <p>{chapter.description}</p>
+                    </details>
                     <div className="lesson-grid">
                       {lessons.map((lesson) => (
                         <LessonCard key={lesson.id} lesson={lesson} />
@@ -97,9 +154,11 @@ export function Roadmap() {
       <section className="future-curriculum">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">LOOKING AHEAD</p>
             <h2>この先につながる学び</h2>
-            <p>第1〜5章の22レッスンを収録しています。以下は今後の計画です。</p>
+            <p>
+              全{courseChapters.length}章・{courseLessons.length}
+              レッスンを収録。以下は今後の計画です。
+            </p>
           </div>
           <span className="badge neutral">
             <Layers3 size={13} /> 今後の計画

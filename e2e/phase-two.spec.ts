@@ -73,9 +73,9 @@ async function completePerfectLesson(page: Page, lesson: Lesson) {
   await page
     .getByRole("button", { name: "文字と音を確認する", exact: true })
     .click();
-  await expect(page.locator("#explore-detail [lang=th]")).toHaveText(
-    lesson.explore[0].thai,
-  );
+  await expect(
+    page.locator('#explore-detail .lesson-explore-word > [lang="th"]'),
+  ).toHaveText(lesson.explore[0].thai);
   await page.getByRole("button", { name: "練習に進む", exact: true }).click();
 
   for (const [index, exercise] of lesson.exercises.entries()) {

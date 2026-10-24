@@ -57,7 +57,7 @@ body {
   color: var(--ink);
   background: var(--page);
   font-family: var(--font-thai), "Noto Sans JP Variable", sans-serif;
-  font-size: 14px;
+  font-size: var(--text-body);
   -webkit-font-smoothing: antialiased;
 }
 button,
@@ -142,7 +142,7 @@ svg {
   gap: 11px;
   align-items: center;
   padding: 0 7px;
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 750;
   color: var(--forest);
   white-space: nowrap;
@@ -167,7 +167,7 @@ svg {
 .brand small {
   display: block;
   margin-top: 5px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   font-weight: 450;
   color: #839086;
   letter-spacing: 0.8px;
@@ -175,7 +175,7 @@ svg {
 .nav-caption {
   margin: 47px 0 13px 15px;
   color: #9da79f;
-  font-size: 9px;
+  font-size: var(--text-caption);
   font-weight: 650;
   letter-spacing: 1.8px;
 }
@@ -192,7 +192,7 @@ svg {
   min-height: 49px;
   color: #7a837c;
   border-radius: 9px;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 500;
   transition: background 0.15s;
 }
@@ -233,19 +233,19 @@ svg {
   margin: 14px 0 22px;
   line-height: 1.9;
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--text-small);
 }
 .sidebar-course-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #7a8577;
   margin-bottom: 9px;
 }
 .sidebar-course-meta strong {
   color: #526e52;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .track {
   height: 5px;
@@ -266,7 +266,7 @@ svg {
   align-items: center;
   margin-top: 17px;
   color: #617859;
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .sidebar-bottom {
   padding-top: 24px;
@@ -274,7 +274,7 @@ svg {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #95a08f;
 }
 .main-shell {
@@ -300,13 +300,13 @@ svg {
   min-height: 44px;
 }
 .font-preference-label {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #677961;
   margin-right: 5px;
   white-space: nowrap;
 }
 .font-preference-option {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #7c8875;
   white-space: nowrap;
 }
@@ -354,12 +354,12 @@ svg {
 }
 .font-preference-notice {
   color: #805a2e;
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.8;
   padding-bottom: 5px;
 }
 .topbar-label {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #8a948c;
   display: flex;
   gap: 8px;
@@ -381,7 +381,7 @@ svg {
   display: flex;
   gap: 6px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #79926e;
 }
 .topbar-stats > span:first-child {
@@ -389,10 +389,10 @@ svg {
 }
 .topbar-stats strong {
   color: #556050;
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .stat-unit {
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .topbar-stats .user-avatar {
   border: 1px solid #d8e2d4;
@@ -403,7 +403,7 @@ svg {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: var(--text-small);
   margin-left: 2px;
 }
 .mobile-brand,
@@ -419,7 +419,7 @@ svg {
   margin-bottom: 29px;
 }
 .eyebrow {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #7d9078;
   font-weight: 650;
   letter-spacing: 1.6px;
@@ -429,7 +429,7 @@ svg {
   margin-bottom: 12px;
 }
 .eyebrow .thai {
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0;
   color: #64845d;
 }
@@ -449,7 +449,7 @@ svg {
 .page-description {
   margin-top: 7px;
   color: #818b82;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.9;
 }
 .dashboard-header {
@@ -466,7 +466,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   white-space: nowrap;
   background: #fbfcf8;
 }
@@ -487,7 +487,7 @@ svg {
   border-radius: 8px;
   min-height: 44px;
   padding: 11px 20px;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
   transition:
     background 0.15s,
@@ -534,7 +534,7 @@ svg {
 }
 .button-sm {
   padding: 9px 13px;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .button-icon {
   width: 44px;
@@ -565,7 +565,7 @@ svg {
   align-items: center;
   gap: 6px;
   color: #66815b;
-  font-size: 8px;
+  font-size: var(--text-caption);
   font-weight: 700;
   letter-spacing: 1.4px;
 }
@@ -585,19 +585,19 @@ svg {
 }
 .hero-copy > p {
   color: #7a8b72;
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.9;
 }
 .hero-lesson-tag {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #788d70;
   margin: 20px 0 11px;
 }
 .hero-copy .button {
-  font-size: 11px;
+  font-size: var(--text-small);
   min-height: 44px;
   gap: 17px;
   padding: 11px 21px;
@@ -607,7 +607,7 @@ svg {
   align-items: center;
   gap: 5px;
   color: #899680;
-  font-size: 8px;
+  font-size: var(--text-caption);
   margin-top: 13px;
 }
 .hero-art {
@@ -659,7 +659,7 @@ svg {
   margin-top: 1px;
 }
 .art-main small {
-  font-size: 6px;
+  font-size: var(--text-caption);
   color: #8d9b7f;
   margin: 6px 0 0;
   letter-spacing: 0.4px;
@@ -728,7 +728,7 @@ svg {
   position: absolute;
   bottom: -2px;
   left: 87px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #92a27d;
   font-style: italic;
   letter-spacing: 1px;
@@ -741,7 +741,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 600;
   text-align: left;
 }
@@ -768,18 +768,18 @@ svg {
   color: #45663e;
 }
 .daily-ring strong > span {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: #a3ae9a;
   font-weight: 500;
 }
 .daily-ring small {
   display: block;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: #98a08e;
   margin-top: 4px;
 }
 .daily-card > p {
-  font-size: 11px;
+  font-size: var(--text-small);
   font-weight: 550;
   color: #647b58;
 }
@@ -787,7 +787,7 @@ svg {
   display: block;
   margin-top: 5px;
   color: #a1a89a;
-  font-size: 8px;
+  font-size: var(--text-caption);
 }
 .weekdays {
   display: flex;
@@ -802,7 +802,7 @@ svg {
   align-items: center;
   gap: 6px;
   color: #a3aaa0;
-  font-size: 8px;
+  font-size: var(--text-caption);
 }
 .weekday-dot {
   display: flex;
@@ -869,7 +869,7 @@ svg {
 }
 .dashboard-stats > div > div > span {
   display: block;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #969d91;
   margin-bottom: 4px;
 }
@@ -881,7 +881,7 @@ svg {
 }
 .dashboard-stats small {
   color: #a1a999;
-  font-size: 9px;
+  font-size: var(--text-caption);
   font-weight: 450;
 }
 .section-heading {
@@ -893,7 +893,7 @@ svg {
 }
 .section-heading .eyebrow {
   margin-bottom: 6px;
-  font-size: 8px;
+  font-size: var(--text-caption);
 }
 .section-heading h2 {
   font-size: 19px;
@@ -903,13 +903,13 @@ svg {
 }
 .section-heading p:not(.eyebrow) {
   color: #92998e;
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin-top: 5px;
   line-height: 1.9;
 }
 .text-link {
   color: #78906b;
-  font-size: 10px;
+  font-size: var(--text-caption);
   display: inline-flex;
   gap: 6px;
   align-items: center;
@@ -932,7 +932,7 @@ svg {
   border-radius: 9px;
   color: #849176;
   margin: 19px 0 16px;
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .chapter-progress-icon {
   display: inline-flex;
@@ -941,7 +941,7 @@ svg {
 .chapter-progress > strong {
   margin-left: auto;
   color: #799068;
-  font-size: 9px;
+  font-size: var(--text-caption);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1000,7 +1000,7 @@ a.lesson-card:hover {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 8px;
+  font-size: var(--text-caption);
   color: #8e9f7c;
 }
 .lesson-state.done {
@@ -1011,18 +1011,18 @@ a.lesson-card:hover {
 }
 .lesson-number {
   color: #9da991;
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 1.2px;
   margin-bottom: 6px;
 }
 .lesson-card h3 {
   color: #506149;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 650;
   line-height: 1.8;
 }
 .lesson-card > p {
-  font-size: 9px;
+  font-size: var(--text-caption);
   line-height: 1.9;
   color: #9aa291;
   margin-top: 6px;
@@ -1041,7 +1041,7 @@ a.lesson-card:hover {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 8px;
+  font-size: var(--text-caption);
 }
 .separator {
   margin: 0 3px;
@@ -1075,7 +1075,7 @@ a.lesson-card:hover {
 }
 .discovery-label {
   color: #89947e;
-  font-size: 9px;
+  font-size: var(--text-caption);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1094,7 +1094,7 @@ a.lesson-card:hover {
 }
 .discovery-equation small {
   color: #c2ccba;
-  font-size: 18px;
+  font-size: 1.25rem;
 }
 .discovery-equation .equation-answer {
   background: #f1f5eb;
@@ -1103,12 +1103,12 @@ a.lesson-card:hover {
 }
 .discovery-note > p {
   color: #929c88;
-  font-size: 9px;
+  font-size: var(--text-caption);
   text-align: center;
 }
 .discovery-note .text-link {
   margin-top: 3px;
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .learning-note {
   background: #eff2e9;
@@ -1125,14 +1125,14 @@ a.lesson-card:hover {
   background: #e3ead7;
 }
 .learning-note h2 {
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
   font-weight: 600;
   color: #6d805e;
 }
 .learning-note p {
   color: #94a084;
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 2;
   margin-top: 10px;
 }
@@ -1141,7 +1141,7 @@ a.lesson-card:hover {
   align-items: center;
   gap: 4px;
   color: #9ea98e;
-  font-size: 8px;
+  font-size: var(--text-caption);
   margin-top: 16px;
 }
 .content-status {
@@ -1150,7 +1150,7 @@ a.lesson-card:hover {
   margin-top: 26px;
   padding: 0 3px;
   color: #8a9384;
-  font-size: 9px;
+  font-size: var(--text-caption);
   line-height: 1.9;
 }
 .content-status > span {
@@ -1174,7 +1174,7 @@ a.lesson-card:hover {
   align-items: center;
   justify-content: space-between;
   color: #a5ad9e;
-  font-size: 8px;
+  font-size: var(--text-caption);
   letter-spacing: 0.3px;
 }
 .footer-dot {
@@ -1194,7 +1194,7 @@ a.lesson-card:hover {
   border: 1px solid #dfebd9;
   border-radius: 30px;
   color: #779268;
-  font-size: 9px;
+  font-size: var(--text-caption);
   padding: 6px 10px;
   white-space: nowrap;
 }
@@ -1212,7 +1212,7 @@ a.lesson-card:hover {
   margin-bottom: 33px;
 }
 .roadmap-intro .eyebrow {
-  font-size: 9px;
+  font-size: var(--text-caption);
   margin-bottom: 8px;
 }
 .roadmap-intro h2 {
@@ -1221,7 +1221,7 @@ a.lesson-card:hover {
   line-height: 1.7;
 }
 .roadmap-intro p {
-  font-size: 11px;
+  font-size: var(--text-small);
   margin-top: 8px;
   color: #819375;
   line-height: 2;
@@ -1246,7 +1246,7 @@ a.lesson-card:hover {
   gap: 5px;
   align-items: center;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: var(--text-small);
   color: #6b855d;
 }
 .roadmap-flow {
@@ -1254,7 +1254,7 @@ a.lesson-card:hover {
   gap: 12px;
   align-items: center;
   margin: 20px 0 11px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #859779;
 }
 .roadmap-flow > span {
@@ -1264,7 +1264,7 @@ a.lesson-card:hover {
 }
 .roadmap-help {
   color: #939d8a;
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.9;
   margin-bottom: 20px;
 }
@@ -1289,19 +1289,19 @@ a.lesson-card:hover {
   display: none;
 }
 .planned-number {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #a3b096;
   font-weight: 600;
 }
 .planned-part strong {
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 550;
 }
 .planned-label {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #a2ac99;
   margin-left: auto;
 }
@@ -1311,7 +1311,7 @@ a.lesson-card:hover {
 .planned-part p {
   padding: 0 22px 20px 48px;
   color: #8d9982;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 2;
 }
 .storage-notice {
@@ -1323,7 +1323,7 @@ a.lesson-card:hover {
   border-radius: 10px;
   color: #896e30;
   padding: 13px 16px;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.9;
   margin-bottom: 22px;
 }
@@ -1373,7 +1373,7 @@ a.lesson-card:hover {
   gap: 7px;
   align-items: center;
   color: #8a9980;
-  font-size: 10px;
+  font-size: var(--text-caption);
   min-height: 44px;
   margin-top: -9px;
   margin-bottom: 17px;
@@ -1398,7 +1398,7 @@ a.lesson-card:hover {
   display: flex;
   gap: 11px;
   align-items: center;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #8d9b82;
   white-space: nowrap;
 }
@@ -1442,7 +1442,7 @@ a.lesson-card:hover {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: var(--text-caption);
   flex-shrink: 0;
 }
 .lesson-step.active > span:first-child {
@@ -1452,17 +1452,17 @@ a.lesson-card:hover {
 }
 .lesson-step strong {
   display: block;
-  font-size: 10px;
+  font-size: var(--text-caption);
   font-weight: 600;
 }
 .lesson-step small {
   display: block;
-  font-size: 7px;
+  font-size: var(--text-caption);
   letter-spacing: 1px;
   margin-bottom: 2px;
 }
 .lesson-review-note {
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.9;
   color: #939b88;
   background: #f0f3ec;
@@ -1487,7 +1487,7 @@ a.lesson-card:hover {
   gap: 8px;
   align-items: center;
   color: #59784b;
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 650;
   margin-bottom: 11px;
 }
@@ -1501,7 +1501,7 @@ a.lesson-card:hover {
   gap: 8px;
   align-items: flex-start;
   color: #788f69;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 2.1;
 }
 .objective-card li > svg {
@@ -1512,14 +1512,14 @@ a.lesson-card:hover {
   padding: 28px 29px;
 }
 .learning-block h2 {
-  font-size: 17px;
+  font-size: 1.1875rem;
   font-weight: 650;
   color: #48643d;
   margin-bottom: 16px;
   line-height: 1.7;
 }
 .learning-block > p {
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 2.2;
   color: #74816b;
   margin-top: 12px;
@@ -1547,17 +1547,17 @@ a.lesson-card:hover {
 .ipa {
   font-family: var(--font-thai), "Noto Sans JP Variable", sans-serif;
   color: #9aa88b;
-  font-size: 12px;
+  font-size: var(--text-small);
   letter-spacing: 0.3px;
 }
 .example-card .meaning {
-  font-size: 11px;
+  font-size: var(--text-small);
   margin-top: 6px;
   color: #7f8d74;
 }
 .example-card .example-note {
   margin-top: 9px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.8;
   color: #98a28c;
 }
@@ -1567,7 +1567,7 @@ a.lesson-card:hover {
   border-radius: 0 7px 7px 0;
   padding: 13px 16px;
   color: #7a8f68;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 2;
   margin-top: 20px;
 }
@@ -1580,7 +1580,7 @@ a.lesson-card:hover {
 }
 .lesson-actions > p {
   color: #98a48c;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .lesson-actions .button {
   min-width: 160px;
@@ -1593,7 +1593,7 @@ a.lesson-card:hover {
   font-weight: 600;
 }
 .explore-intro p {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #8a9880;
   line-height: 2;
   margin-top: 10px;
@@ -1624,7 +1624,7 @@ a.lesson-card:hover {
 }
 .explore-tile .ipa {
   display: block;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .explore-detail {
   text-align: center;
@@ -1636,16 +1636,16 @@ a.lesson-card:hover {
   line-height: 1.9;
 }
 .explore-detail .ipa {
-  font-size: 17px;
+  font-size: 1.1875rem;
   color: #8ca276;
 }
 .explore-detail h3 {
-  font-size: 17px;
+  font-size: 1.1875rem;
   color: #69815b;
   margin-top: 15px;
 }
 .explore-detail > p {
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 2.1;
   color: #94a286;
   margin-top: 15px;
@@ -1657,7 +1657,7 @@ a.lesson-card:hover {
   color: #a2ad94;
   text-align: center;
   margin-top: 14px;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .quiz-card {
   padding: 30px;
@@ -1666,7 +1666,7 @@ a.lesson-card:hover {
   display: flex;
   gap: 12px;
   align-items: center;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #879e77;
   margin-bottom: 31px;
 }
@@ -1678,7 +1678,7 @@ a.lesson-card:hover {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #97a787;
   margin-bottom: 15px;
   letter-spacing: 0.4px;
@@ -1741,11 +1741,11 @@ a.lesson-card:hover {
   border: 1px solid #dfe7d7;
   border-radius: 7px;
   background: #fff;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #acb59f;
 }
 .option-label {
-  font-size: 14px;
+  font-size: var(--text-body);
   line-height: 1.9;
   overflow-wrap: anywhere;
 }
@@ -1756,7 +1756,7 @@ a.lesson-card:hover {
 }
 .option-label small {
   display: block;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #9aaa8c;
 }
 .quiz-feedback {
@@ -1779,11 +1779,11 @@ a.lesson-card:hover {
   margin-top: 3px;
 }
 .quiz-feedback h3 {
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 650;
 }
 .quiz-feedback p {
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 2.1;
   margin-top: 8px;
 }
@@ -1811,7 +1811,7 @@ a.lesson-card:hover {
   font-weight: 600;
 }
 .review-card > p {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #9aaa8a;
   line-height: 2;
   margin-top: 12px;
@@ -1835,7 +1835,7 @@ a.lesson-card:hover {
 .review-score span {
   display: block;
   color: #a0ae8f;
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin-top: 5px;
 }
 .review-score > div + div {
@@ -1848,7 +1848,7 @@ a.lesson-card:hover {
   padding: 25px;
 }
 .review-summary h3 {
-  font-size: 14px;
+  font-size: var(--text-body);
   font-weight: 600;
   color: #6f875a;
   margin-bottom: 12px;
@@ -1862,7 +1862,7 @@ a.lesson-card:hover {
   display: flex;
   gap: 8px;
   color: #8f9f7e;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 2.1;
   margin-bottom: 8px;
 }
@@ -1878,7 +1878,7 @@ a.lesson-card:hover {
 }
 .related-lessons {
   padding: 20px 3px 0;
-  font-size: 11px;
+  font-size: var(--text-small);
   color: #96a485;
   line-height: 2;
 }
@@ -1889,7 +1889,7 @@ a.lesson-card:hover {
   margin-right: 15px;
 }
 .save-note {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #a2ae94;
   margin-top: 20px;
   text-align: center;
@@ -1920,7 +1920,7 @@ a.lesson-card:hover {
     padding: 29px 14px 20px;
   }
   .brand {
-    font-size: 16px;
+    font-size: 1.125rem;
     gap: 8px;
   }
   .brand-mark {
@@ -1931,7 +1931,7 @@ a.lesson-card:hover {
   .nav-link {
     gap: 10px;
     padding: 14px 11px;
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .main-shell {
     margin-left: 214px;
@@ -1960,7 +1960,7 @@ a.lesson-card:hover {
     padding: 21px 15px 17px;
   }
   .daily-heading {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .hero-copy h2 {
     font-size: 29px;
@@ -1970,7 +1970,7 @@ a.lesson-card:hover {
     gap: 10px;
   }
   .dashboard-stats > div > div > span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .lesson-grid {
     gap: 12px;
@@ -1979,20 +1979,20 @@ a.lesson-card:hover {
     padding: 17px 15px 0;
   }
   .lesson-state {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .lesson-card h3 {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .learning-note {
     padding: 23px 18px;
     gap: 10px;
   }
   .learning-note h2 {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .learning-note p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
 }
 @media (max-width: 960px) and (min-width: 761px) {
@@ -2023,7 +2023,7 @@ a.lesson-card:hover {
     padding: 24px;
   }
   .learning-note h2 {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .beginner-pill {
     display: none;
@@ -2072,7 +2072,7 @@ a.lesson-card:hover {
     display: flex;
     align-items: center;
     gap: 9px;
-    font-size: 15px;
+    font-size: 1.0625rem;
     font-weight: 650;
     color: var(--forest);
     letter-spacing: -0.4px;
@@ -2093,13 +2093,13 @@ a.lesson-card:hover {
     display: none;
   }
   .topbar-stats strong {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .topbar-stats > span > svg {
     width: 15px;
   }
   .topbar-stats .stat-unit {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .main-content {
     padding: 27px 22px 85px;
@@ -2112,11 +2112,11 @@ a.lesson-card:hover {
     letter-spacing: -0.5px;
   }
   .page-description {
-    font-size: 10px;
+    font-size: var(--text-caption);
     line-height: 1.9;
   }
   .eyebrow {
-    font-size: 8px;
+    font-size: var(--text-caption);
     letter-spacing: 1.3px;
     margin-bottom: 9px;
   }
@@ -2141,7 +2141,7 @@ a.lesson-card:hover {
     font-size: 29px;
   }
   .hero-copy > p {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .hero-art {
     right: -12px;
@@ -2151,13 +2151,13 @@ a.lesson-card:hover {
   }
   .hero-copy .button {
     padding: 11px 17px;
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .hero-lesson-tag {
     margin-top: 19px;
   }
   .hero-time {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .daily-card {
     display: none;
@@ -2179,27 +2179,27 @@ a.lesson-card:hover {
     width: 17px;
   }
   .dashboard-stats > div > div > span {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .dashboard-stats strong {
-    font-size: 18px;
+    font-size: 1.25rem;
   }
   .dashboard-stats small {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .section-heading {
     gap: 9px;
   }
   .section-heading h2 {
-    font-size: 18px;
+    font-size: 1.25rem;
   }
   .section-heading .text-link {
-    font-size: 8px;
+    font-size: var(--text-caption);
     gap: 4px;
   }
   .chapter-progress {
     padding: 12px;
-    font-size: 8px;
+    font-size: var(--text-caption);
     gap: 7px;
   }
   .chapter-progress .track {
@@ -2222,7 +2222,7 @@ a.lesson-card:hover {
     row-gap: 7px;
   }
   .lesson-state {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .lesson-glyph {
     width: 35px;
@@ -2231,17 +2231,17 @@ a.lesson-card:hover {
     border-radius: 9px;
   }
   .lesson-card h3 {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .lesson-card > p {
-    font-size: 9px;
+    font-size: var(--text-caption);
     line-height: 1.8;
   }
   .lesson-number {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .lesson-card-bottom > span {
-    font-size: 7px;
+    font-size: var(--text-caption);
     gap: 3px;
   }
   .lesson-card-bottom .separator {
@@ -2269,26 +2269,26 @@ a.lesson-card:hover {
     gap: 16px;
   }
   .learning-note h2 {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .learning-note p {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .content-status {
     flex-direction: column;
     gap: 5px;
-    font-size: 9px;
+    font-size: var(--text-caption);
     margin-top: 23px;
   }
   .page-footer {
     gap: 10px;
-    font-size: 7px;
+    font-size: var(--text-caption);
     line-height: 1.9;
     align-items: flex-start;
   }
   .page-footer > span:last-child {
     max-width: 115px;
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .mobile-nav {
     display: grid;
@@ -2314,7 +2314,7 @@ a.lesson-card:hover {
     gap: 5px;
     color: #a2ac97;
     min-height: 44px;
-    font-size: 9px;
+    font-size: var(--text-caption);
     border-radius: 7px;
     min-width: 60px;
   }
@@ -2340,44 +2340,44 @@ a.lesson-card:hover {
     margin: 0 0 0 56px;
   }
   .roadmap-intro h2 {
-    font-size: 16px;
+    font-size: 1.125rem;
   }
   .roadmap-intro p {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .roadmap-intro .eyebrow {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .chapter-count {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .roadmap-flow {
     gap: 7px;
-    font-size: 9px;
+    font-size: var(--text-caption);
     flex-wrap: wrap;
   }
   .roadmap-help {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .planned-part summary {
     padding: 15px 13px;
     gap: 11px;
   }
   .planned-part strong {
-    font-size: 11px;
+    font-size: var(--text-small);
     flex: 1;
   }
   .planned-label {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .planned-number {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .future-curriculum .section-heading {
     align-items: flex-start;
   }
   .future-curriculum .badge {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2391,7 +2391,7 @@ a.lesson-card:hover {
     }
   }
   .storage-notice {
-    font-size: 10px;
+    font-size: var(--text-caption);
     padding: 12px;
   }
   .lesson-heading {
@@ -2403,7 +2403,7 @@ a.lesson-card:hover {
     font-size: 23px;
   }
   .lesson-meta {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .lesson-steps {
     padding: 4px;
@@ -2419,10 +2419,10 @@ a.lesson-card:hover {
     display: none;
   }
   .lesson-step strong {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .lesson-step small {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .objective-card {
     padding: 21px;
@@ -2431,10 +2431,10 @@ a.lesson-card:hover {
     padding: 23px;
   }
   .learning-block h2 {
-    font-size: 16px;
+    font-size: 1.125rem;
   }
   .learning-block > p {
-    font-size: 12px;
+    font-size: var(--text-small);
     line-height: 2.2;
   }
   .example-grid {
@@ -2448,7 +2448,7 @@ a.lesson-card:hover {
     font-size: 33px;
   }
   .rule-callout {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .lesson-actions {
     align-items: stretch;
@@ -2458,7 +2458,7 @@ a.lesson-card:hover {
     min-width: 0;
   }
   .lesson-actions > p {
-    font-size: 9px;
+    font-size: var(--text-caption);
     width: 100%;
     margin-bottom: 3px;
   }
@@ -2473,13 +2473,13 @@ a.lesson-card:hover {
     padding: 24px 21px;
   }
   .explore-detail > p {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .explore-intro h2 {
     font-size: 19px;
   }
   .explore-intro p {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .quiz-card {
     padding: 23px 20px;
@@ -2496,14 +2496,14 @@ a.lesson-card:hover {
     padding: 13px;
   }
   .option-label {
-    font-size: 13px;
+    font-size: var(--text-body);
   }
   .quiz-feedback {
     padding: 16px 14px;
     gap: 9px;
   }
   .quiz-feedback p {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .quiz-card .lesson-actions {
     justify-content: stretch;
@@ -2518,7 +2518,7 @@ a.lesson-card:hover {
     font-size: 22px;
   }
   .review-card > p {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .review-score {
     gap: 23px;
@@ -2530,19 +2530,19 @@ a.lesson-card:hover {
     padding: 22px;
   }
   .review-summary li {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .review-actions .button {
     flex: 1 0 100%;
   }
   .related-lessons {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .empty-state .page-title {
     font-size: 21px;
   }
   .empty-state {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
 }
 @media (max-width: 390px) {
@@ -2569,10 +2569,10 @@ a.lesson-card:hover {
     font-size: 27px;
   }
   .hero-copy > p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .hero-time {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .dashboard-stats > div {
     padding: 0 8px;
@@ -2583,79 +2583,79 @@ a.lesson-card:hover {
     height: 31px;
   }
   .dashboard-stats strong {
-    font-size: 17px;
+    font-size: 1.1875rem;
   }
   .dashboard-stats > div > div > span {
-    font-size: 6px;
+    font-size: var(--text-caption);
   }
   .section-heading h2 {
-    font-size: 16px;
+    font-size: 1.125rem;
   }
   .section-heading .text-link {
-    font-size: 7px;
+    font-size: var(--text-caption);
   }
   .lesson-card {
     padding-left: 12px;
     padding-right: 12px;
   }
   .lesson-state {
-    font-size: 6px;
+    font-size: var(--text-caption);
   }
   .lesson-card h3 {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .lesson-card > p {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .learning-note h2 {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .learning-note p {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
 }
 /* Core reading text stays readable, including explanations and phonetic notation. */
 .page-description {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #687565;
 }
 .hero-copy > p {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #63765c;
 }
 .hero-time {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #687b5c;
 }
 .lesson-card h3 {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: #49603e;
 }
 .lesson-card > p {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: #6b7d60;
 }
 .lesson-number {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #718364;
 }
 .lesson-state {
-  font-size: 9px;
+  font-size: var(--text-caption);
   color: #657e56;
 }
 .is-locked .lesson-state {
   color: #747f6d;
 }
 .lesson-card-bottom > span {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #6c7e60;
 }
 .section-heading p:not(.eyebrow) {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: #6c7b61;
 }
 .dashboard-stats > div > div > span {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #6c7c62;
 }
 .dashboard-stats small {
@@ -2702,7 +2702,7 @@ a.lesson-card:hover {
   margin-top: 20px;
 }
 .review-mistakes summary {
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 600;
   line-height: 1.9;
   color: #5f744d;
@@ -2714,22 +2714,22 @@ a.lesson-card:hover {
   padding: 18px 0;
 }
 .review-mistakes article h3 {
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 600;
   line-height: 2;
   color: #5f744d;
 }
 .review-mistakes article p {
   color: #627653;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 2;
   margin-top: 9px;
 }
 .review-mistakes article .mistake-concepts {
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .content-status {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: #6a7a61;
 }
 .chapter-progress {
@@ -2747,10 +2747,10 @@ a.lesson-card:hover {
     font-size: 29px;
   }
   .hero-copy > p {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .hero-time {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .hero-card {
     min-height: 330px;
@@ -2763,29 +2763,29 @@ a.lesson-card:hover {
     flex-direction: column;
   }
   .lesson-card h3 {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .lesson-card > p {
-    font-size: 11px;
+    font-size: var(--text-small);
   }
   .lesson-number,
   .lesson-state {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .lesson-card-bottom > span {
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .dashboard-stats > div > div > span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .content-status {
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
   .learning-note h2 {
-    font-size: 12px;
+    font-size: var(--text-small);
   }
   .learning-note p {
-    font-size: 11px;
+    font-size: var(--text-small);
     color: #6b7e59;
   }
 }
@@ -2797,14 +2797,14 @@ a.lesson-card:hover {
     gap: 5px;
   }
   .dashboard-stats > div > div > span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
   .lesson-card {
     padding-left: 12px;
     padding-right: 12px;
   }
   .lesson-card-bottom > span {
-    font-size: 8px;
+    font-size: var(--text-caption);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2869,12 +2869,12 @@ a.lesson-card:hover {
 }
 .library-grid-heading {
   margin-bottom: 16px;
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--muted);
 }
 .library-grid-heading h2 {
   color: var(--ink);
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 .alphabet-grid {
@@ -2909,7 +2909,7 @@ a.lesson-card:hover {
   line-height: 1.7;
 }
 .alphabet-tile small {
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.9;
   color: var(--muted);
 }
@@ -2926,7 +2926,7 @@ a.lesson-card:hover {
 .library-help {
   display: flex;
   gap: 9px;
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 1.9;
   color: var(--muted);
   margin-top: 22px;
@@ -2960,7 +2960,7 @@ a.lesson-card:hover {
   line-height: 1.8;
 }
 .alphabet-detail-head p {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--muted);
 }
 .alphabet-detail-body {
@@ -2968,7 +2968,7 @@ a.lesson-card:hover {
   flex-direction: column;
   gap: 22px;
   padding: 26px;
-  font-size: 14px;
+  font-size: var(--text-body);
   line-height: 1.9;
 }
 .alphabet-detail-body h3 {
@@ -2985,11 +2985,11 @@ a.lesson-card:hover {
   gap: 15px;
 }
 .sound-grid dt {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .sound-grid dd {
-  font-size: 17px;
+  font-size: 1.1875rem;
   color: var(--forest);
   margin-top: 6px;
 }
@@ -2997,14 +2997,14 @@ a.lesson-card:hover {
   border-radius: 12px;
   background: #f2f4f1;
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 1.9;
   color: #58675b;
 }
 .source-note {
   border-top: 1px solid var(--line);
   padding-top: 15px;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
   color: var(--muted);
 }
@@ -3024,7 +3024,7 @@ a.lesson-card:hover {
 .library-bottom {
   padding: 22px 26px;
   background: #eaf2eb;
-  font-size: 14px;
+  font-size: var(--text-body);
 }
 .writing-layout {
   display: grid;
@@ -3043,14 +3043,14 @@ a.lesson-card:hover {
   font-weight: 600;
 }
 .writing-select-label {
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 500;
 }
 .writing-select {
   width: 100%;
   min-width: 0;
   min-height: 52px;
-  font-size: 18px;
+  font-size: 1.25rem;
   border: 1px solid #bdcdbd;
   border-radius: 10px;
   padding: 8px;

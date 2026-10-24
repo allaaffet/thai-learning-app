@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <small>タイ語を、ひとつずつ。</small>
           </span>
         </Link>
-        <div className="nav-caption">MY LEARNING</div>
+        <div className="nav-caption">学習メニュー</div>
         <nav className="desktop-nav">
           {navigation.map(({ href, label, icon: Icon }) => (
             <Link
@@ -127,21 +127,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-course">
-          <span className="mini-icon">
-            <Compass size={19} />
-          </span>
-          <p>
-            小さな一歩が、
-            <br />
-            新しい世界につながる。
-          </p>
-          <div className="sidebar-course-meta">
-            <span>コースの進み具合</span>
-            <strong>
-              {ready ? completed : "–"} / {lessons.length}
-            </strong>
+          <div className="sidebar-course-heading">
+            <Compass size={19} aria-hidden="true" />
+            <span>コースの進捗</span>
           </div>
-          <div className="track">
+          <strong className="sidebar-course-value">
+            {ready ? completed : "–"} <small>/ {lessons.length}</small>
+          </strong>
+          <div
+            className="track"
+            role="progressbar"
+            aria-label="コースの完了レッスン数"
+            aria-valuemin={0}
+            aria-valuemax={lessons.length}
+            aria-valuenow={ready ? completed : undefined}
+          >
             <span
               style={{
                 width: `${ready ? (completed / lessons.length) * 100 : 0}%`,
@@ -151,10 +151,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/roadmap">
             カリキュラムを見る <ArrowUpRight size={14} />
           </Link>
-        </div>
-        <div className="sidebar-bottom">
-          <Leaf size={15} />
-          <span>自分のペースで、大丈夫。</span>
         </div>
       </aside>
 
@@ -166,10 +162,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </span>
             <span>Thai Learning</span>
           </Link>
-          <span className="topbar-label">
-            <span className="status-dot" />
-            日本語で学ぶ、タイ語の基礎
-          </span>
           <div className="topbar-controls">
             <ThaiFontToggle />
             <SoundSettings />

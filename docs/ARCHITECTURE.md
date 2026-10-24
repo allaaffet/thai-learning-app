@@ -194,3 +194,11 @@ Providerは保存直前の再読込と `storage` イベントで通常の別タ�
 `SoundSettings` は共通ヘッダーに入口を置き、ネイティブの `dialog`、スイッチ、音量のrange、試聴ボタンを提供する。設定変更・保存の復元・他タブの変更で自動再生せず、ユーザーの回答確定・完了・試聴操作からだけ再生を要求する。SRSは少なくとも1語を自己評価してその回を終えたときだけ終了音を要求する。再受講の合格完了はXP付与の有無と独立し、任意入力や認識文字列の一致は音を要求しない。
 
 `audio-focus.ts` が教材音声・マイクを使う所有者を管理する。TTS、マイク許可待ちから録音終了まで、音声認識、録音の再生が音声の使用を取得し、終了・エラー・破棄で解放する。使用中は効果音を抑止し、使用開始の通知で開始待ち・再生中の効果音を停止する。抑止した効果音をキューに残さない。Providerはルート変更、タブ非表示、`pagehide` と破棄でも音を止める。詳細は [SOUND_EFFECTS.md](SOUND_EFFECTS.md) を参照する。
+
+## 表示密度と図のコンポーネント
+
+`layout.tsx` は `globals.css` の後に `visual-refresh.css` を読み込む。共通の文字サイズを `--text-body`（1rem）、`--text-learning`（1.125rem）、`--text-small`（0.875rem）、`--text-caption`（0.75rem）で管理する。既存画面の小さい固定文字もこの変数を参照し、本文や操作を狭い画面だけ極端に縮めない。ホーム・レッスン・参照・記録の構造は `visual-home.css`・`visual-lesson.css`・`visual-reference.css`・`visual-progress.css` に分ける。CSSの最終的な順序と折返しは本番ビルドでも確認する。
+
+`lesson-visuals.tsx` の `LearningBlockCard` は第一段落、例、注意、calloutを常設し、補足段落を標準の `details` / `summary` へ移す。`ExampleVisual` は既存の登録語とThai・IPAが一致するときだけ音節分析と明示声調を図示し、既存文法例の完全一致時だけ `segments` の役割を表示する。新しい声調判定・音節分割・文法解析は追加しない。原文・IPA・Unicodeの保持、TTSの対象判定、採点・保存の境界は従来どおり。
+
+単語カテゴリー、文法の型、章の完了ステップ、学習記録をアイコン・チップ・バーで表す。7日の棒グラフは既存 `getLearningInsights` の実解答数だけを使い、学習時間や習熟度を推定しない。読み込み中はグラフを表示せず、0件と区別する。詳しい表示方針は [VISUAL_DESIGN.md](VISUAL_DESIGN.md) を参照する。

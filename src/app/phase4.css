@@ -48,7 +48,7 @@
   margin-top: 18px;
 }
 .phase4-insight-metrics dt {
-  font-size: 12px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 .phase4-insight-metrics dd {
@@ -72,7 +72,7 @@
 }
 .phase4-week time,
 .phase4-week span {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #697563;
 }
 .phase4-week strong {
@@ -81,7 +81,7 @@
   line-height: 2;
 }
 .phase4-week small {
-  font-size: 11px;
+  font-size: var(--text-small);
   margin-left: 4px;
 }
 @media (max-width: 760px) {
@@ -96,20 +96,20 @@
   }
   .phase4-week time {
     white-space: nowrap;
-    font-size: 9px;
+    font-size: var(--text-caption);
   }
   .phase4-week strong {
     white-space: nowrap;
     font-size: 20px;
   }
   .phase4-week small {
-    font-size: 8px;
+    font-size: var(--text-caption);
     margin-left: 1px;
   }
   .phase4-week span {
     writing-mode: vertical-rl;
     margin-top: 7px;
-    font-size: 10px;
+    font-size: var(--text-caption);
   }
 }
 .language-page-header {
@@ -128,14 +128,14 @@
   border-radius: 12px;
   background: #f4f6ef;
   color: #677365;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.95;
   margin-bottom: 25px;
 }
 .language-disclosure strong {
   display: block;
   color: #506449;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
   margin-bottom: 4px;
 }
@@ -156,7 +156,7 @@
 .language-search label,
 .language-filter label {
   display: block;
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
   color: #536557;
   margin-bottom: 9px;
@@ -180,7 +180,7 @@
   min-height: 46px;
   background: transparent;
   border: 0;
-  font-size: 14px;
+  font-size: var(--text-body);
   padding: 8px 12px 8px 0;
   color: var(--ink);
   outline-offset: 3px;
@@ -199,12 +199,12 @@
   border-radius: 8px;
   border: 1px solid var(--line);
   background: #fff;
-  font-size: 13px;
+  font-size: var(--text-body);
   color: #536557;
 }
 .language-result-count {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
   padding-block: 14px;
   flex-shrink: 0;
 }
@@ -215,7 +215,7 @@
   border-radius: 10px;
   background: #f4f7f0;
   color: #4c6551;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
   margin-bottom: 20px;
   overflow-wrap: anywhere;
@@ -244,7 +244,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #7b8776;
   letter-spacing: 0.04em;
 }
@@ -264,34 +264,34 @@
 }
 .language-ipa {
   color: #71806f;
-  font-size: 13px;
+  font-size: var(--text-body);
   font-family: system-ui, sans-serif;
   line-height: 1.9;
   overflow-wrap: anywhere;
 }
 .vocabulary-meaning {
   color: #354e3b;
-  font-size: 16px;
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.9;
   margin-top: 5px;
 }
 .vocabulary-syllables {
   color: #7b8776;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 2;
   margin-top: 8px;
   overflow-wrap: anywhere;
 }
 .vocabulary-syllables .thai {
-  font-size: 14px;
+  font-size: var(--text-body);
 }
 .vocabulary-example {
   margin-top: 17px;
   padding: 14px 16px;
   background: #f6f7f2;
   border-radius: 9px;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
   color: #536151;
   overflow-wrap: anywhere;
@@ -302,13 +302,13 @@
   line-height: 2;
 }
 .vocabulary-example .language-ipa {
-  font-size: 12px;
+  font-size: var(--text-small);
   margin-bottom: 5px;
 }
 .vocabulary-word-note,
 .language-muted {
   color: #7e8578;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.9;
 }
 .vocabulary-word-note {
@@ -332,7 +332,7 @@
   margin-top: 18px;
   padding-top: 14px;
   color: #70806d;
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 1.9;
 }
 .vocabulary-more > summary,
@@ -346,7 +346,7 @@
   margin-top: 19px;
   padding-top: 18px;
   border-top: 1px solid #e9ede3;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
 }
 .language-related h4 {
@@ -365,7 +365,7 @@
 }
 .language-related li span {
   color: #828a7d;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .language-related a {
   color: var(--forest);
@@ -378,10 +378,10 @@
 }
 .language-related > a {
   margin-top: 12px;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .language-sources {
-  font-size: 10px;
+  font-size: var(--text-caption);
   line-height: 1.9;
   color: #828a7d;
   margin-top: 20px;
@@ -396,7 +396,7 @@
   text-underline-offset: 3px;
 }
 .language-bottom-note {
-  font-size: 11px;
+  font-size: var(--text-small);
   line-height: 2;
   color: #828a7d;
   margin-top: 28px;
@@ -406,7 +406,7 @@
   text-align: center;
   color: #788273;
   line-height: 2;
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .language-empty > svg {
   display: block;
@@ -414,7 +414,7 @@
   color: #78906b;
 }
 .language-empty h2 {
-  font-size: 18px;
+  font-size: 1.25rem;
   color: #36563e;
   font-weight: 600;
   margin-bottom: 10px;
@@ -438,11 +438,11 @@
   margin-inline: 5px;
 }
 .grammar-navigation .language-search input {
-  font-size: 12px;
+  font-size: var(--text-small);
 }
 .grammar-result-count {
   color: #929a8a;
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin: 15px 6px 11px;
 }
 .grammar-navigation li + li {
@@ -456,7 +456,7 @@
   min-height: 54px;
   padding: 10px;
   gap: 9px;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.8;
   border-radius: 8px;
   color: #63715d;
@@ -464,7 +464,7 @@
 }
 .grammar-navigation li button > span:first-child {
   color: #8d9883;
-  font-size: 10px;
+  font-size: var(--text-caption);
 }
 .grammar-navigation li button > span:nth-child(2) {
   flex: 1;
@@ -488,7 +488,7 @@
   padding: 20px 8px 0;
   margin-top: 17px;
   color: #6d7c61;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .grammar-detail {
   min-width: 0;
@@ -504,12 +504,12 @@
 }
 .grammar-summary {
   color: #74816c;
-  font-size: 13px;
+  font-size: var(--text-body);
   line-height: 2;
   margin-top: 9px;
 }
 .grammar-detail section h3 {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: #4e644b;
   font-weight: 600;
   margin-bottom: 12px;
@@ -522,14 +522,14 @@
   margin-top: 24px;
 }
 .grammar-pattern p {
-  font-size: 16px;
+  font-size: 1.125rem;
   color: #3d6146;
   line-height: 2;
   overflow-wrap: anywhere;
 }
 .grammar-explanation {
   margin-top: 28px;
-  font-size: 13px;
+  font-size: var(--text-body);
   color: #66745f;
   line-height: 2.1;
 }
@@ -544,7 +544,7 @@
   border: 1px solid #e6eadf;
   border-radius: 10px;
   background: #fcfcf8;
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #62715c;
   line-height: 2;
   overflow-wrap: anywhere;
@@ -580,7 +580,7 @@
 }
 .grammar-segments dd {
   color: #7b876f;
-  font-size: 10px;
+  font-size: var(--text-caption);
   margin: 0;
 }
 .grammar-vocabulary {
@@ -598,7 +598,7 @@
   border: 1px solid #dfe6d8;
   border-radius: 8px;
   padding: 7px 12px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #74826a;
 }
 .grammar-vocabulary a .thai {
@@ -616,7 +616,7 @@
   color: #738369;
 }
 .review-overview p {
-  font-size: 12px;
+  font-size: var(--text-small);
   margin-top: 15px;
 }
 .review-overview strong {
@@ -627,7 +627,7 @@
   margin-top: 6px;
 }
 .review-overview strong span {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: #7e8b73;
   font-weight: 400;
   margin-left: 9px;
@@ -637,7 +637,7 @@
   padding: 38px;
   line-height: 2;
   color: #718067;
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .review-start h2,
 .review-completion h2 {
@@ -662,13 +662,13 @@
   align-items: center;
   gap: 8px;
   color: #7d8973;
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .review-study-meta span:last-child {
   background: #f0f3e9;
   border-radius: 5px;
   padding: 4px 8px;
-  font-size: 9px;
+  font-size: var(--text-caption);
 }
 .review-progress {
   margin-top: 17px;
@@ -686,7 +686,7 @@
 .review-prompt {
   text-align: center;
   color: #87927b;
-  font-size: 12px;
+  font-size: var(--text-small);
   margin-top: 32px;
 }
 .review-card-word {
@@ -702,7 +702,7 @@
   padding: 4px 0 28px;
 }
 .review-reveal p {
-  font-size: 11px;
+  font-size: var(--text-small);
   color: #89917f;
   line-height: 2;
   margin-bottom: 23px;
@@ -731,7 +731,7 @@
   min-width: 0;
 }
 .review-rating legend {
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
   color: #5e7555;
   margin-bottom: 14px;
@@ -759,12 +759,12 @@
   background: #edf3e5;
 }
 .review-rating button strong {
-  font-size: 12px;
+  font-size: var(--text-small);
   font-weight: 600;
   color: #43623e;
 }
 .review-rating button span {
-  font-size: 10px;
+  font-size: var(--text-caption);
   color: #819172;
 }
 .review-rating button:disabled {
@@ -775,7 +775,7 @@
   margin-top: 22px;
   border-top: 1px solid #e3ead9;
   padding-top: 18px;
-  font-size: 12px;
+  font-size: var(--text-small);
   line-height: 1.9;
   color: #5f7953;
 }
@@ -787,7 +787,7 @@
   margin: 25px auto 0;
   padding: 10px 5px;
   color: #85917b;
-  font-size: 11px;
+  font-size: var(--text-small);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -808,7 +808,7 @@
 }
 .review-completion strong {
   color: #45683c;
-  font-size: 18px;
+  font-size: 1.25rem;
 }
 .review-completion-actions {
   display: flex;
@@ -824,7 +824,7 @@
   justify-content: center;
   gap: 9px;
   padding-top: 12px;
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #5e7753;
 }
 .review-how-it-works {
@@ -917,7 +917,7 @@
     padding: 32px 22px;
   }
   .language-empty h2 {
-    font-size: 17px;
+    font-size: 1.1875rem;
   }
   .review-card-word {
     font-size: 61px;

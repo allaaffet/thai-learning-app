@@ -13,6 +13,7 @@ import {
   Leaf,
   LockKeyhole,
   RotateCcw,
+  ScanEye,
   Sparkles,
   Target,
   Trophy,
@@ -34,6 +35,7 @@ import { isThaiSpeechText } from "@/lib/device-speech";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSoundEffects } from "@/components/sound-effects-provider";
+import { ExampleVisual, LearningBlockCard } from "@/components/lesson-visuals";
 
 const stages = [
   { label: "理解する", english: "LEARN" },
@@ -265,51 +267,55 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <div ref={panel} tabIndex={-1} className="outline-none scroll-mt-6">
         {stage === 0 && (
           <>
-            <section className="objective-card">
+            <section className="objective-card visual-objective-card">
               <h2>
                 <Target size={17} /> このレッスンで、できるようになること
               </h2>
               <ul>
-                {lesson.objectives.map((objective) => (
+                {lesson.objectives.map((objective, index) => (
                   <li key={objective}>
-                    <Check size={13} />
+                    <span className="lesson-objective-icon" aria-hidden="true">
+                      {index === 0 ? (
+                        <Target size={23} />
+                      ) : index === 1 ? (
+                        <ScanEye size={23} />
+                      ) : (
+                        <BookOpen size={23} />
+                      )}
+                    </span>
                     <span>{objective}</span>
                   </li>
                 ))}
               </ul>
+              {lesson.prerequisites.length > 0 && (
+                <div className="lesson-prerequisite-links">
+                  <span>前提レッスン</span>
+                  {lesson.prerequisites.map((id) => {
+                    const prerequisite = lessons.find((item) => item.id === id);
+                    return prerequisite ? (
+                      <Link key={id} href={`/lessons/${id}`}>
+                        <CircleCheck size={15} aria-hidden="true" />
+                        {prerequisite.title}
+                      </Link>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </section>
-            <p className="explore-disclaimer">
-              例語の再生には端末のタイ語合成音声（未監修）を使います。録音教材ではなく、読み方・声調の自然さは未検証です。タイ語の声がない端末では再生できません。音声提供元への通信が発生する場合があります。
-            </p>
-            {lesson.blocks.map((block) => (
-              <section className="learning-block surface" key={block.id}>
-                <h2>{block.title}</h2>
-                {block.paragraphs.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-                {block.examples && (
-                  <div className="example-grid">
-                    {block.examples.map((example, index) => (
-                      <div key={index} className="example-card">
-                        <div className="example-thai thai" lang="th">
-                          {example.thai}
-                        </div>
-                        <div className="ipa">{example.ipa}</div>
-                        <div className="meaning">{example.meaning}</div>
-                        {example.note && (
-                          <p className="example-note">{example.note}</p>
-                        )}
-                        {isThaiSpeechText(example.thai) && (
-                          <SpeakButton text={example.thai} compact />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {block.callout && (
-                  <div className="rule-callout">{block.callout}</div>
-                )}
-              </section>
+            <details className="explore-disclaimer lesson-audio-details">
+              <summary>
+                合成音声・未監修／提供元へ通信する場合があります
+              </summary>
+              <p>
+                例語の再生には端末のタイ語合成音声（未監修）を使います。録音教材ではなく、読み方・声調の自然さは未検証です。タイ語の声がない端末では再生できません。音声提供元への通信が発生する場合があります。
+              </p>
+            </details>
+            {lesson.blocks.map((block, index) => (
+              <LearningBlockCard
+                block={block}
+                number={index + 1}
+                key={block.id}
+              />
             ))}
             <div className="lesson-actions">
               <p>読むペースは、自分に合わせて。</p>
@@ -328,11 +334,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 <Eye size={14} /> TAKE A CLOSER LOOK
               </p>
               <h2>見比べると、違いが見えてくる。</h2>
-              <p>
-                カードを選んで、文字・IPA・意味を確かめましょう。
-                <br />
-                文字の形と音の仕組みを比較し、対応端末では合成音声も確認できます。
-              </p>
+              <p>カードを選び、文字・音・意味を見比べましょう。</p>
             </div>
             <div
               className="explore-grid"
@@ -359,15 +361,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               ))}
             </div>
             <div
-              className="explore-detail surface"
+              className="explore-detail surface visual-explore-detail"
               id="explore-detail"
               aria-live="polite"
             >
-              <div className="thai" lang="th">
-                {explored.thai}
+              <div className="lesson-explore-word">
+                <div className="thai" lang="th">
+                  {explored.thai}
+                </div>
+                <div className="ipa">{explored.ipa}</div>
+                <h3>{explored.meaning}</h3>
               </div>
-              <div className="ipa">{explored.ipa}</div>
-              <h3>{explored.meaning}</h3>
+              <ExampleVisual example={explored} />
               <p>{explored.note}</p>
               {isThaiSpeechText(explored.thai) ? (
                 <SpeakButton
@@ -601,12 +606,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 </p>
               )}
             </section>
-            <section className="review-summary surface">
+            <section className="review-summary surface visual-review-summary">
               <h3>今日の「わかった」を持ち帰ろう。</h3>
               <ul>
-                {lesson.summary.map((item) => (
+                {lesson.summary.map((item, index) => (
                   <li key={item}>
-                    <Check size={14} />
+                    <span className="lesson-summary-number" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                     <span>{item}</span>
                   </li>
                 ))}

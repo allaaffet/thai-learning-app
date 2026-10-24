@@ -5,10 +5,20 @@ import { useState } from "react";
 import {
   ArrowRight,
   BookOpen,
+  Boxes,
   Check,
+  Clock3,
+  Hash,
+  Info,
   LockKeyhole,
+  MessageCircle,
+  MoveUpRight,
   Plus,
   Search,
+  Shapes,
+  Users,
+  Volume2,
+  type LucideIcon,
 } from "lucide-react";
 import {
   languageSources,
@@ -21,6 +31,51 @@ import { useLearning } from "@/components/learning-provider";
 import { useReview } from "@/components/review-provider";
 import { SpeakButton } from "@/components/speech-practice";
 import { Button } from "@/components/ui/button";
+
+const categoryIcons: Record<string, LucideIcon> = {
+  pronouns: Users,
+  verbs: MoveUpRight,
+  nouns: Boxes,
+  qualities: Shapes,
+  particles: MessageCircle,
+  quantity: Hash,
+  connections: Clock3,
+};
+
+export function LanguageDisclosure({
+  count,
+  kind,
+}: {
+  count: number;
+  kind: "vocabulary" | "grammar";
+}) {
+  return (
+    <div className="language-disclosure reference-disclosure">
+      <div className="reference-disclosure-overview">
+        <span className="reference-disclosure-badge">
+          <Info size={16} aria-hidden="true" />
+          教材案・専門家監修前
+        </span>
+        <span>
+          {kind === "vocabulary"
+            ? `基本語彙 ${count}語`
+            : `基本文法 ${count}項目`}
+        </span>
+      </div>
+      <p className="reference-audio-notice">
+        <Volume2 size={15} aria-hidden="true" />
+        合成音声は未監修・提供元へ通信する場合があります。
+      </p>
+      <details>
+        <summary>教材と音声について</summary>
+        <p>
+          説明・IPA・語義・例文は専門家の監修前です。出典ごとの照合範囲は各項目から確認できます。
+          音声は端末に依存し、タイ語の声がない端末では再生できません。
+        </p>
+      </details>
+    </div>
+  );
+}
 
 export function LanguageSources({
   sourceIds,
@@ -108,14 +163,12 @@ export function VocabularyPage() {
   );
 
   return (
-    <div className="language-page">
+    <div className="language-page visual-reference-page">
       <header className="page-header language-page-header">
         <div>
           <p className="eyebrow">WORDS IN CONTEXT</p>
           <h1 className="page-title">ことばを、少しずつ。</h1>
-          <p className="page-description">
-            文字から意味へ、意味からひとことへ。気になる単語を、例文と一緒に確かめましょう。
-          </p>
+          <p className="page-description">気になることばを、例文と一緒に。</p>
         </div>
         <Button asChild variant="outline">
           <Link href="/review">
@@ -124,14 +177,7 @@ export function VocabularyPage() {
         </Button>
       </header>
 
-      <div className="language-disclosure">
-        <strong>
-          基本語彙 {vocabularyEntries.length}語 · 教材案・専門家監修前
-        </strong>
-        <p>
-          IPA・語義・例文は専門家の監修前です。音声は端末の合成音声（未監修）で、提供元への通信が発生する場合があります。タイ語の声がない端末では再生できません。
-        </p>
-      </div>
+      <LanguageDisclosure count={vocabularyEntries.length} kind="vocabulary" />
 
       <div className="language-toolbar surface">
         <div className="language-search">
@@ -201,46 +247,50 @@ export function VocabularyPage() {
             const category = vocabularyCategories.find(
               (item) => item.id === entry.categoryId,
             );
+            const CategoryIcon = categoryIcons[entry.categoryId] ?? BookOpen;
             return (
               <article
                 key={entry.id}
                 id={entry.id}
-                className="surface vocabulary-card"
+                className={`surface vocabulary-card vocabulary-visual-card category-${entry.categoryId}`}
                 aria-labelledby={`vocabulary-${entry.id}`}
               >
                 <div className="vocabulary-card-meta">
-                  <span>{category?.label ?? "基本語彙"}</span>
+                  <span>
+                    <CategoryIcon size={17} aria-hidden="true" />
+                    {category?.label ?? "基本語彙"}
+                  </span>
                   <span>A1</span>
                 </div>
-                <h2 className="thai" lang="th" id={`vocabulary-${entry.id}`}>
-                  {entry.thai}
-                </h2>
-                <p className="language-ipa">{entry.ipa}</p>
-                <p className="vocabulary-meaning">{entry.meaning}</p>
-                <p className="vocabulary-syllables">
-                  音節：
-                  {entry.syllables.map((syllable, index) => (
-                    <span key={`${entry.id}-${index}`}>
-                      <span className="thai" lang="th">
-                        {syllable}
-                      </span>
-                      {index < entry.syllables.length - 1 && " / "}
-                    </span>
-                  ))}
-                </p>
+                <div className="vocabulary-word-visual">
+                  <div>
+                    <h2
+                      className="thai"
+                      lang="th"
+                      id={`vocabulary-${entry.id}`}
+                    >
+                      {entry.thai}
+                    </h2>
+                    <p className="vocabulary-meaning">{entry.meaning}</p>
+                    <p className="language-ipa">{entry.ipa}</p>
+                  </div>
+                  <span
+                    className="vocabulary-category-visual"
+                    aria-hidden="true"
+                  >
+                    <CategoryIcon size={42} strokeWidth={1.4} />
+                  </span>
+                </div>
                 <div className="vocabulary-example">
+                  <span className="reference-example-label">
+                    <MessageCircle size={15} aria-hidden="true" />
+                    ひとこと
+                  </span>
                   <p className="thai" lang="th">
                     {entry.example.thai}
                   </p>
-                  <p className="language-ipa">{entry.example.ipa}</p>
                   <p>{entry.example.meaning}</p>
-                  {entry.example.note && (
-                    <p className="language-muted">{entry.example.note}</p>
-                  )}
                 </div>
-                {entry.note && (
-                  <p className="vocabulary-word-note">{entry.note}</p>
-                )}
                 <div className="vocabulary-actions">
                   <SpeakButton text={entry.thai} compact />
                   <Button
@@ -267,6 +317,27 @@ export function VocabularyPage() {
                     {registered ? "登録済み" : "復習に追加"}
                   </Button>
                 </div>
+                <details className="vocabulary-more vocabulary-pronunciation-details">
+                  <summary>音節・発音・補足</summary>
+                  <p className="vocabulary-syllables">
+                    音節：
+                    {entry.syllables.map((syllable, index) => (
+                      <span key={`${entry.id}-${index}`}>
+                        <span className="thai" lang="th">
+                          {syllable}
+                        </span>
+                        {index < entry.syllables.length - 1 && " / "}
+                      </span>
+                    ))}
+                  </p>
+                  <p className="language-ipa">例文のIPA：{entry.example.ipa}</p>
+                  {entry.note && (
+                    <p className="vocabulary-word-note">{entry.note}</p>
+                  )}
+                  {entry.example.note && (
+                    <p className="language-muted">{entry.example.note}</p>
+                  )}
+                </details>
                 <details className="vocabulary-more">
                   <summary>関連する学び・出典</summary>
                   <RelatedLanguageLessons lessonIds={entry.relatedLessonIds} />
@@ -277,9 +348,12 @@ export function VocabularyPage() {
           })}
         </div>
       )}
-      <p className="language-bottom-note">
-        復習に追加する単語は自分で選べます。登録や自己評価でXPは増えず、レッスンの前提条件も変わりません。カードはこのブラウザに保存されます。
-      </p>
+      <details className="language-bottom-note reference-bottom-details">
+        <summary>復習カードの保存について</summary>
+        <p>
+          復習に追加する単語は自分で選べます。登録や自己評価でXPは増えず、レッスンの前提条件も変わりません。カードはこのブラウザに保存されます。
+        </p>
+      </details>
     </div>
   );
 }

@@ -30,7 +30,7 @@ export function ProgressPage() {
 
   if (!ready) {
     return (
-      <div className="space-y-8">
+      <div className="progress-dashboard space-y-8">
         <header className="page-header">
           <p className="eyebrow">YOUR PROGRESS</p>
           <h1 className="page-title">学びのあしあと</h1>
@@ -54,23 +54,21 @@ export function ProgressPage() {
       value: `${completedCount}`,
       unit: `/ ${lessons.length}`,
       icon: BookOpen,
-      note: "小さな一歩の積み重ね",
+      note: "学習順の進捗",
     },
     {
       label: "獲得したXP",
       value: `${getTotalXp(progress)}`,
       unit: "XP",
       icon: Sparkles,
-      note: "初回のレッスン完了で獲得",
+      note: "初回完了で獲得",
     },
     {
       label: "クイズの正答率",
       value: hasAttempts ? `${Math.round(accuracy)}` : "—",
       unit: hasAttempts ? "%" : "",
       icon: Target,
-      note: hasAttempts
-        ? "すべての受講回の初回回答"
-        : "クイズに答えると記録されます",
+      note: hasAttempts ? "受講ごとの初回回答" : "まだ解答の記録がありません",
     },
     {
       label: "学習した日数",
@@ -85,13 +83,11 @@ export function ProgressPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="progress-dashboard space-y-8">
       <header className="page-header">
         <p className="eyebrow">YOUR PROGRESS</p>
         <h1 className="page-title">学びのあしあと</h1>
-        <p className="page-description">
-          昨日より、ひとつわかる。その積み重ねを振り返りましょう。
-        </p>
+        <p className="page-description">続けた日も、わかったことも、ここに。</p>
       </header>
 
       {storageMessage && (
@@ -105,7 +101,7 @@ export function ProgressPage() {
 
       <div className="stat-grid">
         {stats.map((stat) => (
-          <Card key={stat.label} className="stat-card">
+          <Card key={stat.label} className="stat-card progress-stat-card">
             <div className="stat-icon">
               <stat.icon className="h-5 w-5" aria-hidden="true" />
             </div>
@@ -118,6 +114,20 @@ export function ProgressPage() {
                 {stat.unit}
               </span>
             </p>
+            {stat.label === "完了したレッスン" && (
+              <div className="progress-lesson-dots" aria-hidden="true">
+                {lessons.map((lesson) => (
+                  <span
+                    key={lesson.id}
+                    className={
+                      progress.lessons[lesson.id]?.completedAt
+                        ? "is-complete"
+                        : ""
+                    }
+                  />
+                ))}
+              </div>
+            )}
             <p className="mt-2 text-xs leading-6 text-[#77817b]">{stat.note}</p>
           </Card>
         ))}
@@ -134,7 +144,7 @@ export function ProgressPage() {
                 最初の一歩を、ここから。
               </h2>
               <p className="mt-1 text-sm leading-7 text-[#68746c]">
-                最初のレッスンを終えると、あなたの学習記録が増えていきます。
+                レッスンを終えると、記録が増えていきます。
               </p>
             </div>
           </div>
@@ -177,7 +187,7 @@ export function ProgressPage() {
               return (
                 <li
                   key={lesson.id}
-                  className="flex flex-wrap items-center gap-4 px-5 py-5 sm:px-6"
+                  className="progress-lesson-row flex flex-wrap items-center gap-4 px-5 py-5 sm:px-6"
                 >
                   <span
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${completed ? "bg-[#eaf2eb] text-[#285b46]" : unlocked ? "bg-[#f4f5ef] text-[#69715d]" : "bg-[#f4f5f3] text-[#99a29a]"}`}
@@ -196,20 +206,35 @@ export function ProgressPage() {
                     >
                       {lesson.title}
                     </h3>
-                    <p className="mt-0.5 text-xs leading-6 text-[#77817b]">
-                      {completed
-                        ? "完了"
-                        : !unlocked
-                          ? "未解放"
-                          : studied
-                            ? "復習が必要"
-                            : "未学習"}
-                      {studied &&
-                        ` · 最高正答率 ${Math.round(record.bestScore)}% · ${record.attemptCount}回受講`}
-                      {!unlocked &&
-                        neededLessons.length > 0 &&
-                        ` · 「${neededLessons.map((item) => item.title).join("」「")}」の完了後に学べます`}
-                    </p>
+                    <div className="progress-lesson-meta">
+                      <span
+                        className={`progress-status ${completed ? "is-complete" : ""}`}
+                      >
+                        {completed
+                          ? "完了"
+                          : !unlocked
+                            ? "未解放"
+                            : studied
+                              ? "復習が必要"
+                              : "未学習"}
+                      </span>
+                      {studied && (
+                        <span>
+                          最高正答率 {Math.round(record.bestScore)}% ·{" "}
+                          {record.attemptCount}回受講
+                        </span>
+                      )}
+                    </div>
+                    {!unlocked && neededLessons.length > 0 && (
+                      <details className="progress-prerequisites">
+                        <summary>先に学ぶレッスン</summary>
+                        <p>
+                          「
+                          {neededLessons.map((item) => item.title).join("」「")}
+                          」の完了後に学べます
+                        </p>
+                      </details>
+                    )}
                   </div>
                   {unlocked ? (
                     <Button
@@ -239,12 +264,15 @@ export function ProgressPage() {
         </Card>
       </section>
 
-      <div className="flex items-start gap-3 rounded-2xl border border-[#e4e9e2] bg-white p-5 text-sm leading-7 text-[#77817b]">
-        <Info className="mt-1 h-4 w-4 shrink-0" aria-hidden="true" />
+      <details className="progress-record-note rounded-2xl border border-[#e4e9e2] bg-white p-5 text-sm leading-7 text-[#77817b]">
+        <summary>
+          <Info className="h-4 w-4 shrink-0" aria-hidden="true" />
+          学習記録の見方・保存について
+        </summary>
         <p>
-          XPは学習の積み重ね、正答率は理解度の目安です。再受講でXPは増えませんが、最高正答率を更新できます。記録はこのブラウザに保存され、別の端末には同期されません。
+          XPは学習の積み重ね、正答率は解答の記録です。XPの多さは習熟度を示しません。再受講でXPは増えませんが、最高正答率を更新できます。記録はこのブラウザに保存され、別の端末には同期されません。
         </p>
-      </div>
+      </details>
     </div>
   );
 }

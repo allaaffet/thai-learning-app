@@ -17,7 +17,7 @@
   min-height: 40px;
   min-width: 40px;
   padding: 9px;
-  font-size: 10px;
+  font-size: var(--text-caption);
   flex-shrink: 0;
 }
 .sound-settings-dialog {
@@ -50,7 +50,7 @@
 }
 .sound-settings-dialog p {
   line-height: 1.9;
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .sound-settings-toggle {
   display: flex;
@@ -86,7 +86,7 @@
   display: flex;
   justify-content: space-between;
   margin-block: 18px 12px;
-  font-size: 13px;
+  font-size: var(--text-body);
 }
 .sound-settings-dialog input[type="range"] {
   width: 100%;
@@ -98,7 +98,7 @@
 .sound-settings-dialog .sound-settings-note {
   margin-top: 20px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-small);
 }
 .sound-settings-dialog p[role="status"] {
   margin-top: 14px;

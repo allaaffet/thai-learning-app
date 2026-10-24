@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, BookOpen, Search } from "lucide-react";
+import { ArrowRight, BookOpen, MessageCircle, Search } from "lucide-react";
 import { grammarPoints, getVocabularyEntry } from "@/data/language";
 import {
   LanguageSources,
+  LanguageDisclosure,
   RelatedLanguageLessons,
 } from "@/components/vocabulary-page";
 import { SpeakButton } from "@/components/speech-practice";
@@ -65,22 +66,13 @@ export function GrammarPage() {
   }
 
   return (
-    <div className="language-page">
+    <div className="language-page visual-reference-page">
       <header className="page-header">
         <p className="eyebrow">GRAMMAR REFERENCE</p>
         <h1 className="page-title">文の仕組みを、つかむ。</h1>
-        <p className="page-description">
-          日本語との違いを知ると、タイ語のひとことがつながりはじめます。
-        </p>
+        <p className="page-description">語順を見つけると、ことばがつながる。</p>
       </header>
-      <div className="language-disclosure">
-        <strong>
-          基本文法 {grammarPoints.length}項目 · 教材案・専門家監修前
-        </strong>
-        <p>
-          調べるためのリファレンスです。順番に練習したいときは、関連レッスンから進めましょう。説明・IPA・例文は専門家監修前です。合成音声は端末に依存し、音声提供元への通信が発生する場合があります。
-        </p>
-      </div>
+      <LanguageDisclosure count={grammarPoints.length} kind="grammar" />
       <div className="grammar-layout">
         <aside className="surface grammar-navigation" aria-label="文法項目">
           <div className="language-search">
@@ -140,17 +132,43 @@ export function GrammarPage() {
               aria-labelledby="grammar-pattern-heading"
             >
               <h3 id="grammar-pattern-heading">文の組み立て</h3>
-              <p>{selected.pattern}</p>
+              <div className="grammar-pattern-visual">
+                {selected.pattern.split(" ／ ").map((pattern, patternIndex) => (
+                  <div
+                    className="grammar-pattern-alternative"
+                    key={`${selected.id}-pattern-${patternIndex}`}
+                  >
+                    {patternIndex > 0 && (
+                      <span className="grammar-pattern-separator">／</span>
+                    )}
+                    <div className="grammar-pattern-row">
+                      {pattern.split(" ＋ ").map((part, partIndex) => (
+                        <span
+                          className="grammar-pattern-step"
+                          key={`${selected.id}-pattern-${patternIndex}-${partIndex}`}
+                        >
+                          {partIndex > 0 && (
+                            <ArrowRight size={17} aria-hidden="true" />
+                          )}
+                          <span>{part}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </section>
-            <section
+            <details
               className="grammar-explanation"
               aria-labelledby="grammar-explanation-heading"
             >
-              <h3 id="grammar-explanation-heading">日本語との違い・考え方</h3>
+              <summary>
+                <h3 id="grammar-explanation-heading">日本語との違い・考え方</h3>
+              </summary>
               {selected.explanation.map((paragraph, index) => (
                 <p key={`${selected.id}-explanation-${index}`}>{paragraph}</p>
               ))}
-            </section>
+            </details>
             <section
               className="grammar-examples"
               aria-labelledby="grammar-examples-heading"
@@ -161,11 +179,14 @@ export function GrammarPage() {
                   className="grammar-example"
                   key={`${selected.id}-example-${index}`}
                 >
+                  <span className="reference-example-label">
+                    <MessageCircle size={15} aria-hidden="true" />
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   <p className="thai grammar-example-thai" lang="th">
                     {example.thai}
                   </p>
-                  <p className="language-ipa">{example.ipa}</p>
-                  <p>{example.meaning}</p>
+                  <p className="grammar-example-meaning">{example.meaning}</p>
                   <dl className="grammar-segments" aria-label="語句の役割">
                     {example.segments.map((segment, segmentIndex) => (
                       <div
@@ -174,14 +195,26 @@ export function GrammarPage() {
                         <dt className="thai" lang="th">
                           {segment.thai}
                         </dt>
-                        <dd>{segment.role}</dd>
+                        <dd>
+                          <span
+                            className="grammar-role-number"
+                            aria-hidden="true"
+                          >
+                            {segmentIndex + 1}
+                          </span>
+                          {segment.role}
+                        </dd>
                       </div>
                     ))}
                   </dl>
-                  {example.note && (
-                    <p className="language-muted">{example.note}</p>
-                  )}
                   <SpeakButton text={example.thai} compact />
+                  <details className="grammar-example-details">
+                    <summary>発音・補足を確認</summary>
+                    <p className="language-ipa">{example.ipa}</p>
+                    {example.note && (
+                      <p className="language-muted">{example.note}</p>
+                    )}
+                  </details>
                 </div>
               ))}
             </section>

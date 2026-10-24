@@ -64,7 +64,7 @@ export function ToneContour({
       role="img"
       aria-labelledby={`${id}-title ${id}-description`}
     >
-      <title id={`${id}-title`}>{info.label}の模式図</title>
+      <title id={`${id}-title`}>{`${info.label}の模式図`}</title>
       <desc id={`${id}-description`}>
         {info.description}。高さは1が低く、5が高い。時間は左から右へ進みます。
       </desc>
