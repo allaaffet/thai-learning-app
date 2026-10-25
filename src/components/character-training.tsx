@@ -16,10 +16,12 @@ import {
   Sparkles,
   Target,
   Trophy,
+  Link2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SpeakButton } from "@/components/speech-practice";
+import { CharacterPairGame } from "@/components/character-pair-game";
 import {
   CharacterAudioPrompt,
   type CharacterAudioReadiness,
@@ -67,7 +69,7 @@ const MODES: { value: ActivePracticeMode; label: string; hint: string }[] = [
   },
 ];
 
-type Stage = "setup" | "learn" | "quiz" | "result";
+type Stage = "setup" | "learn" | "pairs" | "quiz" | "result";
 
 function entriesFor(ids: readonly string[]) {
   return ids.flatMap((id) => {
@@ -316,6 +318,22 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
     focusStage();
   }
 
+  function startPairs() {
+    if (!canStart) return;
+    // The game is an unscored warm-up. Only the later eight-question quiz saves results.
+    activeQuestionId.current = null;
+    audioReadinessRef.current = null;
+    setAudioReadiness(null);
+    setSession(null);
+    setAnswers([]);
+    setError(null);
+    setStage("pairs");
+    window.requestAnimationFrame(() => {
+      const game = document.getElementById("character-pairs-stage");
+      game?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+  }
+
   function practiceAgain(ids: string[]) {
     if (!ids.length) return;
     const withContrast = [...ids];
@@ -439,17 +457,23 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
       <ol className="ct-steps" aria-label="文字トレーニングの流れ">
         {[
           { label: "選ぶ", key: "setup", icon: Layers2 },
-          { label: "聞いておぼえる", key: "learn", icon: Headphones },
+          { label: "遊んでおぼえる", key: "learn", icon: Link2 },
           { label: "8問チャレンジ", key: "quiz", icon: Target },
         ].map((step, index) => (
           <li
             key={step.key}
             className={
-              stage === step.key || (stage === "result" && step.key === "quiz")
+              stage === step.key ||
+              (stage === "pairs" && step.key === "learn") ||
+              (stage === "result" && step.key === "quiz")
                 ? "is-current"
                 : ""
             }
-            aria-current={stage === step.key ? "step" : undefined}
+            aria-current={
+              stage === step.key || (stage === "pairs" && step.key === "learn")
+                ? "step"
+                : undefined
+            }
           >
             <span>
               <step.icon size={18} aria-hidden="true" />
@@ -677,6 +701,16 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   type="button"
                   size="lg"
                   disabled={!canStart}
+                  onClick={startPairs}
+                >
+                  <Link2 size={19} />
+                  ペアさがしで遊ぶ
+                  <ArrowRight size={18} />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!canStart}
                   onClick={() => startLearn()}
                 >
                   <Headphones size={19} />
@@ -713,6 +747,20 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
             </div>
           </aside>
         </section>
+      )}
+
+      {stage === "pairs" && (
+        <div id="character-pairs-stage" style={{ scrollMarginTop: "100px" }}>
+          <CharacterPairGame
+            selectedIds={selectedIds}
+            mode={mode}
+            onQuiz={(pairMode) => startQuiz(selectedIds, pairMode)}
+            onBack={() => {
+              setStage("setup");
+              focusStage();
+            }}
+          />
+        </div>
       )}
 
       {stage === "learn" && learnEntry && (
@@ -865,6 +913,10 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
             </div>
           </div>
           <div className="ct-bottom-actions">
+            <Button type="button" variant="outline" onClick={startPairs}>
+              <Link2 size={17} />
+              ペアさがしで遊ぶ
+            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -1115,7 +1167,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   <>
                     <strong>{question.cue}</strong>
                     （字母名の最初の音節）と、英字名{" "}
-                    <strong>{question.readingName}</strong> に対応する文字は{" "}
+                    <strong>
+                      {question.readingName}
+                    </strong> に対応する文字は{" "}
                     <span className="thai" lang="th">
                       {target.thai}
                     </span>

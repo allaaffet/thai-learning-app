@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Headphones } from "lucide-react";
+import { ArrowRight, Link2 } from "lucide-react";
 
 export function CharacterTrainingTeaser() {
   return (
@@ -16,10 +16,10 @@ export function CharacterTrainingTeaser() {
       </div>
       <div className="character-training-teaser-copy">
         <span>
-          <Headphones size={17} aria-hidden="true" /> 文字の読み方を、音から
+          <Link2 size={17} aria-hidden="true" /> 音と文字のペアを見つけよう
         </span>
-        <h2>4文字から、聞いて覚えよう。</h2>
-        <p>名前を聞く → 8問チャレンジ → 聞き直す。</p>
+        <h2>つなげるたび、文字がわかる。</h2>
+        <p>ペアさがし → 並べ替えてもう1周 → 8問で確認。</p>
       </div>
       <Link
         className="character-training-teaser-link"
