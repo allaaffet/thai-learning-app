@@ -24,6 +24,10 @@ import { useLearning } from "@/components/learning-provider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StudyInsights } from "@/components/study-insights";
+import {
+  AchievementCollection,
+  ExperienceMeter,
+} from "@/components/game-dashboard";
 
 export function ProgressPage() {
   const { progress, ready, storageMessage } = useLearning();
@@ -157,6 +161,10 @@ export function ProgressPage() {
         </Card>
       )}
 
+      <div className="game-progress-collection">
+        <ExperienceMeter compact />
+        <AchievementCollection />
+      </div>
       <StudyInsights />
       <section aria-labelledby="lesson-progress-heading">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">

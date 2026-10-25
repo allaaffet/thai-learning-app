@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource-variable/noto-sans-jp";
 import "./globals.css";
 import "./visual-refresh.css";
+import "./gamification.css";
 import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
 import { ReviewProvider } from "@/components/review-provider";

@@ -1,0 +1,608 @@
+.experience-card {
+  min-width: 0;
+  padding: 24px;
+  background: linear-gradient(155deg, #fffdf5, #f7faf1);
+  border-color: #e4e5cd;
+}
+
+.experience-card-heading,
+.game-section-heading,
+.game-quest-card-top,
+.game-quest-total,
+.game-badge-total {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.experience-card-heading h2 {
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--forest);
+}
+
+.game-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  color: #8b7138;
+  background: #f4ecd6;
+}
+
+.experience-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 18px;
+  gap: 18px;
+}
+
+.experience-medallion {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: min(100%, max(116px, 4.4em));
+  min-height: 116px;
+  padding: 14px 0;
+  border: 5px solid #e3d6ab;
+  border-radius: 34% 42% 34% 42%;
+  background: #fffef8;
+  box-shadow: 0 0 0 5px #f0eddb;
+  color: var(--forest);
+}
+
+.experience-medallion > span {
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: #8a7b52;
+}
+
+.experience-medallion strong {
+  font-size: 3.5rem;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: -0.05em;
+}
+
+.experience-spark {
+  position: absolute;
+  top: 12px;
+  right: -14px;
+  color: #b39342;
+  background: #fffdf3;
+  border-radius: 5px;
+}
+
+.experience-details {
+  min-width: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.experience-total {
+  font-size: 1.375rem;
+  font-weight: 650;
+  line-height: 1.7;
+  color: var(--forest);
+  overflow-wrap: anywhere;
+}
+
+.experience-next {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px 6px;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #707956;
+  line-height: 1.8;
+}
+
+.experience-next strong {
+  font-weight: 650;
+  color: #667843;
+}
+
+.game-milestone-meter {
+  height: 9px;
+  min-width: 0;
+  background: #e8ede4;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.game-milestone-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #6e9b74;
+}
+
+.experience-meter {
+  margin-top: 13px;
+  height: 10px;
+  background: #ece8d7;
+}
+
+.experience-meter > span {
+  background: linear-gradient(90deg, #5c8c61, #b3ac59);
+}
+
+.game-explanation {
+  font-size: 0.875rem;
+  line-height: 1.9;
+  color: #697661;
+  margin-top: 20px;
+}
+
+.game-explanation summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  width: fit-content;
+  padding-block: 8px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.game-explanation summary::-webkit-details-marker {
+  display: none;
+}
+
+.game-explanation[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.game-explanation p + p {
+  margin-top: 9px;
+}
+
+.experience-card > .game-explanation {
+  border-top: 1px solid #e6e7d5;
+  margin-top: 18px;
+  padding-top: 4px;
+}
+
+.experience-card.is-compact .experience-card-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 28px;
+  text-align: left;
+}
+
+.experience-card.is-compact .experience-details {
+  text-align: left;
+}
+
+.experience-card.is-compact .experience-next {
+  justify-content: flex-start;
+}
+
+.game-quest-board,
+.game-achievements {
+  min-width: 0;
+  margin-block: 32px;
+  scroll-margin-top: 25px;
+}
+
+.game-section-heading {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  margin-bottom: 18px;
+}
+
+.game-section-heading > div {
+  min-width: 0;
+}
+
+.game-section-heading h2 {
+  margin-top: 6px;
+  color: var(--forest);
+  font-size: 1.375rem;
+  font-weight: 650;
+  line-height: 1.7;
+}
+
+.game-section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #75876b;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+.game-section-kicker > svg {
+  flex-shrink: 0;
+}
+
+.game-quest-total,
+.game-badge-total {
+  flex-wrap: wrap;
+  color: var(--forest);
+  background: #eaf2e5;
+  border: 1px solid #dde7d4;
+  border-radius: 30px;
+  font-size: 1rem;
+  padding: 7px 13px;
+  line-height: 1.7;
+}
+
+.game-quest-total > span,
+.game-badge-total > span {
+  font-size: 0.875rem;
+}
+
+.game-quest-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.game-quest-card {
+  --quest-tint: #edf3e6;
+  --quest-ink: #6e895b;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 21px;
+  border: 1px solid #dfe7d6;
+  border-top: 4px solid #c9d9bc;
+  border-radius: 15px;
+  background: #fff;
+}
+
+.game-quest-card.quest-answers {
+  --quest-tint: #faf1dd;
+  --quest-ink: #a38541;
+  border-top-color: #e6d39f;
+}
+
+.game-quest-card.quest-review {
+  --quest-tint: #e8f2ef;
+  --quest-ink: #5d8f82;
+  border-top-color: #bbd8ce;
+}
+
+.game-quest-card.is-complete {
+  border-color: #c4d8b9;
+  border-top-color: #7b9d68;
+  background: #f5f9ef;
+}
+
+.game-quest-card-top {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.game-quest-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--quest-ink);
+  background: var(--quest-tint);
+}
+
+.game-quest-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: #859077;
+  background: #f3f5ef;
+}
+
+.game-quest-state.is-complete {
+  background: #e7f0de;
+  color: #577847;
+}
+
+.game-quest-card h3 {
+  margin-top: 17px;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.9;
+  color: #46613f;
+  overflow-wrap: anywhere;
+}
+
+.game-quest-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  margin-block: 13px 17px;
+}
+
+.game-quest-progress > strong {
+  color: #537447;
+  font-size: 1.375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-quest-progress > strong > span {
+  color: #8a947e;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.game-quest-card > .button {
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 10px;
+  margin-top: auto;
+  white-space: normal;
+}
+
+.game-quest-waiting {
+  color: #77856d;
+  font-size: 0.875rem;
+  line-height: 1.9;
+  margin-bottom: 13px;
+}
+
+.game-quest-help {
+  margin-top: 8px;
+}
+
+.game-loading {
+  padding: 24px;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.game-badge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: 15px;
+}
+
+.game-badge-card {
+  min-width: 0;
+  border: 1px solid #e1e7dc;
+  border-radius: 16px;
+  background: #f8faf6;
+  color: #788470;
+  overflow-wrap: anywhere;
+}
+
+.game-badge-card.is-earned {
+  border-color: #d9d0a6;
+  background: linear-gradient(155deg, #fffdf4, #f5f8ec);
+}
+
+.game-badge-card > summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 23px 16px 16px;
+  min-height: 190px;
+  text-align: center;
+  list-style: none;
+  cursor: pointer;
+}
+
+.game-badge-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.game-badge-icon {
+  display: grid;
+  position: relative;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 2px;
+  border: 2px dashed #dce3d5;
+  border-radius: 21px;
+  background: #eef2e9;
+  color: #99a58c;
+}
+
+.game-badge-card.is-earned .game-badge-icon {
+  color: #927a3d;
+  background: #f4ecd0;
+  border-color: #e2d3a3;
+  border-style: solid;
+  box-shadow: 3px 3px 0 #e7e3ce;
+}
+
+.game-badge-icon > span {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  right: -7px;
+  bottom: -6px;
+  border: 3px solid #fcfcf6;
+  border-radius: 50%;
+  color: white;
+  background: #6f9061;
+}
+
+.game-badge-title {
+  font-weight: 650;
+  color: #627458;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+.game-badge-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #8a957f;
+  font-size: 0.75rem;
+  line-height: 1.8;
+}
+
+.game-badge-card.is-earned .game-badge-state {
+  color: #7a854d;
+}
+
+.game-badge-chevron {
+  color: #99a48c;
+  margin-top: auto;
+}
+
+.game-badge-card[open] .game-badge-chevron {
+  transform: rotate(180deg);
+}
+
+.game-badge-condition {
+  border-top: 1px solid #e8ece0;
+  padding: 15px;
+  color: #74816b;
+  font-size: 0.875rem;
+  line-height: 1.9;
+}
+
+.game-badge-condition .game-milestone-meter {
+  margin-top: 13px;
+}
+
+.game-badge-count {
+  margin-top: 7px;
+  text-align: right;
+  color: #5e7853;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-badge-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 20px;
+  margin-top: 13px;
+  color: #78846e;
+  font-size: 0.875rem;
+  line-height: 1.9;
+}
+
+.game-week-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px 25px;
+  padding: 18px 24px;
+  margin-top: 18px;
+  background: #f0f5e9;
+  border: 1px solid #e1e8d8;
+  border-radius: 13px;
+}
+
+.game-week-strip-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #628052;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.game-week-strip .weekdays {
+  flex: 1 1 260px;
+  max-width: 440px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.game-week-strip .weekday-dot {
+  width: 27px;
+  height: 27px;
+}
+
+@media (max-width: 1100px) {
+  .game-quest-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .game-quest-card {
+    padding: 20px;
+  }
+  .game-badge-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .dashboard-hero-grid > .experience-card .experience-card-body {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 27px;
+  }
+  .dashboard-hero-grid > .experience-card .experience-details {
+    text-align: left;
+  }
+  .dashboard-hero-grid > .experience-card .experience-next {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .game-section-heading h2 {
+    font-size: 1.25rem;
+  }
+  .experience-card {
+    padding: 22px;
+  }
+  .game-quest-board,
+  .game-achievements {
+    margin-block: 28px;
+  }
+  .game-week-strip {
+    padding: 17px;
+  }
+  .game-week-strip .weekdays {
+    max-width: none;
+    flex-basis: 100%;
+  }
+  .game-badge-grid {
+    gap: 11px;
+  }
+  .game-badge-card > summary {
+    padding: 20px 12px 13px;
+  }
+  .game-badge-condition {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-hero-grid > .experience-card .experience-card-body,
+  .experience-card.is-compact .experience-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .dashboard-hero-grid > .experience-card .experience-details,
+  .experience-card.is-compact .experience-details {
+    text-align: center;
+  }
+  .dashboard-hero-grid > .experience-card .experience-next,
+  .experience-card.is-compact .experience-next {
+    justify-content: center;
+  }
+}

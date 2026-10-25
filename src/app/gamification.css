@@ -1,0 +1,131 @@
+@import "./game-dashboard.css";
+@import "./game-lesson.css";
+
+.completion-rewards {
+  margin-block: 24px;
+  text-align: left;
+  border: 1px solid #e1e7d9;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fffdf8;
+}
+.reward-experience {
+  display: flex;
+  gap: 16px;
+  padding: 22px;
+  align-items: center;
+}
+.reward-symbol {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: #eaf1df;
+  color: var(--forest);
+}
+.reward-experience.is-level-up {
+  background: #faf0cf;
+}
+.reward-experience.is-level-up .reward-symbol {
+  background: #f5dfa3;
+  color: #886622;
+}
+.reward-experience > div {
+  min-width: 0;
+}
+.reward-label {
+  display: block;
+  font-size: var(--text-small);
+  color: #68745c;
+}
+.reward-experience strong {
+  display: block;
+  font-size: 22px;
+  color: var(--forest);
+  line-height: 1.7;
+}
+.reward-experience p {
+  font-size: var(--text-small);
+  color: #68745c;
+}
+.reward-new-badges {
+  border-top: 1px solid #e7eadf;
+  padding: 20px 22px;
+}
+.reward-new-badges h3 {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: var(--text-body);
+  color: #8b6b28;
+  font-weight: 600;
+}
+.reward-new-badges ul {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin-top: 14px;
+}
+.reward-new-badges li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.reward-new-badges li > svg {
+  flex-shrink: 0;
+  color: #b29343;
+  margin-top: 4px;
+}
+.reward-new-badges li > div {
+  min-width: 0;
+}
+.reward-new-badges li strong {
+  display: block;
+  color: var(--forest);
+  font-size: var(--text-body);
+}
+.reward-new-badges li span {
+  display: block;
+  color: #6c775f;
+  font-size: var(--text-small);
+}
+.reward-quest-summary {
+  border-top: 1px solid #e7eadf;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding: 15px 22px;
+  color: #557443;
+  font-size: var(--text-small);
+}
+.reward-quest-summary a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-left: auto;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.game-progress-collection {
+  display: grid;
+  gap: 24px;
+  scroll-margin-top: 24px;
+}
+@media (max-width: 380px) {
+  .reward-experience,
+  .reward-new-badges,
+  .reward-quest-summary {
+    padding-inline: 16px;
+  }
+  .reward-symbol {
+    width: 40px;
+    height: 40px;
+  }
+  .reward-experience {
+    gap: 11px;
+  }
+}

@@ -15,6 +15,11 @@ import { useReview } from "@/components/review-provider";
 import { SpeakButton } from "@/components/speech-practice";
 import { Button } from "@/components/ui/button";
 import { useSoundEffects } from "@/components/sound-effects-provider";
+import { useGameProgress } from "@/components/use-game-progress";
+import {
+  CompletionRewards,
+  type RewardBaseline,
+} from "@/components/completion-rewards";
 
 interface ReviewSession {
   ids: string[];
@@ -44,6 +49,10 @@ function formatDate(value: string) {
 export function ReviewPage() {
   const { state, ready, storageMessage, rateCard } = useReview();
   const { playEffect } = useSoundEffects();
+  const { game } = useGameProgress();
+  const [rewardBaseline, setRewardBaseline] = useState<RewardBaseline | null>(
+    null,
+  );
   const soundedSession = useRef<string | null>(null);
   const [now, setNow] = useState<Date | null>(null);
   const [session, setSession] = useState<ReviewSession | null>(null);
@@ -97,6 +106,16 @@ export function ReviewPage() {
       setNotice("復習の予定が更新されました。次の予定を確認してください。");
       return;
     }
+    setRewardBaseline(
+      game
+        ? {
+            level: game.experience.level,
+            badgeIds: game.badges
+              .filter((badge) => badge.done)
+              .map((badge) => badge.id),
+          }
+        : null,
+    );
     submitted.current = false;
     setNotice("");
     setSession({
@@ -220,6 +239,9 @@ export function ReviewPage() {
               <CalendarClock size={18} aria-hidden="true" />
               次の予定：{formatDate(nextCard.dueAt)}
             </p>
+          )}
+          {session.reviewed > 0 && (
+            <CompletionRewards baseline={rewardBaseline} />
           )}
           <div className="review-completion-actions">
             <Button

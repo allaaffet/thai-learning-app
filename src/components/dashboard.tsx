@@ -21,7 +21,12 @@ import {
 } from "@/data/course";
 import { useLearning } from "@/components/learning-provider";
 import { LessonCard } from "@/components/lesson-card";
-import { ReviewSummary } from "@/components/review-summary";
+import { ReviewSummary, useLocalClock } from "@/components/review-summary";
+import {
+  AchievementCollection,
+  DailyQuestBoard,
+  ExperienceMeter,
+} from "@/components/game-dashboard";
 import { toneDescriptions } from "@/components/tone-contour";
 import { Button } from "@/components/ui/button";
 import { getNextLesson, getStreak, getTotalXp } from "@/lib/progress";
@@ -32,6 +37,7 @@ function dateKey(date: Date) {
 
 export function Dashboard() {
   const { progress, ready } = useLearning();
+  const now = useLocalClock();
   const completed = lessons.filter(
     (lesson) => progress.lessons[lesson.id]?.completedAt,
   ).length;
@@ -44,15 +50,15 @@ export function Dashboard() {
   ).length;
   const xp = getTotalXp(progress);
   const preview = active.explore.find((item) => item.thai.length <= 8);
-  const todayDone = ready && progress.studyDays.includes(dateKey(new Date()));
-  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-  const week = Array.from({ length: 7 }, (_, index) => {
-    const day = new Date();
+  const weekdays = ["月", "火", "水", "木", "金", "土", "日"];
+  const week = weekdays.map((label, index) => {
+    if (!now) return { label, done: false, today: false };
+    const day = new Date(now);
     day.setDate(day.getDate() - ((day.getDay() + 6) % 7) + index);
     return {
-      label: weekdays[day.getDay()],
+      label,
       done: ready && progress.studyDays.includes(dateKey(day)),
-      today: ready && dateKey(day) === dateKey(new Date()),
+      today: ready && dateKey(day) === dateKey(now),
     };
   });
 
@@ -124,40 +130,28 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="daily-card surface">
-          <div className="daily-heading">
-            <span className="mini-icon">
-              <Target size={19} />
-            </span>
-            <span>今日の目標</span>
-          </div>
-          <div className={`daily-ring ${todayDone ? "is-done" : ""}`}>
-            <div>
-              <strong>
-                {todayDone ? "1" : "0"}
-                <span> / 1</span>
-              </strong>
-              <small>1レッスン</small>
-            </div>
-          </div>
-          <p>
-            {todayDone ? "今日の一歩、できました。" : "まずは1レッスンから。"}
-          </p>
-          <div className="weekdays" aria-label="今週の学習日">
-            {week.map((day, index) => (
-              <div key={index}>
-                <span>{day.label}</span>
-                <span
-                  className={`weekday-dot ${day.done ? "done" : ""} ${day.today ? "today" : ""}`}
-                  aria-label={`${day.label}曜日${day.done ? " 学習済み" : ""}`}
-                >
-                  {day.done ? <Check size={13} /> : <span />}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ExperienceMeter />
       </section>
+
+      <div className="game-week-strip">
+        <span className="game-week-strip-heading">
+          <Leaf size={18} aria-hidden="true" />
+          今週の学習スタンプ
+        </span>
+        <div className="weekdays" aria-label="今週の学習日">
+          {week.map((day, index) => (
+            <div key={index}>
+              <span>{day.label}</span>
+              <span
+                className={`weekday-dot ${day.done ? "done" : ""} ${day.today ? "today" : ""}`}
+                aria-label={`${day.label}曜日${day.done ? " 学習済み" : ""}`}
+              >
+                {day.done ? <Check size={13} /> : <span />}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <section className="dashboard-stats" aria-label="学習状況">
         <div>
@@ -198,7 +192,9 @@ export function Dashboard() {
         </div>
       </section>
 
+      <DailyQuestBoard />
       <ReviewSummary />
+      <AchievementCollection compact />
       <section className="chapter-section">
         <div className="section-heading">
           <div>

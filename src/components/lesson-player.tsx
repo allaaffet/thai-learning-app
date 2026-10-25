@@ -36,6 +36,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSoundEffects } from "@/components/sound-effects-provider";
 import { ExampleVisual, LearningBlockCard } from "@/components/lesson-visuals";
+import { useGameProgress } from "@/components/use-game-progress";
+import {
+  CompletionRewards,
+  type RewardBaseline,
+} from "@/components/completion-rewards";
+import { LessonCelebration } from "@/components/lesson-celebration";
 
 const stages = [
   { label: "理解する", english: "LEARN" },
@@ -47,6 +53,10 @@ const stages = [
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const { progress, ready, finishLesson, storageMessage } = useLearning();
   const { playEffect } = useSoundEffects();
+  const { game } = useGameProgress();
+  const [rewardBaseline, setRewardBaseline] = useState<RewardBaseline | null>(
+    null,
+  );
   const committedQuestions = useRef(new Set<string>());
   const [stage, setStage] = useState(0);
   const [captureActive, setCaptureActive] = useState(false);
@@ -59,6 +69,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     earnedXp: number;
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [celebrating, setCelebrating] = useState(false);
   const saved = useRef(false);
   const panel = useRef<HTMLDivElement>(null);
   const questionHeading = useRef<HTMLHeadingElement>(null);
@@ -69,6 +80,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     else panel.current?.focus({ preventScroll: true });
     panel.current?.scrollIntoView({ block: "start" });
   }, [stage, questionIndex]);
+
+  useEffect(() => {
+    if (!celebrating) return;
+    const timer = window.setTimeout(() => setCelebrating(false), 1_100);
+    return () => window.clearTimeout(timer);
+  }, [celebrating]);
 
   if (!ready)
     return (
@@ -121,12 +138,23 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const completionXp = progress.lessons[lesson.id]?.completedAt ? 0 : lesson.xp;
   const outputTask = getLessonOutputTask(lesson.id);
   const pendingGrade = gradeExercise(question, response);
+  let correctChain = 0;
+  for (let index = answers.length - 1; index >= 0; index--) {
+    if (!answers[index].correct) break;
+    correctChain += 1;
+  }
+  const positiveFeedback = [
+    "正解！ いい調子です。",
+    "正解！ 一歩進みました。",
+    "正解！ その調子で。",
+  ][questionIndex % 3];
 
   function pauseRecordedAudio() {
     panel.current?.querySelectorAll("audio").forEach((audio) => audio.pause());
   }
 
   function goToStage(index: number) {
+    if (index !== 3) setCelebrating(false);
     if (index === 3 && answers.length === lesson.exercises.length && !passed)
       recordResult();
     setStage(index);
@@ -161,6 +189,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   function recordResult() {
     if (saved.current) return savedResult;
     try {
+      if (game)
+        setRewardBaseline({
+          level: game.experience.level,
+          badgeIds: game.badges
+            .filter((badge) => badge.done)
+            .map((badge) => badge.id),
+        });
       const result = finishLesson(lesson, {
         correct,
         total: lesson.exercises.length,
@@ -168,7 +203,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       });
       saved.current = true;
       setSavedResult(result);
-      if (result.passed) playEffect("lesson-complete");
+      if (result.passed) {
+        playEffect("lesson-complete");
+        setCelebrating(true);
+      }
       setErrorMessage(null);
       return result;
     } catch (error) {
@@ -194,6 +232,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }
 
   function retryQuiz() {
+    setCelebrating(false);
     committedQuestions.current.clear();
     setQuestionIndex(0);
     setResponse(null);
@@ -418,18 +457,72 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <div
                 className="track"
                 role="progressbar"
-                aria-valuenow={questionIndex}
+                aria-valuenow={answers.length}
                 aria-valuemin={0}
                 aria-valuemax={lesson.exercises.length}
                 aria-label="問題の進み具合"
               >
                 <span
                   style={{
-                    width: `${(questionIndex / lesson.exercises.length) * 100}%`,
+                    width: `${(answers.length / lesson.exercises.length) * 100}%`,
                   }}
                 />
               </div>
               <span>{correct}問正解</span>
+            </div>
+            <div className="lesson-game-progress">
+              <ol
+                className="quiz-answer-trail"
+                aria-label="このレッスンの解答状況"
+              >
+                {lesson.exercises.map((exercise, index) => {
+                  const attempt = answers.find(
+                    (answer) => answer.exerciseId === exercise.id,
+                  );
+                  const current = index === questionIndex;
+                  return (
+                    <li
+                      key={exercise.id}
+                      className={cn(
+                        attempt
+                          ? attempt.correct
+                            ? "is-correct"
+                            : "is-reviewed"
+                          : current && "is-current",
+                      )}
+                      aria-current={current ? "step" : undefined}
+                    >
+                      <span className="quiz-answer-dot" aria-hidden="true">
+                        {attempt ? (
+                          attempt.correct ? (
+                            <Check size={16} />
+                          ) : (
+                            <BookOpen size={15} />
+                          )
+                        ) : (
+                          index + 1
+                        )}
+                      </span>
+                      <span className="sr-only">
+                        問題{index + 1}：
+                        {attempt
+                          ? attempt.correct
+                            ? "正解"
+                            : "理由を確認"
+                          : current
+                            ? "回答中"
+                            : "これから"}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+              {correctChain >= 2 && (
+                <span className="quiz-chain-chip" data-testid="quiz-streak">
+                  <Sparkles size={15} aria-hidden="true" />
+                  {correctChain}問連続で正解
+                </span>
+              )}
             </div>
             <p className="quiz-kind">
               <BookOpen size={13} />
@@ -471,7 +564,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 <div>
                   <h3>
                     {answered.correct
-                      ? "正解！ その調子です。"
+                      ? positiveFeedback
                       : "不正解。理由を確かめてみましょう。"}
                   </h3>
                   {!answered.correct && (
@@ -509,7 +602,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
         {stage === 3 && (
           <>
-            <section className="review-card surface">
+            <section
+              className={cn(
+                "review-card surface game-review-card",
+                completedSession && "game-review-complete",
+              )}
+            >
+              {celebrating && completedSession && <LessonCelebration />}
               <span className="score-emblem">
                 {completedSession ? (
                   <Trophy size={39} strokeWidth={1.5} />
@@ -520,7 +619,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 )}
               </span>
               <p className="eyebrow justify-center">
-                {completedSession ? "ONE MORE STEP FORWARD" : "LET’S LOOK BACK"}
+                {completedSession ? "LESSON CLEAR" : "LET’S LOOK BACK"}
               </p>
               <h2>
                 {completedSession
@@ -536,14 +635,20 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                     ? "今回わかったことを確認して、レッスンを完了しましょう。"
                     : "5問中4問以上で完了です。解説に戻ってから、何度でも挑戦できます。"}
               </p>
-              <div className="review-score">
+              <div className="review-score game-review-score">
                 <div>
                   <strong>{score}%</strong>
                   <span>
                     正答率 · {correct} / {lesson.exercises.length}問
                   </span>
                 </div>
-                <div>
+                <div
+                  className={
+                    completedSession && savedResult.earnedXp > 0
+                      ? "game-earned-xp"
+                      : undefined
+                  }
+                >
                   <strong>
                     {completedSession
                       ? `+${savedResult.earnedXp}`
@@ -606,6 +711,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 </p>
               )}
             </section>
+            {completedSession && (
+              <CompletionRewards baseline={rewardBaseline} />
+            )}
             <section className="review-summary surface visual-review-summary">
               <h3>今日の「わかった」を持ち帰ろう。</h3>
               <ul>

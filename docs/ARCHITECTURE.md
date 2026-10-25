@@ -202,3 +202,13 @@ Providerは保存直前の再読込と `storage` イベントで通常の別タ�
 `lesson-visuals.tsx` の `LearningBlockCard` は第一段落、例、注意、calloutを常設し、補足段落を標準の `details` / `summary` へ移す。`ExampleVisual` は既存の登録語とThai・IPAが一致するときだけ音節分析と明示声調を図示し、既存文法例の完全一致時だけ `segments` の役割を表示する。新しい声調判定・音節分割・文法解析は追加しない。原文・IPA・Unicodeの保持、TTSの対象判定、採点・保存の境界は従来どおり。
 
 単語カテゴリー、文法の型、章の完了ステップ、学習記録をアイコン・チップ・バーで表す。7日の棒グラフは既存 `getLearningInsights` の実解答数だけを使い、学習時間や習熟度を推定しない。読み込み中はグラフを表示せず、0件と区別する。詳しい表示方針は [VISUAL_DESIGN.md](VISUAL_DESIGN.md) を参照する。
+
+## 既存記録から導出するクエストとバッジ
+
+`src/lib/gamification.ts` の `getGameProgress` は、検証済みの受講・復習記録、現在の教材参照、明示的な現在日時を入力として、日次クエスト・経験レベル・8バッジの表示モデルを返す純粋関数とする。保存、XP付与、採点、前提の解放を行わない。新しいlocalStorageキーや保存版は設けず、進捗版 `1` と独立したSRSを引き続き使う。
+
+日次集計はローカル日付を使い、未来の日時・未知の課や設問・完全に重複した回答を数えない。終了受講の `lastStudiedAt`、確定回答の `attemptedAt`、SRSの `reviewedAt` を参照する。累計学習日は有効な `studyDays` の重複を除き、復習バッジはカードの累計 `reviewCount` から求めるため、最新1000件への履歴削減後も回数を保てる。経験レベルは既存 `getTotalXp` の表示値を使い、現コースのXP合計までのゲージだけを上限で止める。
+
+`use-game-progress.ts` は両Providerの読込み後にモデルを作り、記録更新、1分ごとの時計、フォーカス・表示状態の変化で日時を更新する。初期の空状態を保存・達成扱いにせず、記録直後も次の分まで待たずに表示を更新する。`game-dashboard.tsx` の `DailyQuestBoard`・`ExperienceMeter`・`AchievementCollection` がホームとProgressで共有される。
+
+`completion-rewards.tsx` は、操作前に保持したレベル・獲得済みバッジIDとの差分を、レッスン／復習の終了画面で示す。一時的な比較情報は保存しない。`LessonCelebration` は合格後の完了操作から短時間だけマウントし、ループや追加音声を持たず、`prefers-reduced-motion` では非表示にする。クイズの連続正解表示も受講内の回答配列から求め、正答率・XPへ加算しない。詳しい条件と利用者向け説明は [GAMIFICATION.md](GAMIFICATION.md) を参照する。
