@@ -194,12 +194,6 @@
   color: var(--ct-amber-ink);
   font-size: var(--text-caption);
 }
-.ct-cue-emoji {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.4;
-}
 .ct-empty-selection {
   grid-column: 1 / -1;
   padding: 20px;
@@ -504,16 +498,6 @@
 .ct-flashcard-answer h3 {
   margin: 0;
   font-size: 1.45rem;
-}
-.ct-cue-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 59px;
-  height: 59px;
-  border-radius: 17px;
-  color: var(--forest);
-  background: #e4efe6;
 }
 .ct-letter-name {
   font-size: 1.7rem;
@@ -1239,4 +1223,175 @@
   border-radius: 15px;
   color: var(--ct-soft-ink);
   background: #f8faf6;
+}
+/* The sound and its written name are the focus of character practice. */
+.ct-selected-letter > small[lang="th"] {
+  color: var(--ct-soft-ink);
+  font-size: var(--text-small);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.ct-text-modes {
+  margin: 5px 0 12px;
+}
+.ct-text-modes > summary {
+  min-height: 44px;
+  padding: 8px 2px;
+  color: var(--forest);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.ct-text-modes[open] > summary {
+  margin-bottom: 6px;
+}
+.ct-learn-audio {
+  margin-bottom: 21px;
+  padding: 18px;
+  border: 1px solid #d9e7dd;
+  border-radius: 17px;
+  background: #f5faf6;
+}
+.ct-audio-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 13px;
+  color: var(--forest);
+  font-size: var(--text-learning);
+  font-weight: 700;
+}
+.ct-name-audio .button {
+  justify-content: center;
+  width: 100%;
+  min-height: 61px;
+  padding: 13px 17px;
+  border-color: var(--forest);
+  border-radius: 13px;
+  background: var(--forest);
+  color: #fff;
+  font-size: var(--text-learning);
+  box-shadow: 0 3px 0 #1e4634;
+}
+.ct-name-audio .button:not(:disabled):hover {
+  background: var(--forest-dark);
+}
+.ct-example-audio {
+  margin: 12px 0;
+}
+.ct-example-audio .button {
+  justify-content: center;
+  width: 100%;
+  min-height: 49px;
+  background: #fff;
+}
+.ct-name-meaning {
+  color: var(--ct-soft-ink);
+  font-size: var(--text-small);
+}
+.ct-audio-question {
+  max-width: 480px;
+  margin: 20px auto 0;
+}
+.ct-audio-question > .ct-audio-notice {
+  text-align: left;
+}
+.ct-listen-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 22px;
+  border: 1px solid #d5e5da;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at 50% 0, #fff 0, #eff7f0 100%);
+}
+.ct-listen-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 17px;
+  color: var(--forest);
+}
+.ct-listen-control > svg {
+  box-sizing: content-box;
+  padding: 19px;
+  border: 1px solid #d2e4d5;
+  border-radius: 25px;
+  background: #e7f1e9;
+}
+.ct-listen-control > .button {
+  justify-content: center;
+  width: 100%;
+  min-height: 63px;
+  font-size: var(--text-learning);
+}
+.ct-listen-voice {
+  overflow-wrap: anywhere;
+}
+.ct-listen-status {
+  color: var(--forest);
+}
+.ct-listen-status > svg {
+  display: inline;
+  vertical-align: middle;
+}
+.ct-listen-error {
+  color: #79571c;
+}
+.ct-audio-fallback {
+  margin-top: 11px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: var(--text-small);
+}
+.ct-audio-finished {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 70px;
+  color: var(--forest);
+}
+.ct-feedback-audio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 17px 0;
+  padding-top: 14px;
+  border-top: 1px solid #dce7d9;
+}
+.ct-feedback-audio .ct-audio-notice {
+  flex: 1 0 100%;
+  margin-bottom: 0;
+}
+.ct-feedback-audio .speech-inline {
+  min-width: 0;
+  max-width: 100%;
+}
+.ct-feedback-audio .speech-inline .button {
+  min-height: 48px;
+}
+@media (max-width: 650px) {
+  .ct-learn-audio,
+  .ct-listen-prompt {
+    padding: 17px 13px;
+  }
+  .ct-selected-letter > small[lang="th"] {
+    font-size: var(--text-caption);
+  }
+  .ct-steps li {
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+  .ct-listen-control > .button {
+    font-size: var(--text-body);
+  }
+  .ct-feedback-audio > .speech-inline {
+    width: 100%;
+  }
+  .ct-feedback-audio > .speech-inline .button {
+    justify-content: center;
+    width: 100%;
+  }
 }

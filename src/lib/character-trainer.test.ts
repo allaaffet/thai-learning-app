@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { alphabetCharacters } from "@/data/alphabet";
 import {
   CHARACTER_TRAINING_PRESETS,
-  CHARACTER_TRAINING_VISUAL_CUES,
   DEFAULT_CHARACTER_SELECTION,
   getCharacterTrainingCue,
 } from "@/data/character-training";
@@ -15,6 +14,7 @@ import {
   TRAINING_ROUND_SIZE,
   type TrainerQuestion,
 } from "@/lib/character-trainer";
+import { isThaiSpeechText } from "@/lib/device-speech";
 
 function entry(id: string) {
   const character = alphabetCharacters.find((item) => item.id === id);
@@ -29,22 +29,6 @@ const defaultInput = {
 };
 
 describe("文字トレーニングの教材参照", () => {
-  it("図の手掛かりは実在する文字の既存の字母名の意味に対応する", () => {
-    const meaningsByVisualCue: Record<string, string> = {
-      "🐔": "鶏",
-      "🐴": "馬",
-      "🐭": "ねずみ",
-      "🐍": "蛇",
-    };
-    for (const [id, visualCue] of Object.entries(
-      CHARACTER_TRAINING_VISUAL_CUES,
-    )) {
-      expect(entry(id)).toBeDefined();
-      expect(DEFAULT_CHARACTER_SELECTION).toContain(id);
-      expect(getCharacterTrainingCue(id)).toBe(meaningsByVisualCue[visualCue]);
-    }
-  });
-
   it("44文字の名前の手掛かりを区別し、字母や廃用字の注記を漏らさない", () => {
     const cues = alphabetCharacters.map(getCharacterTrainingCue);
     expect(alphabetCharacters).toHaveLength(44);
@@ -399,6 +383,138 @@ describe("同音字と別読みの扱い", () => {
             ).toBe(true);
         }
       }
+    }
+  });
+});
+
+describe("字母名を聞いて文字を選ぶ練習", () => {
+  it("44文字の既存の字母名は区別でき、Thai合成音声の入力形式を満たす", () => {
+    const before = JSON.stringify(alphabetCharacters);
+    expect(
+      new Set(alphabetCharacters.map((character) => character.name)).size,
+    ).toBe(44);
+    for (const target of alphabetCharacters) {
+      expect(isThaiSpeechText(target.name)).toBe(true);
+      const companion = target.id === "ko-kai" ? "mo-ma" : "ko-kai";
+      const session = createCharacterTrainingSession({
+        selectedIds: [target.id, companion],
+        mode: "audio-to-letter",
+        seed: 4,
+      });
+      const question = session.questions.find(
+        (item) => item.targetId === target.id,
+      )!;
+      expect(question.audioText).toBe(target.name);
+      expect(question.cue).toBe("");
+      expect(question.prompt).toBe("聞こえた名前の文字は？");
+      expect(question.prompt).not.toContain(target.thai);
+      expect(question.prompt).not.toContain(getCharacterTrainingCue(target));
+      expect(gradeCharacterTrainingQuestion(question, target.id)).toMatchObject(
+        {
+          characterId: target.id,
+          kind: "audio-to-letter",
+          correct: true,
+        },
+      );
+    }
+    expect(JSON.stringify(alphabetCharacters)).toBe(before);
+  });
+
+  it("音声モードでも2〜8の選択文字だけを均等に出題し、2〜4つの字形から選ぶ", () => {
+    for (let size = 2; size <= 8; size += 1) {
+      const selectedIds = alphabetCharacters
+        .slice(0, size)
+        .map((character) => character.id);
+      const input = { selectedIds, mode: "audio-to-letter" as const, seed: 12 };
+      const session = createCharacterTrainingSession(input);
+      expect(session).toEqual(createCharacterTrainingSession(input));
+      expect(session.questions).toHaveLength(TRAINING_ROUND_SIZE);
+      expect(session.soundFallback).toBe(false);
+      const counts = selectedIds.map(
+        (id) =>
+          session.questions.filter((question) => question.targetId === id)
+            .length,
+      );
+      expect(Math.min(...counts)).toBeGreaterThanOrEqual(1);
+      expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+      for (const question of session.questions) {
+        expect(question.kind).toBe("audio-to-letter");
+        expect(question.options.length).toBeGreaterThanOrEqual(2);
+        expect(question.options.length).toBeLessThanOrEqual(4);
+        expect(question.correctOptionId).toBe(question.targetId);
+        expect(new Set(question.options.map((option) => option.id)).size).toBe(
+          question.options.length,
+        );
+        for (const option of question.options) {
+          expect(selectedIds).toContain(option.id);
+          expect(option.label).toBe(entry(option.id).thai);
+        }
+      }
+    }
+  });
+
+  it("初頭音が同じ文字や別読みを持つ文字も、全文の字母名で区別する", () => {
+    for (const selectedIds of [
+      ["kho-khai", "kho-khwai"],
+      ["tho-nangmontho", "do-dek"],
+    ]) {
+      expect(
+        getCharacterTrainingModeAvailability(selectedIds).soundAvailable,
+      ).toBe(false);
+      const session = createCharacterTrainingSession({
+        selectedIds,
+        mode: "audio-to-letter",
+        seed: 5,
+      });
+      expect(session.soundFallback).toBe(false);
+      expect(
+        new Set(session.questions.map((question) => question.audioText)).size,
+      ).toBe(2);
+      for (const question of session.questions) {
+        expect(question.kind).toBe("audio-to-letter");
+        expect(question.options.map((option) => option.id).sort()).toEqual(
+          [...selectedIds].sort(),
+        );
+        expect(
+          gradeCharacterTrainingQuestion(question, question.targetId).correct,
+        ).toBe(true);
+        const wrong = selectedIds.find((id) => id !== question.targetId)!;
+        expect(gradeCharacterTrainingQuestion(question, wrong).correct).toBe(
+          false,
+        );
+        expect(gradeCharacterTrainingQuestion(question, null).correct).toBe(
+          false,
+        );
+      }
+    }
+  });
+
+  it("音声文の欠落・改変、文字の手掛かりの混入、全文名を表示した選択肢を採点しない", () => {
+    const question = createCharacterTrainingSession({
+      ...defaultInput,
+      mode: "audio-to-letter",
+    }).questions[0];
+    const target = entry(question.targetId);
+    const brokenQuestions: TrainerQuestion[] = [
+      { ...question, audioText: undefined },
+      { ...question, audioText: target.name.normalize("NFD") + " " },
+      { ...question, audioText: target.thai },
+      { ...question, audioText: target.initialIpa },
+      { ...question, cue: target.thai },
+      { ...question, cue: getCharacterTrainingCue(target) },
+      { ...question, prompt: target.name },
+      {
+        ...question,
+        options: question.options.map((option) => ({
+          ...option,
+          label: entry(option.id).name,
+        })),
+      },
+    ];
+    for (const broken of brokenQuestions) {
+      expect(() =>
+        gradeCharacterTrainingQuestion(broken, question.correctOptionId),
+      ).toThrow();
     }
   });
 });

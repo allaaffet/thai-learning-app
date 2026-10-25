@@ -105,6 +105,21 @@ async function openTraining(page: Page, query = "") {
   await expect(
     page.getByRole("button", { name: "このセットで覚える", exact: true }),
   ).toBeEnabled();
+  await chooseTextMode(page);
+}
+
+async function chooseTextMode(page: Page, name = "名前から文字") {
+  const summary = page
+    .getByRole("region", { name: setupName, exact: true })
+    .locator("summary")
+    .filter({ hasText: "文字だけで練習" });
+  if (
+    !(await summary.evaluate((node) =>
+      node.parentElement?.hasAttribute("open"),
+    ))
+  )
+    await summary.click();
+  await page.getByRole("radio", { name, exact: true }).check();
 }
 
 async function openCustom(page: Page) {
@@ -308,7 +323,7 @@ test("4文字を見て覚え、8問完了だけを保存し、再読込み後も
     .getByRole("button", { name: "名前をかくす", exact: true })
     .click();
   await expect(
-    learn.getByText("この文字の名前、思い出せる？", { exact: true }),
+    learn.getByText("音を聞いて、文字の名前を思い出そう。", { exact: true }),
   ).toBeVisible();
   await learn.getByRole("button", { name: "名前をみる", exact: true }).click();
   expect((await savedTraining(page)).records).toEqual({});
@@ -428,16 +443,14 @@ test("同じ初頭音のข・คは音だけで区別させず、ミックス�
 }) => {
   await openTraining(page);
   await chooseCharacters(page, ["kho-khai", "kho-khwai"]);
-  await page
-    .getByRole("radio", { name: "文字から初頭音", exact: true })
-    .check();
+  await chooseTextMode(page, "文字から初頭音");
   await expect(
     page.getByRole("button", { name: "すぐに8問チャレンジ", exact: true }),
   ).toBeDisabled();
   await expect(
     page.getByRole("region", { name: setupName, exact: true }),
   ).toContainText("一意に作れません");
-  await page.getByRole("radio", { name: "ミックス", exact: true }).check();
+  await chooseTextMode(page, "ミックス");
   await expect(
     page.getByRole("region", { name: setupName, exact: true }),
   ).toContainText("「名前から文字」のみ");
@@ -454,9 +467,7 @@ test("同じ初頭音のข・คは音だけで区別させず、ミックス�
     .getByRole("button", { name: "文字を選び直す", exact: true })
     .click();
   await chooseCharacters(page, ["kho-khai", "kho-khwai", "mo-ma"]);
-  await page
-    .getByRole("radio", { name: "文字から初頭音", exact: true })
-    .check();
+  await chooseTextMode(page, "文字から初頭音");
   await startChallenge(page);
   await finishRound(page, "correct", 0, "letter-to-sound");
   expect(answerTotals(await savedTraining(page))).toEqual({
@@ -505,6 +516,9 @@ test("文字を指定したURLと不正なURLに対応し、320px幅・字体切
   await page.keyboard.press("Enter");
   await expect(quiz.getByRole("status")).toBeVisible();
   await expectNoOverflow(page);
+  await page.evaluate(() =>
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" }),
+  );
   await page.screenshot({
     path: testInfo.outputPath("character-training-320px.png"),
     fullPage: true,

@@ -61,7 +61,7 @@ describe("character training settings and records", () => {
     expect(first).toEqual({
       version: 1,
       selectedIds: DEFAULT_CHARACTER_SELECTION,
-      mode: "name-to-letter",
+      mode: "audio-to-letter",
       records: {},
       sessionsCompleted: 0,
       recentSessionIds: [],
@@ -316,6 +316,37 @@ describe("character training settings and records", () => {
 });
 
 describe("character training storage validation", () => {
+  it("preserves all three legacy version-1 modes and counters, then saves the new audio setting", () => {
+    for (const mode of [
+      "name-to-letter",
+      "letter-to-sound",
+      "mixed",
+    ] as const) {
+      const legacy = { ...finishedState(), mode };
+      const raw = JSON.stringify(legacy);
+      const storage = memoryStorage(raw);
+      const loaded = loadCharacterTrainingState(storage);
+      expect(loaded).toEqual({ status: "loaded", state: legacy });
+      expect(storage.values.get(CHARACTER_TRAINING_STORAGE_KEY)).toBe(raw);
+      expect(storage.setItem).not.toHaveBeenCalled();
+      const next = withCharacterTrainingSettings(loaded.state, {
+        selectedIds: loaded.state.selectedIds,
+        mode: "audio-to-letter",
+      });
+      expect(next.records).toEqual(legacy.records);
+      expect(next.sessionsCompleted).toBe(legacy.sessionsCompleted);
+      expect(next.recentSessionIds).toEqual(legacy.recentSessionIds);
+      expect(next.lastPracticedAt).toBe(legacy.lastPracticedAt);
+      expect(saveCharacterTrainingState(next, storage)).toBe(true);
+      expect(loadCharacterTrainingState(storage)).toEqual({
+        status: "loaded",
+        state: next,
+      });
+      expect(next.mode).toBe("audio-to-letter");
+      expect(next.version).toBe(1);
+    }
+  });
+
   it("loads empty storage without writing and round-trips only trainer data", () => {
     const storage = memoryStorage();
     const oldKeys = [

@@ -11,7 +11,7 @@ import {
   type SpeechVoice,
 } from "@/lib/device-speech";
 
-function useThaiSpeech() {
+export function useThaiSpeech() {
   const owner = useId();
   const controller = useRef<SpeechController | undefined>(undefined);
   const [voice, setVoice] = useState<SpeechVoice>();

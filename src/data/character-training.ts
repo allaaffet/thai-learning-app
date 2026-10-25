@@ -16,14 +16,6 @@ export const DEFAULT_CHARACTER_SELECTION: string[] = characterIdsFor([
   "ง",
 ]);
 
-/** 字母名に既存の日本語訳がある4文字だけに、思い出すための図を添える。 */
-export const CHARACTER_TRAINING_VISUAL_CUES: Record<string, string> = {
-  "ko-kai": "🐔",
-  "mo-ma": "🐴",
-  "no-nu": "🐭",
-  "ngo-ngu": "🐍",
-};
-
 export interface CharacterTrainingPreset {
   id: string;
   title: string;
@@ -36,7 +28,7 @@ export const CHARACTER_TRAINING_PRESETS: CharacterTrainingPreset[] = [
   {
     id: "first-four",
     title: "はじめの4文字",
-    description: "少ない文字から、名前と形を結び付けましょう。",
+    description: "4文字の名前を聞いて、字形と結び付けましょう。",
     characterIds: [...DEFAULT_CHARACTER_SELECTION],
   },
   {

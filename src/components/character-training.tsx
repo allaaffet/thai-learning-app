@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,7 +12,7 @@ import {
   Layers2,
   Lightbulb,
   RotateCcw,
-  Shapes,
+  Headphones,
   Sparkles,
   Target,
   Trophy,
@@ -20,12 +20,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SpeakButton } from "@/components/speech-practice";
+import {
+  CharacterAudioPrompt,
+  type CharacterAudioReadiness,
+} from "@/components/character-audio-prompt";
 import { useSoundEffects } from "@/components/sound-effects-provider";
 import { useCharacterTraining } from "@/components/use-character-training";
 import { alphabetCharacters } from "@/data/alphabet";
 import {
   CHARACTER_TRAINING_PRESETS,
-  CHARACTER_TRAINING_VISUAL_CUES,
   DEFAULT_CHARACTER_SELECTION,
   getCharacterTrainingCue,
 } from "@/data/character-training";
@@ -48,6 +51,11 @@ const characterMap = new Map(
 );
 const MODES: { value: CharacterTrainingMode; label: string; hint: string }[] = [
   {
+    value: "audio-to-letter",
+    label: "音声から文字",
+    hint: "文字の名前を聞いて選ぶ",
+  },
+  {
     value: "name-to-letter",
     label: "名前から文字",
     hint: "「鶏」から ก を選ぶ",
@@ -69,25 +77,34 @@ function entriesFor(ids: readonly string[]) {
   });
 }
 
-function CueIcon({
-  entry,
-  size = 28,
+function ModeOption({
+  item,
+  mode,
+  disabled,
+  onSelect,
 }: {
-  entry: AlphabetCharacter;
-  size?: number;
+  item: (typeof MODES)[number];
+  mode: CharacterTrainingMode;
+  disabled: boolean;
+  onSelect: (mode: CharacterTrainingMode) => void;
 }) {
-  const image = CHARACTER_TRAINING_VISUAL_CUES[entry.id];
-  if (image)
-    return (
-      <span
-        className="ct-cue-emoji"
-        style={{ fontSize: size }}
-        aria-hidden="true"
-      >
-        {image}
+  return (
+    <label className={`ct-mode${mode === item.value ? " is-selected" : ""}`}>
+      <input
+        type="radio"
+        name="character-training-mode"
+        aria-label={item.label}
+        value={item.value}
+        checked={mode === item.value}
+        onChange={() => onSelect(item.value)}
+        disabled={disabled}
+      />
+      <span>
+        <strong>{item.label}</strong>
+        <small>{item.hint}</small>
       </span>
-    );
-  return <Shapes size={size} aria-hidden="true" />;
+    </label>
+  );
 }
 
 function CharacterIdentity({
@@ -129,7 +146,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([
     ...DEFAULT_CHARACTER_SELECTION,
   ]);
-  const [mode, setMode] = useState<CharacterTrainingMode>("name-to-letter");
+  const [mode, setMode] = useState<CharacterTrainingMode>("audio-to-letter");
   const [draftReady, setDraftReady] = useState(false);
   const initialized = useRef(false);
   const [learnIndex, setLearnIndex] = useState(0);
@@ -143,6 +160,15 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
   const submitted = useRef(new Set<string>());
   const completed = useRef(new Set<string>());
   const stageHeading = useRef<HTMLHeadingElement>(null);
+  const activeQuestionId = useRef<string | null>(null);
+  const audioReadinessRef = useRef<CharacterAudioReadiness | null>(null);
+  const [audioReadiness, setAudioReadiness] =
+    useState<CharacterAudioReadiness | null>(null);
+  const handleAudioReadiness = useCallback((next: CharacterAudioReadiness) => {
+    if (next.questionId !== activeQuestionId.current) return;
+    audioReadinessRef.current = next;
+    setAudioReadiness(next);
+  }, []);
 
   useEffect(() => {
     if (!training.ready || initialized.current) return;
@@ -179,6 +205,15 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
     ? answers.find((item) => item.questionId === question.id)
     : undefined;
   const target = question ? characterMap.get(question.targetId) : undefined;
+  const currentAudio =
+    audioReadiness?.questionId === question?.id ? audioReadiness : null;
+  const audioAnswerReady =
+    question?.kind !== "audio-to-letter" ||
+    Boolean(
+      currentAudio?.heard &&
+        !currentAudio.playing &&
+        currentAudio.available === true,
+    );
   const learnEntry = selectedEntries[learnIndex] ?? selectedEntries[0];
   const incorrectIds = [
     ...new Set(
@@ -244,6 +279,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
       }
       setSelectedIds([...ids]);
       setMode(nextMode);
+      activeQuestionId.current = next.questions[0].id;
+      audioReadinessRef.current = null;
+      setAudioReadiness(null);
       setSession(next);
       setAnswers([]);
       setQuestionIndex(0);
@@ -310,6 +348,16 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
 
   function submit(optionId: string | null) {
     if (!question || submitted.current.has(question.id)) return;
+    const readiness = audioReadinessRef.current;
+    if (
+      question.kind === "audio-to-letter" &&
+      (!readiness ||
+        readiness.questionId !== question.id ||
+        !readiness.heard ||
+        readiness.playing ||
+        readiness.available !== true)
+    )
+      return;
     const graded = gradeCharacterTrainingQuestion(question, optionId);
     submitted.current.add(question.id);
     setAnswers((current) => [...current, graded]);
@@ -340,12 +388,41 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
         return;
       }
       completed.current.add(session.id);
+      activeQuestionId.current = null;
+      audioReadinessRef.current = null;
+      setAudioReadiness(null);
       setStage("result");
       playEffect("review-complete");
     } else {
+      activeQuestionId.current = session.questions[questionIndex + 1].id;
+      audioReadinessRef.current = null;
+      setAudioReadiness(null);
       setQuestionIndex((current) => current + 1);
       setSelectedOption(null);
     }
+    focusStage();
+  }
+
+  function switchToTextPractice() {
+    if (!training.saveSettings(selectedIds, "name-to-letter")) {
+      setError(
+        "文字だけの練習に切り替えられませんでした。文字を選び直してください。",
+      );
+      return;
+    }
+    activeQuestionId.current = null;
+    audioReadinessRef.current = null;
+    setAudioReadiness(null);
+    setSession(null);
+    setAnswers([]);
+    setQuestionIndex(0);
+    setSelectedOption(null);
+    setMode("name-to-letter");
+    setRoundNote("文字だけの練習に切り替えました。途中の回答は記録しません。");
+    setLearnIndex(0);
+    setRevealed(true);
+    setStage("learn");
+    setError(null);
     focusStage();
   }
 
@@ -357,7 +434,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
             <Sparkles size={15} aria-hidden="true" /> CHARACTER STUDIO
           </p>
           <h1>文字を、楽しく覚えよう。</h1>
-          <p className="ct-intro">まず4字。見て、思い出して、8問チャレンジ。</p>
+          <p className="ct-intro">文字を見て、音を聞いて、読み方を覚える。</p>
           <span className="ct-verification">教材案・専門家監修前</span>
         </div>
         <div className="ct-header-art" aria-hidden="true">
@@ -374,7 +451,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
       <ol className="ct-steps" aria-label="文字トレーニングの流れ">
         {[
           { label: "選ぶ", key: "setup", icon: Layers2 },
-          { label: "おぼえる", key: "learn", icon: Eye },
+          { label: "聞いておぼえる", key: "learn", icon: Headphones },
           { label: "8問チャレンジ", key: "quiz", icon: Target },
         ].map((step, index) => (
           <li
@@ -458,11 +535,12 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
             <section aria-label="練習する文字" className="ct-selected-grid">
               {selectedEntries.map((entry) => (
                 <div key={entry.id} className="ct-selected-letter">
-                  <CueIcon entry={entry} size={23} />
                   <span className="thai" lang="th">
                     {entry.thai}
                   </span>
-                  <strong>{getCharacterTrainingCue(entry)}</strong>
+                  <small className="thai" lang="th">
+                    {entry.name}
+                  </small>
                   {entry.usage === "obsolete" && <small>廃用字</small>}
                 </div>
               ))}
@@ -581,43 +659,50 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               <p className="eyebrow">CHOOSE YOUR CHALLENGE</p>
               <fieldset>
                 <legend>練習モード</legend>
-                {MODES.map((item) => (
-                  <label
-                    key={item.value}
-                    className={`ct-mode${mode === item.value ? " is-selected" : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="character-training-mode"
-                      aria-label={item.label}
-                      value={item.value}
-                      checked={mode === item.value}
-                      onChange={() => setMode(item.value)}
+                <ModeOption
+                  item={MODES[0]}
+                  mode={mode}
+                  disabled={!draftReady}
+                  onSelect={setMode}
+                />
+                <details
+                  className="ct-text-modes"
+                  open={mode !== "audio-to-letter"}
+                >
+                  <summary>文字だけで練習</summary>
+                  {MODES.slice(1).map((item) => (
+                    <ModeOption
+                      key={item.value}
+                      item={item}
+                      mode={mode}
                       disabled={!draftReady}
+                      onSelect={setMode}
                     />
-                    <span>
-                      <strong>{item.label}</strong>
-                      <small>{item.hint}</small>
-                    </span>
-                  </label>
-                ))}
+                  ))}
+                </details>
               </fieldset>
               {mode === "letter-to-sound" && (
                 <p className="ct-small">
                   IPAは文字の基本初頭音です。字母名全体や、聞き取りの問題ではありません。
                 </p>
               )}
-              {mode !== "name-to-letter" && !available.soundAvailable && (
-                <p className="ct-context-note" role="status">
-                  {available.soundFallbackReason}
-                  {mode === "mixed"
-                    ? " 今回のミックスは「名前から文字」のみで出題します。"
-                    : " 「名前から文字」か「ミックス」を選んでください。"}
-                </p>
-              )}
+              {(mode === "letter-to-sound" || mode === "mixed") &&
+                !available.soundAvailable && (
+                  <p className="ct-context-note" role="status">
+                    {available.soundFallbackReason}
+                    {mode === "mixed"
+                      ? " 今回のミックスは「名前から文字」のみで出題します。"
+                      : " 「名前から文字」か「ミックス」を選んでください。"}
+                  </p>
+                )}
               {!validCount && (
                 <p className="ct-context-note" role="status">
                   始めるには2〜8字を選んでください。
+                </p>
+              )}
+              {mode === "audio-to-letter" && (
+                <p className="ct-small">
+                  聞く音声は、子音単体の音ではなく「文字の名前（字母名）」です。合成音声が使えないときは、文字だけの練習に切り替えられます。
                 </p>
               )}
               <div className="ct-start-actions">
@@ -627,7 +712,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   disabled={!canStart}
                   onClick={() => startLearn()}
                 >
-                  <Eye size={19} />
+                  <Headphones size={19} />
                   このセットで覚える
                   <ArrowRight size={18} />
                 </Button>
@@ -646,7 +731,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               <p>
                 まちがえても大丈夫。
                 <br />
-                見比べるたび、文字に慣れます。
+                聞き直すたび、文字に慣れます。
               </p>
             </div>
             <div className="ct-session-stat">
@@ -667,9 +752,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
         <section className="surface ct-learn" aria-label="文字をおぼえる">
           <div className="ct-section-heading">
             <div>
-              <p className="eyebrow">MEET YOUR LETTERS</p>
+              <p className="eyebrow">LISTEN & READ</p>
               <h2 ref={stageHeading} tabIndex={-1}>
-                見る。かくす。思い出す。
+                聞く。読む。思い出す。
               </h2>
             </div>
             <span className="ct-count">
@@ -685,15 +770,12 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               </span>
               {revealed ? (
                 <div className="ct-flashcard-answer">
-                  <span className="ct-cue-icon">
-                    <CueIcon entry={learnEntry} size={31} />
-                  </span>
-                  <h3>{getCharacterTrainingCue(learnEntry)}</h3>
+                  <span className="ct-small">文字の名前（字母名）</span>
                   <p className="thai ct-letter-name" lang="th">
                     {learnEntry.name}
                   </p>
-                  <p className="ct-initial">
-                    基本初頭音 <strong>{learnEntry.initialIpa}</strong>
+                  <p className="ct-name-meaning">
+                    {getCharacterTrainingCue(learnEntry)}の文字
                   </p>
                   {learnEntry.usage === "obsolete" && (
                     <span className="ct-obsolete">
@@ -703,8 +785,8 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 </div>
               ) : (
                 <div className="ct-flashcard-hidden">
-                  <CircleHelp size={32} aria-hidden="true" />
-                  <p>この文字の名前、思い出せる？</p>
+                  <Headphones size={32} aria-hidden="true" />
+                  <p>音を聞いて、文字の名前を思い出そう。</p>
                 </div>
               )}
               <Button
@@ -736,6 +818,31 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   </button>
                 ))}
               </div>
+              <div className="ct-learn-audio">
+                <p className="ct-audio-heading">
+                  <Headphones size={22} aria-hidden="true" />
+                  まず、音を聞いてみよう
+                </p>
+                <AudioNotice />
+                <div className="ct-name-audio">
+                  <SpeakButton
+                    key={`name-${learnEntry.id}`}
+                    text={learnEntry.name}
+                    label="文字の名前を聞く"
+                  />
+                </div>
+                <div className="ct-example-audio">
+                  <SpeakButton
+                    key={`example-${learnEntry.id}`}
+                    text={learnEntry.example.thai}
+                    label="例語を聞く"
+                    compact
+                  />
+                </div>
+                <p className="ct-small">
+                  字母名は文字を呼ぶ名前です。子音単体の音とは異なります。
+                </p>
+              </div>
               {revealed ? (
                 <>
                   <div className="ct-example-card">
@@ -753,12 +860,6 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                       <p className="ct-small">{learnEntry.example.note}</p>
                     )}
                   </div>
-                  <AudioNotice />
-                  <SpeakButton
-                    key={learnEntry.id}
-                    text={learnEntry.name}
-                    label="文字の名前を聞く"
-                  />
                   <details className="ct-extra">
                     <summary>字体・発音のメモ</summary>
                     <div className="ct-font-comparison">
@@ -776,8 +877,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                       </div>
                     </div>
                     <p>字母名（最初の音節）：{learnEntry.ipa}</p>
+                    <p>子音の基本初頭音：{learnEntry.initialIpa}</p>
                     <p className="ct-small">
-                      IPAは字母名全体の発音ではありません。例語のIPAには、その語の母音と声調も含まれます。
+                      字母名のIPAは、名前全体の発音ではありません。例語のIPAには、その語の母音と声調も含まれます。
                     </p>
                     {learnEntry.note && <p>{learnEntry.note}</p>}
                     <Link
@@ -790,7 +892,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 </>
               ) : (
                 <p className="ct-hidden-hint">
-                  「名前をみる」で、例語と音声も確認できます。
+                  音声で思い出したら、「名前をみる」で読み方と例語を確認できます。
                 </p>
               )}
             </div>
@@ -800,6 +902,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               type="button"
               variant="ghost"
               onClick={() => {
+                activeQuestionId.current = null;
                 setStage("setup");
                 focusStage();
               }}
@@ -808,7 +911,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               文字を選び直す
             </Button>
             <Button type="button" size="lg" onClick={() => startQuiz()}>
-              <Target size={19} />
+              <Headphones size={19} />
               8問チャレンジをはじめる
               <ArrowRight size={17} />
             </Button>
@@ -875,11 +978,41 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
             <h2 ref={stageHeading} tabIndex={-1}>
               {question.prompt}
             </h2>
-            {question.kind === "name-to-letter" ? (
+            {question.kind === "audio-to-letter" ? (
+              <div className="ct-audio-question">
+                <AudioNotice />
+                {!answer ? (
+                  <>
+                    {question.audioText ? (
+                      <CharacterAudioPrompt
+                        key={question.id}
+                        questionId={question.id}
+                        text={question.audioText}
+                        onReadyChange={handleAudioReadiness}
+                      />
+                    ) : (
+                      <p role="alert">
+                        この問題の音声データを確認できません。文字だけの練習に切り替えてください。
+                      </p>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="ct-audio-fallback"
+                      onClick={switchToTextPractice}
+                    >
+                      文字だけの練習に切り替える
+                    </Button>
+                  </>
+                ) : (
+                  <p className="ct-audio-finished">
+                    <Headphones size={21} aria-hidden="true" />
+                    音声の答えを確認しよう
+                  </p>
+                )}
+              </div>
+            ) : question.kind === "name-to-letter" ? (
               <div className="ct-question-cue">
-                <span className="ct-cue-icon">
-                  <CueIcon entry={target} size={33} />
-                </span>
                 <strong>{question.cue}</strong>
               </div>
             ) : (
@@ -919,11 +1052,13 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   />
                   <span
                     className={
-                      question.kind === "name-to-letter"
+                      question.kind !== "letter-to-sound"
                         ? "thai ct-option-glyph"
                         : "ct-option-ipa"
                     }
-                    lang={question.kind === "name-to-letter" ? "th" : undefined}
+                    lang={
+                      question.kind !== "letter-to-sound" ? "th" : undefined
+                    }
                   >
                     {option.label}
                   </span>
@@ -945,6 +1080,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               <Button
                 type="button"
                 variant="ghost"
+                disabled={!audioAnswerReady}
                 onClick={() => submit(null)}
               >
                 わからない
@@ -952,7 +1088,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               <Button
                 type="button"
                 size="lg"
-                disabled={!selectedOption}
+                disabled={!selectedOption || !audioAnswerReady}
                 onClick={() => submit(selectedOption)}
               >
                 答えを確認
@@ -979,7 +1115,19 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 </h3>
               </div>
               <p>
-                {question.kind === "name-to-letter" ? (
+                {question.kind === "audio-to-letter" ? (
+                  <>
+                    聞こえた文字の名前は{" "}
+                    <span className="thai" lang="th">
+                      {target.name}
+                    </span>
+                    。対応する文字は{" "}
+                    <span className="thai" lang="th">
+                      {target.thai}
+                    </span>{" "}
+                    です。
+                  </>
+                ) : question.kind === "name-to-letter" ? (
                   <>
                     <strong>{question.cue}</strong>の文字は{" "}
                     <span className="thai" lang="th">
@@ -1002,7 +1150,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 )}
               </p>
               {!answer.correct &&
-                question.kind === "name-to-letter" &&
+                question.kind !== "letter-to-sound" &&
                 chosenEntry && (
                   <div className="ct-comparison">
                     <div>
@@ -1028,6 +1176,26 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                     ／ 今回の基本初頭音：{target.initialIpa}
                   </p>
                 )}
+              {question.kind === "audio-to-letter" && (
+                <>
+                  <p className="ct-small">
+                    字母名（最初の音節）のIPA：{target.ipa}
+                    。名前全体のIPAではありません。
+                  </p>
+                  <div className="ct-feedback-audio">
+                    <AudioNotice />
+                    <SpeakButton
+                      text={target.name}
+                      label="正解の文字名を聞く"
+                    />
+                    <SpeakButton
+                      text={target.example.thai}
+                      label="正解の例語を聞く"
+                      compact
+                    />
+                  </div>
+                </>
+              )}
               {target.note && <p className="ct-small">{target.note}</p>}
               <p className="ct-small">
                 {answer.correct
@@ -1046,6 +1214,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
             type="button"
             className="ct-quit"
             onClick={() => {
+              activeQuestionId.current = null;
               setStage("setup");
               setRoundNote(
                 "途中の回答は記録しません。文字を選んで、また始められます。",

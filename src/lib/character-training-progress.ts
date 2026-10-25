@@ -60,7 +60,7 @@ export function createEmptyCharacterTrainingState(): CharacterTrainingState {
   return {
     version: 1,
     selectedIds: [...DEFAULT_CHARACTER_SELECTION],
-    mode: "name-to-letter",
+    mode: "audio-to-letter",
     records: {},
     sessionsCompleted: 0,
     recentSessionIds: [],
@@ -110,6 +110,7 @@ function isSessionId(value: unknown): value is string {
 
 function isMode(value: unknown): value is CharacterTrainingMode {
   return (
+    value === "audio-to-letter" ||
     value === "name-to-letter" ||
     value === "letter-to-sound" ||
     value === "mixed"

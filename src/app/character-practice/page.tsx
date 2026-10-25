@@ -5,7 +5,7 @@ import { alphabetCharacters } from "@/data/alphabet";
 export const metadata: Metadata = {
   title: "文字トレーニング",
   description:
-    "少ない文字から、形と名前・初頭音を8問のゲームで繰り返し覚えます。",
+    "タイ文字の名前と例語を聞き、音声から文字を選ぶ8問の練習で読み方を覚えます。",
 };
 
 export default async function Page({

@@ -7,6 +7,7 @@ export const MAX_TRAINING_CHARACTERS = 8;
 export const TRAINING_ROUND_SIZE = 8;
 
 export type CharacterTrainingMode =
+  | "audio-to-letter"
   | "name-to-letter"
   | "letter-to-sound"
   | "mixed";
@@ -18,6 +19,7 @@ export interface TrainerQuestion {
   targetId: string;
   prompt: string;
   cue: string;
+  audioText?: string;
   options: { id: string; label: string }[];
   correctOptionId: string;
 }
@@ -122,8 +124,9 @@ function questionFor(
   random: () => number,
   id: string,
 ): TrainerQuestion {
-  if (kind === "name-to-letter") {
-    const cue = getCharacterTrainingCue(target);
+  if (kind !== "letter-to-sound") {
+    const isAudio = kind === "audio-to-letter";
+    const cue = isAudio ? "" : getCharacterTrainingCue(target);
     const distractors = shuffle(
       characters.filter((entry) => entry.id !== target.id),
       random,
@@ -132,8 +135,9 @@ function questionFor(
       id,
       kind,
       targetId: target.id,
-      prompt: `「${cue}」の文字は？`,
+      prompt: isAudio ? "聞こえた名前の文字は？" : `「${cue}」の文字は？`,
       cue,
+      ...(isAudio ? { audioText: target.name } : {}),
       options: shuffle([target, ...distractors], random).map((entry) => ({
         id: entry.id,
         label: entry.thai,
@@ -178,6 +182,7 @@ export function createCharacterTrainingSession({
 }): TrainerSession {
   const characters = selectedCharacters(selectedIds);
   if (
+    mode !== "audio-to-letter" &&
     mode !== "name-to-letter" &&
     mode !== "letter-to-sound" &&
     mode !== "mixed"
@@ -221,11 +226,13 @@ export function createCharacterTrainingSession({
       .slice(0, TRAINING_ROUND_SIZE)
       .map((target, index) => {
         const kind =
-          mode === "name-to-letter" || soundFallback
-            ? "name-to-letter"
-            : mode === "letter-to-sound"
-              ? "letter-to-sound"
-              : mixedKinds[index];
+          mode === "audio-to-letter"
+            ? "audio-to-letter"
+            : mode === "name-to-letter" || soundFallback
+              ? "name-to-letter"
+              : mode === "letter-to-sound"
+                ? "letter-to-sound"
+                : mixedKinds[index];
         return questionFor(
           target,
           characters,
@@ -249,7 +256,8 @@ export function gradeCharacterTrainingQuestion(
     !target ||
     typeof question.id !== "string" ||
     !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$/.test(question.id) ||
-    (question.kind !== "name-to-letter" &&
+    (question.kind !== "audio-to-letter" &&
+      question.kind !== "name-to-letter" &&
       question.kind !== "letter-to-sound") ||
     !Array.isArray(question.options) ||
     question.options.length < 2 ||
@@ -257,8 +265,18 @@ export function gradeCharacterTrainingQuestion(
   ) {
     throw new Error("問題の形式を確認してください。");
   }
+  if (
+    question.kind === "audio-to-letter" &&
+    (question.audioText !== target.name ||
+      question.cue !== "" ||
+      question.prompt !== "聞こえた名前の文字は？")
+  ) {
+    throw new Error("音声問題と字母名の整合性を確認してください。");
+  }
   const expectedAnswer =
-    question.kind === "name-to-letter" ? target.id : `ipa:${target.initialIpa}`;
+    question.kind === "letter-to-sound"
+      ? `ipa:${target.initialIpa}`
+      : target.id;
   const accepted = acceptedInitialSounds(target);
   if (
     question.correctOptionId !== expectedAnswer ||
@@ -274,7 +292,7 @@ export function gradeCharacterTrainingQuestion(
         typeof option.label !== "string"
       )
         return false;
-      if (question.kind === "name-to-letter") {
+      if (question.kind !== "letter-to-sound") {
         return alphabetCharacters.some(
           (entry) => entry.id === option.id && entry.thai === option.label,
         );
