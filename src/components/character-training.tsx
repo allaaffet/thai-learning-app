@@ -36,7 +36,6 @@ import type { AlphabetCharacter } from "@/lib/alphabet-types";
 import { getWeakCharacterIds } from "@/lib/character-training-progress";
 import {
   createCharacterTrainingSession,
-  getCharacterTrainingModeAvailability,
   gradeCharacterTrainingQuestion,
   MAX_TRAINING_CHARACTERS,
   MIN_TRAINING_CHARACTERS,
@@ -49,7 +48,13 @@ import {
 const characterMap = new Map(
   alphabetCharacters.map((entry) => [entry.id, entry]),
 );
-const MODES: { value: CharacterTrainingMode; label: string; hint: string }[] = [
+type ActivePracticeMode = "audio-to-letter" | "name-to-letter";
+
+function activePracticeMode(mode: CharacterTrainingMode): ActivePracticeMode {
+  return mode === "audio-to-letter" ? mode : "name-to-letter";
+}
+
+const MODES: { value: ActivePracticeMode; label: string; hint: string }[] = [
   {
     value: "audio-to-letter",
     label: "音声から文字",
@@ -57,15 +62,9 @@ const MODES: { value: CharacterTrainingMode; label: string; hint: string }[] = [
   },
   {
     value: "name-to-letter",
-    label: "名前から文字",
-    hint: "「鶏」から ก を選ぶ",
+    label: "読み方から文字",
+    hint: "発音記号と英字の文字名を見て選ぶ",
   },
-  {
-    value: "letter-to-sound",
-    label: "文字から初頭音",
-    hint: "文字と基本のIPAを結ぶ",
-  },
-  { value: "mixed", label: "ミックス", hint: "名前と初頭音をまぜる" },
 ];
 
 type Stage = "setup" | "learn" | "quiz" | "result";
@@ -84,9 +83,9 @@ function ModeOption({
   onSelect,
 }: {
   item: (typeof MODES)[number];
-  mode: CharacterTrainingMode;
+  mode: ActivePracticeMode;
   disabled: boolean;
-  onSelect: (mode: CharacterTrainingMode) => void;
+  onSelect: (mode: ActivePracticeMode) => void;
 }) {
   return (
     <label className={`ct-mode${mode === item.value ? " is-selected" : ""}`}>
@@ -146,7 +145,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([
     ...DEFAULT_CHARACTER_SELECTION,
   ]);
-  const [mode, setMode] = useState<CharacterTrainingMode>("audio-to-letter");
+  const [mode, setMode] = useState<ActivePracticeMode>("audio-to-letter");
   const [draftReady, setDraftReady] = useState(false);
   const initialized = useRef(false);
   const [learnIndex, setLearnIndex] = useState(0);
@@ -180,7 +179,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
       : [...training.state.selectedIds];
     queueMicrotask(() => {
       setSelectedIds(draft);
-      setMode(training.state.mode);
+      setMode(activePracticeMode(training.state.mode));
       setDraftReady(true);
     });
   }, [
@@ -191,14 +190,10 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
   ]);
 
   const selectedEntries = entriesFor(selectedIds);
-  const available = getCharacterTrainingModeAvailability(selectedIds);
   const validCount =
     selectedIds.length >= MIN_TRAINING_CHARACTERS &&
     selectedIds.length <= MAX_TRAINING_CHARACTERS;
-  const canStart =
-    draftReady &&
-    validCount &&
-    (mode !== "letter-to-sound" || available.soundAvailable);
+  const canStart = draftReady && validCount;
   const weakIds = getWeakCharacterIds(training.state);
   const question = session?.questions[questionIndex];
   const answer = question
@@ -256,7 +251,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
 
   function startQuiz(
     ids = selectedIds,
-    nextMode = mode,
+    nextMode: CharacterTrainingMode = mode,
     note: string | null = roundNote,
   ) {
     try {
@@ -265,20 +260,21 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
       const sessionId =
         window.crypto.randomUUID?.() ??
         `training-${Array.from(randomValues, (value) => value.toString(16)).join("-")}`;
+      const practiceMode = activePracticeMode(nextMode);
       const next = createCharacterTrainingSession({
         selectedIds: ids,
-        mode: nextMode,
+        mode: practiceMode,
         seed,
         sessionId,
       });
-      if (!training.saveSettings([...ids], nextMode)) {
+      if (!training.saveSettings([...ids], practiceMode)) {
         setError(
           "練習する文字を設定できませんでした。文字を選び直してください。",
         );
         return;
       }
       setSelectedIds([...ids]);
-      setMode(nextMode);
+      setMode(practiceMode);
       activeQuestionId.current = next.questions[0].id;
       audioReadinessRef.current = null;
       setAudioReadiness(null);
@@ -330,14 +326,6 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
       );
       if (contrast) withContrast.push(contrast);
       note = "もう一度の1字に、見比べる1字を加えました。2字で8問練習します。";
-    }
-    // A narrow retry may contain only homophones. Keep it playable and state the mode change.
-    if (
-      mode === "letter-to-sound" &&
-      !getCharacterTrainingModeAvailability(withContrast).soundAvailable
-    ) {
-      setMode("name-to-letter");
-      note = `${note ? `${note} ` : ""}同じ初頭音を区別できるよう、今回は「名前から文字」で確認します。`;
     }
     setSelectedIds(withContrast.slice(0, MAX_TRAINING_CHARACTERS));
     setRoundNote(note);
@@ -659,42 +647,21 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               <p className="eyebrow">CHOOSE YOUR CHALLENGE</p>
               <fieldset>
                 <legend>練習モード</legend>
-                <ModeOption
-                  item={MODES[0]}
-                  mode={mode}
-                  disabled={!draftReady}
-                  onSelect={setMode}
-                />
-                <details
-                  className="ct-text-modes"
-                  open={mode !== "audio-to-letter"}
-                >
-                  <summary>文字だけで練習</summary>
-                  {MODES.slice(1).map((item) => (
-                    <ModeOption
-                      key={item.value}
-                      item={item}
-                      mode={mode}
-                      disabled={!draftReady}
-                      onSelect={setMode}
-                    />
-                  ))}
-                </details>
+                {MODES.map((item) => (
+                  <ModeOption
+                    key={item.value}
+                    item={item}
+                    mode={mode}
+                    disabled={!draftReady}
+                    onSelect={setMode}
+                  />
+                ))}
               </fieldset>
-              {mode === "letter-to-sound" && (
+              {mode === "name-to-letter" && (
                 <p className="ct-small">
-                  IPAは文字の基本初頭音です。字母名全体や、聞き取りの問題ではありません。
+                  日本語の意味は出題しません。字母名の最初の音節をIPAで、文字名を英字で表示します。
                 </p>
               )}
-              {(mode === "letter-to-sound" || mode === "mixed") &&
-                !available.soundAvailable && (
-                  <p className="ct-context-note" role="status">
-                    {available.soundFallbackReason}
-                    {mode === "mixed"
-                      ? " 今回のミックスは「名前から文字」のみで出題します。"
-                      : " 「名前から文字」か「ミックス」を選んでください。"}
-                  </p>
-                )}
               {!validCount && (
                 <p className="ct-context-note" role="status">
                   始めるには2〜8字を選んでください。
@@ -1012,8 +979,25 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 )}
               </div>
             ) : question.kind === "name-to-letter" ? (
-              <div className="ct-question-cue">
-                <strong>{question.cue}</strong>
+              <div className="ct-reading-cue">
+                <strong className="ct-reading-ipa">{question.cue}</strong>
+                <span className="ct-small">字母名の最初の音節 / IPA</span>
+                <strong className="ct-reading-name">
+                  {question.readingName}
+                </strong>
+                <span className="ct-small">字母名の英字表記（Unicode名）</span>
+                <p className="ct-small">
+                  英字名は発音記号ではありません。同じ音の文字は、英字名も手がかりに選びましょう。
+                </p>
+                <details className="ct-reading-audio">
+                  <summary>読み方を音声で確認する</summary>
+                  <AudioNotice />
+                  <SpeakButton
+                    key={question.id}
+                    text={target.name}
+                    label="読み方を聞く"
+                  />
+                </details>
               </div>
             ) : (
               <>
@@ -1129,7 +1113,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   </>
                 ) : question.kind === "name-to-letter" ? (
                   <>
-                    <strong>{question.cue}</strong>の文字は{" "}
+                    <strong>{question.cue}</strong>
+                    （字母名の最初の音節）と、英字名{" "}
+                    <strong>{question.readingName}</strong> に対応する文字は{" "}
                     <span className="thai" lang="th">
                       {target.thai}
                     </span>

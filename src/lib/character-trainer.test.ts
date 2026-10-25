@@ -4,6 +4,7 @@ import {
   CHARACTER_TRAINING_PRESETS,
   DEFAULT_CHARACTER_SELECTION,
   getCharacterTrainingCue,
+  getCharacterTrainingReading,
 } from "@/data/character-training";
 import {
   createCharacterTrainingSession,
@@ -94,6 +95,49 @@ describe("文字トレーニングの教材参照", () => {
     ).toThrow();
     expect(() =>
       getCharacterTrainingCue({ ...entry("ko-kai"), meaning: "กの ก" }),
+    ).toThrow();
+  });
+
+  it("44文字の読みの手掛かりは既存の最初の音節のIPAと一意なUnicode名から取り出す", () => {
+    const before = JSON.stringify(alphabetCharacters);
+    const readings = alphabetCharacters.map(getCharacterTrainingReading);
+    expect(new Set(readings.map((reading) => reading.romanizedName)).size).toBe(
+      44,
+    );
+    for (const character of alphabetCharacters) {
+      const reading = getCharacterTrainingReading(character.id);
+      expect(reading.ipa).toBe(character.ipa);
+      expect(`THAI CHARACTER ${reading.romanizedName.toUpperCase()}`).toBe(
+        character.unicodeName,
+      );
+      expect(reading.romanizedName).toMatch(/^[a-z]+(?: [a-z]+)*$/);
+      expect(reading.ipa + reading.romanizedName).not.toMatch(
+        /[\u0e00-\u0e7f]/u,
+      );
+    }
+    expect(getCharacterTrainingReading("ngo-ngu")).toEqual({
+      ipa: entry("ngo-ngu").ipa,
+      romanizedName: "ngo ngu",
+    });
+    expect(JSON.stringify(alphabetCharacters)).toBe(before);
+  });
+
+  it("Unicode名の非標準な形式や不明な文字の読みを推測しない", () => {
+    expect(() => getCharacterTrainingReading("unknown")).toThrow();
+    for (const unicodeName of [
+      "THAI CHARACTER ngo ngu",
+      "THAI CHARACTER  NGO NGU",
+      "THAI CHAR NGO NGU",
+      "THAI CHARACTER NGO NGU\n",
+      "THAI CHARACTER NGO งู",
+      "THAI CHARACTER NGO-NGU",
+    ]) {
+      expect(() =>
+        getCharacterTrainingReading({ ...entry("ngo-ngu"), unicodeName }),
+      ).toThrow();
+    }
+    expect(() =>
+      getCharacterTrainingReading({ ...entry("ngo-ngu"), ipa: "" }),
     ).toThrow();
   });
 
@@ -208,7 +252,10 @@ describe("出題順と選択範囲", () => {
             ),
           ).toHaveLength(1);
           expect(question.prompt).not.toContain(entry(question.targetId).thai);
-          expect(question.cue).toBe(getCharacterTrainingCue(question.targetId));
+          expect(question.cue).toBe(entry(question.targetId).ipa);
+          expect(question.readingName).toBe(
+            getCharacterTrainingReading(question.targetId).romanizedName,
+          );
           for (const option of question.options) {
             expect(selectedIds).toContain(option.id);
             expect(option.label).toBe(entry(option.id).thai);
@@ -383,6 +430,91 @@ describe("同音字と別読みの扱い", () => {
             ).toBe(true);
         }
       }
+    }
+  });
+});
+
+describe("読み方から文字を選ぶ練習", () => {
+  it("全44文字の問題には既存IPAと英字名を示し、日本語の意味やThai名を手掛かりにしない", () => {
+    for (const target of alphabetCharacters) {
+      const companion = target.id === "ko-kai" ? "mo-ma" : "ko-kai";
+      const session = createCharacterTrainingSession({
+        selectedIds: [target.id, companion],
+        mode: "name-to-letter",
+        seed: 9,
+      });
+      for (const question of session.questions) {
+        const character = entry(question.targetId);
+        const reading = getCharacterTrainingReading(character);
+        expect(question.prompt).toBe("この読み方の文字は？");
+        expect(question.cue).toBe(reading.ipa);
+        expect(question.readingName).toBe(reading.romanizedName);
+        expect(question.audioText).toBeUndefined();
+        const text = question.prompt + question.cue + question.readingName;
+        expect(text).not.toContain(getCharacterTrainingCue(character));
+        expect(text).not.toMatch(/[\u0e00-\u0e7f]/u);
+        expect(
+          gradeCharacterTrainingQuestion(question, question.targetId).correct,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("最初の音節のIPAが同じでもUnicode名全体で文字を区別する", () => {
+    const selectedIds = ["kho-khwai", "kho-rakhang"];
+    expect(entry(selectedIds[0]).ipa).toBe(entry(selectedIds[1]).ipa);
+    for (const mode of ["name-to-letter", "mixed"] as const) {
+      const session = createCharacterTrainingSession({
+        selectedIds,
+        mode,
+        seed: 8,
+      });
+      expect(
+        session.questions.every(
+          (question) => question.kind === "name-to-letter",
+        ),
+      ).toBe(true);
+      expect(
+        new Set(session.questions.map((question) => question.readingName)).size,
+      ).toBe(2);
+      for (const question of session.questions) {
+        expect(question.prompt).toBe("この読み方の文字は？");
+        expect(
+          gradeCharacterTrainingQuestion(question, question.targetId).correct,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("IPAや英字名の欠落・改変、日本語の意味への差戻しを採点しない", () => {
+    const question = createCharacterTrainingSession({
+      ...defaultInput,
+      mode: "name-to-letter",
+    }).questions[0];
+    const target = entry(question.targetId);
+    const other = entry(
+      DEFAULT_CHARACTER_SELECTION.find((id) => id !== question.targetId)!,
+    );
+    const brokenQuestions: TrainerQuestion[] = [
+      { ...question, readingName: undefined },
+      {
+        ...question,
+        readingName: getCharacterTrainingReading(other).romanizedName,
+      },
+      { ...question, readingName: target.name },
+      { ...question, readingName: `${question.readingName} ` },
+      { ...question, cue: target.initialIpa },
+      { ...question, cue: `${target.ipa} ` },
+      { ...question, cue: getCharacterTrainingCue(target) },
+      {
+        ...question,
+        prompt: `「${getCharacterTrainingCue(target)}」の文字は？`,
+      },
+    ];
+    for (const broken of brokenQuestions) {
+      expect(() =>
+        gradeCharacterTrainingQuestion(broken, question.correctOptionId),
+      ).toThrow();
     }
   });
 });

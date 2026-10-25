@@ -1,5 +1,5 @@
 import { alphabetCharacters } from "@/data/alphabet";
-import { getCharacterTrainingCue } from "@/data/character-training";
+import { getCharacterTrainingReading } from "@/data/character-training";
 import type { AlphabetCharacter } from "@/lib/alphabet-types";
 
 export const MIN_TRAINING_CHARACTERS = 2;
@@ -20,6 +20,7 @@ export interface TrainerQuestion {
   prompt: string;
   cue: string;
   audioText?: string;
+  readingName?: string;
   options: { id: string; label: string }[];
   correctOptionId: string;
 }
@@ -126,7 +127,7 @@ function questionFor(
 ): TrainerQuestion {
   if (kind !== "letter-to-sound") {
     const isAudio = kind === "audio-to-letter";
-    const cue = isAudio ? "" : getCharacterTrainingCue(target);
+    const reading = isAudio ? undefined : getCharacterTrainingReading(target);
     const distractors = shuffle(
       characters.filter((entry) => entry.id !== target.id),
       random,
@@ -135,9 +136,11 @@ function questionFor(
       id,
       kind,
       targetId: target.id,
-      prompt: isAudio ? "聞こえた名前の文字は？" : `「${cue}」の文字は？`,
-      cue,
-      ...(isAudio ? { audioText: target.name } : {}),
+      prompt: isAudio ? "聞こえた名前の文字は？" : "この読み方の文字は？",
+      cue: reading?.ipa ?? "",
+      ...(reading
+        ? { readingName: reading.romanizedName }
+        : { audioText: target.name }),
       options: shuffle([target, ...distractors], random).map((entry) => ({
         id: entry.id,
         label: entry.thai,
@@ -272,6 +275,16 @@ export function gradeCharacterTrainingQuestion(
       question.prompt !== "聞こえた名前の文字は？")
   ) {
     throw new Error("音声問題と字母名の整合性を確認してください。");
+  }
+  if (question.kind === "name-to-letter") {
+    const reading = getCharacterTrainingReading(target);
+    if (
+      question.cue !== reading.ipa ||
+      question.readingName !== reading.romanizedName ||
+      question.prompt !== "この読み方の文字は？"
+    ) {
+      throw new Error("読み方と字母名の整合性を確認してください。");
+    }
   }
   const expectedAnswer =
     question.kind === "letter-to-sound"

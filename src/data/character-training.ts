@@ -85,3 +85,27 @@ export function getCharacterTrainingCue(
   }
   return cue;
 }
+
+/** IPAは既存の「字母名の最初の音節」、英字部分は発音記号ではないUnicode名。 */
+export function getCharacterTrainingReading(
+  entryOrId: AlphabetCharacter | string,
+): { ipa: string; romanizedName: string } {
+  const entry =
+    typeof entryOrId === "string"
+      ? alphabetCharacters.find((character) => character.id === entryOrId)
+      : entryOrId;
+  const match =
+    entry && typeof entry.unicodeName === "string"
+      ? /^THAI CHARACTER ([A-Z]+(?: [A-Z]+)*)$/.exec(entry.unicodeName)
+      : null;
+  if (
+    !entry ||
+    !match ||
+    match[0] !== entry.unicodeName ||
+    typeof entry.ipa !== "string" ||
+    entry.ipa.length === 0
+  ) {
+    throw new Error("字母名の表記を確認できません。");
+  }
+  return { ipa: entry.ipa, romanizedName: match[1].toLowerCase() };
+}

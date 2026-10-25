@@ -680,6 +680,42 @@
 .ct-question h2 {
   font-size: 1.35rem;
 }
+.ct-reading-cue {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem auto 0;
+  max-width: 34rem;
+  min-width: 0;
+}
+.ct-reading-cue > strong {
+  display: block;
+  max-width: 100%;
+  color: var(--forest);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.ct-reading-ipa {
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+}
+.ct-reading-name {
+  margin-top: 0.65rem;
+  font-size: 1.35rem;
+}
+.ct-reading-cue > p {
+  margin-top: 0.75rem;
+}
+.ct-reading-audio {
+  width: 100%;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+.ct-reading-audio > summary {
+  min-height: 3rem;
+  padding: 0.6rem 0;
+  color: var(--forest);
+  cursor: pointer;
+}
 .ct-question-cue {
   display: flex;
   align-items: center;

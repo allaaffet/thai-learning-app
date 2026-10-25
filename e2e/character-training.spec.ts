@@ -108,18 +108,10 @@ async function openTraining(page: Page, query = "") {
   await chooseTextMode(page);
 }
 
-async function chooseTextMode(page: Page, name = "名前から文字") {
-  const summary = page
-    .getByRole("region", { name: setupName, exact: true })
-    .locator("summary")
-    .filter({ hasText: "文字だけで練習" });
-  if (
-    !(await summary.evaluate((node) =>
-      node.parentElement?.hasAttribute("open"),
-    ))
-  )
-    await summary.click();
-  await page.getByRole("radio", { name, exact: true }).check();
+async function chooseTextMode(page: Page) {
+  await page
+    .getByRole("radio", { name: "読み方から文字", exact: true })
+    .check();
 }
 
 async function openCustom(page: Page) {
@@ -178,11 +170,23 @@ async function answerQuestion(page: Page, action: AnswerAction = "correct") {
   const targetId = await quiz.getAttribute("data-character-id");
   const kind = await quiz.getAttribute("data-kind");
   const target = alphabetCharacters.find((entry) => entry.id === targetId);
-  if (!target || (kind !== "name-to-letter" && kind !== "letter-to-sound"))
+  if (!target || kind !== "name-to-letter")
     throw new Error("問題の文字・形式を確認できません");
+  await expect(
+    quiz.getByRole("heading", { name: "この読み方の文字は？", exact: true }),
+  ).toBeVisible();
+  await expect(quiz).toContainText(target.ipa);
+  await expect(quiz).toContainText(
+    target.unicodeName.replace("THAI CHARACTER ", "").toLowerCase(),
+  );
+  await expect(quiz).not.toContainText(target.name);
+  const cue = target.meaning.slice(
+    0,
+    target.meaning.lastIndexOf(`の ${target.thai}`),
+  );
+  await expect(quiz).not.toContainText(cue);
   // 正答は表示中の文字の教材値から選ぶ。セッション生成・採点関数は使わない。
-  const correctOptionId =
-    kind === "name-to-letter" ? target.id : `ipa:${target.initialIpa}`;
+  const correctOptionId = target.id;
   const radios = quiz.getByRole("radio");
   const optionIds = await radios.evaluateAll((nodes) =>
     nodes.map((node) => node.getAttribute("data-option-id")),
@@ -190,8 +194,6 @@ async function answerQuestion(page: Page, action: AnswerAction = "correct") {
   expect(optionIds.length).toBeGreaterThanOrEqual(2);
   expect(new Set(optionIds).size).toBe(optionIds.length);
   expect(optionIds).toContain(correctOptionId);
-  if (kind === "letter-to-sound")
-    expect(optionIds.every((id) => id?.startsWith("ipa:"))).toBe(true);
   if (action === "skip") {
     await quiz.getByRole("button", { name: "わからない", exact: true }).click();
   } else {
@@ -207,9 +209,7 @@ async function answerQuestion(page: Page, action: AnswerAction = "correct") {
   }
   const feedback = quiz.getByRole("status");
   await expect(feedback).toBeVisible();
-  await expect(feedback).toContainText(
-    kind === "name-to-letter" ? target.name : target.initialIpa,
-  );
+  await expect(feedback).toContainText(target.name);
   await expect(feedback).toContainText(
     action === "correct" ? "そのとおり！" : "ペナルティはありません",
   );
@@ -438,42 +438,47 @@ test("44文字のカスタム選択は2〜8字で始められ、既定・見比�
   expect(await trainingRaw(page)).toBeNull();
 });
 
-test("同じ初頭音のข・คは音だけで区別させず、ミックスの代替とIPA選択肢の一意性を示す", async ({
+test("読み方のIPA・文字名で同音字を見分け、旧モードの保存記録も保持する", async ({
   page,
 }) => {
   await openTraining(page);
   await chooseCharacters(page, ["kho-khai", "kho-khwai"]);
-  await chooseTextMode(page, "文字から初頭音");
-  await expect(
-    page.getByRole("button", { name: "すぐに8問チャレンジ", exact: true }),
-  ).toBeDisabled();
-  await expect(
-    page.getByRole("region", { name: setupName, exact: true }),
-  ).toContainText("一意に作れません");
-  await chooseTextMode(page, "ミックス");
-  await expect(
-    page.getByRole("region", { name: setupName, exact: true }),
-  ).toContainText("「名前から文字」のみ");
   await startChallenge(page);
-  await expect(
-    page.getByRole("region", { name: quizName, exact: true }),
-  ).toContainText("同音による紛らわしさ");
   await finishRound(page, "correct", 0, "name-to-letter");
-  expect(answerTotals(await savedTraining(page))).toEqual({
+  const completed = await savedTraining(page);
+  expect(answerTotals(completed)).toEqual({
     correct: 8,
     incorrect: 0,
   });
-  await page
-    .getByRole("button", { name: "文字を選び直す", exact: true })
-    .click();
-  await chooseCharacters(page, ["kho-khai", "kho-khwai", "mo-ma"]);
-  await chooseTextMode(page, "文字から初頭音");
-  await startChallenge(page);
-  await finishRound(page, "correct", 0, "letter-to-sound");
-  expect(answerTotals(await savedTraining(page))).toEqual({
-    correct: 16,
-    incorrect: 0,
-  });
+  for (const mode of ["mixed", "letter-to-sound", "name-to-letter"] as const) {
+    const legacy = { ...completed, mode };
+    const raw = JSON.stringify(legacy);
+    await page.evaluate(({ key, raw }) => localStorage.setItem(key, raw), {
+      key: CHARACTER_TRAINING_STORAGE_KEY,
+      raw,
+    });
+    await page.reload();
+    await expect(
+      page.getByRole("radio", { name: "読み方から文字", exact: true }),
+    ).toBeChecked();
+    await expect(
+      page
+        .getByRole("region", { name: setupName, exact: true })
+        .getByRole("radio"),
+    ).toHaveCount(2);
+    // 旧設定を表示するだけでは保存内容を移行・上書きしない。
+    expect(await trainingRaw(page)).toBe(raw);
+    await startChallenge(page);
+    await answerQuestion(page);
+    const started = await savedTraining(page);
+    expect(started.mode).toBe("name-to-letter");
+    expect(started.records).toEqual(completed.records);
+    expect(started.sessionsCompleted).toBe(1);
+    expect(started.recentSessionIds).toEqual(completed.recentSessionIds);
+    await page
+      .getByRole("button", { name: "文字を選び直す", exact: true })
+      .click();
+  }
 });
 
 test("文字を指定したURLと不正なURLに対応し、320px幅・字体切替・キーボードで練習できる", async ({
