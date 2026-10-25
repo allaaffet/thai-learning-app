@@ -30,6 +30,7 @@ import {
 import { toneDescriptions } from "@/components/tone-contour";
 import { Button } from "@/components/ui/button";
 import { getNextLesson, getStreak, getTotalXp } from "@/lib/progress";
+import { CharacterTrainingTeaser } from "@/components/character-training-teaser";
 
 function dateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -77,6 +78,8 @@ export function Dashboard() {
           <Leaf size={14} /> はじめてのタイ語
         </span>
       </div>
+
+      <CharacterTrainingTeaser />
 
       <section className="dashboard-hero-grid" aria-label="今日の学習">
         <div className="hero-card visual-next-lesson">

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Info, PencilLine, Search } from "lucide-react";
+import { ArrowRight, Gamepad2, Info, PencilLine, Search } from "lucide-react";
 import { alphabetCharacters, vowelPatterns } from "@/data/alphabet";
 import { courseSources } from "@/data/course";
 import type { ConsonantClass } from "@/lib/content-types";
 import type { VowelPattern } from "@/lib/alphabet-types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CharacterTrainingTeaser } from "@/components/character-training-teaser";
 
 const classes: Record<ConsonantClass, string> = {
   mid: "中子音",
@@ -138,6 +139,7 @@ export function CharactersPage() {
           44の子音と、32の母音パターン。形・音・意味を結び付ける、あなたの文字ノート。
         </p>
       </header>
+      <CharacterTrainingTeaser />
       <div className="library-toolbar">
         <div className="filter-row" role="group" aria-label="文字の種類">
           <FilterButton
@@ -294,6 +296,12 @@ export function CharactersPage() {
                       <p className="muted">{selected.example.note}</p>
                     )}
                   </div>
+                  <Button asChild variant="outline">
+                    <Link href={`/character-practice?focus=${selected.id}`}>
+                      <Gamepad2 size={16} />
+                      この文字から練習する
+                    </Link>
+                  </Button>
                   <Button asChild variant="outline">
                     <Link href={`/writing?character=${selected.id}`}>
                       <PencilLine size={16} />

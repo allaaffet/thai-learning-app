@@ -1,0 +1,95 @@
+import { alphabetCharacters } from "@/data/alphabet";
+import type { AlphabetCharacter } from "@/lib/alphabet-types";
+
+function characterIdsFor(glyphs: string[]): string[] {
+  return glyphs.map((glyph) => {
+    const character = alphabetCharacters.find((entry) => entry.thai === glyph);
+    if (!character) throw new Error(`文字データが見つかりません: ${glyph}`);
+    return character.id;
+  });
+}
+
+export const DEFAULT_CHARACTER_SELECTION: string[] = characterIdsFor([
+  "ก",
+  "ม",
+  "น",
+  "ง",
+]);
+
+/** 字母名に既存の日本語訳がある4文字だけに、思い出すための図を添える。 */
+export const CHARACTER_TRAINING_VISUAL_CUES: Record<string, string> = {
+  "ko-kai": "🐔",
+  "mo-ma": "🐴",
+  "no-nu": "🐭",
+  "ngo-ngu": "🐍",
+};
+
+export interface CharacterTrainingPreset {
+  id: string;
+  title: string;
+  description: string;
+  characterIds: string[];
+}
+
+/** 教材の字形・音価はalphabet.tsを参照し、ここでは練習する組合せだけを持つ。 */
+export const CHARACTER_TRAINING_PRESETS: CharacterTrainingPreset[] = [
+  {
+    id: "first-four",
+    title: "はじめの4文字",
+    description: "少ない文字から、名前と形を結び付けましょう。",
+    characterIds: [...DEFAULT_CHARACTER_SELECTION],
+  },
+  {
+    id: "basic-eight",
+    title: "基本の8文字",
+    description: "4文字に慣れたら、練習する文字を増やしましょう。",
+    characterIds: characterIdsFor(["ก", "ม", "น", "ง", "จ", "ด", "ต", "บ"]),
+  },
+  {
+    id: "shape-a",
+    title: "見比べセット A",
+    description: "3つの形を並べて見比べましょう。",
+    characterIds: characterIdsFor(["ก", "ถ", "ภ"]),
+  },
+  {
+    id: "shape-b",
+    title: "見比べセット B",
+    description: "形と名前を一緒に思い出しましょう。",
+    characterIds: characterIdsFor(["ข", "ช", "ซ"]),
+  },
+  {
+    id: "shape-c",
+    title: "見比べセット C",
+    description: "4つの形をゆっくり見比べましょう。",
+    characterIds: characterIdsFor(["บ", "ป", "ผ", "ฝ"]),
+  },
+];
+
+/** 「星形の凧の ฬ」のような語中の「の」を保ち、末尾の字母説明だけを外す。 */
+export function getCharacterTrainingCue(
+  entryOrId: AlphabetCharacter | string,
+): string {
+  const entry =
+    typeof entryOrId === "string"
+      ? alphabetCharacters.find((character) => character.id === entryOrId)
+      : entryOrId;
+  if (
+    !entry ||
+    typeof entry.meaning !== "string" ||
+    typeof entry.thai !== "string"
+  ) {
+    throw new Error("文字の名前を確認できません。");
+  }
+  const suffix = `の ${entry.thai}`;
+  const suffixIndex = entry.meaning.lastIndexOf(suffix);
+  const annotation = entry.meaning.slice(suffixIndex + suffix.length);
+  const cue = entry.meaning.slice(0, suffixIndex);
+  if (
+    suffixIndex <= 0 ||
+    (annotation !== "" && annotation !== "（現在は通常使わない）") ||
+    /[\u0e00-\u0e7f]/u.test(cue)
+  ) {
+    throw new Error("文字の名前の形式を確認できません。");
+  }
+  return cue;
+}

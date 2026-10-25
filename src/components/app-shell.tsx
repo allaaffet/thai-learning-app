@@ -19,6 +19,7 @@ import {
   BookText,
   Languages,
   RotateCcw,
+  Gamepad2,
 } from "lucide-react";
 import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
@@ -35,6 +36,12 @@ const navigation = [
     label: "タイ文字ノート",
     mobile: "文字",
     icon: BookOpen,
+  },
+  {
+    href: "/character-practice",
+    label: "文字トレーニング",
+    mobile: "字トレ",
+    icon: Gamepad2,
   },
   { href: "/writing", label: "書き取り練習", mobile: "書く", icon: PencilLine },
   {
