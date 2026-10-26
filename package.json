@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:lan": "playwright test --config playwright.lan.config.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "engines": {

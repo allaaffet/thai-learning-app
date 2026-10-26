@@ -223,6 +223,17 @@ PC・Pixel 7相当の全E2E102件が成功しました（失敗・スキップ�
 
 開発サーバーでもホーム・文字ノート・文字トレーニングのHTTP 200を確認しました。localhostの390pxブラウザでホーム→読み方のペアさがし→正しいペアの固定と進捗表示まで操作し、文字練習の保存原文が変わらず、実行時エラーがないことを確認しました。
 
+## LAN経由のスマートフォン操作（2026-10-26）
+
+Next.js 16.4.2の開発用接続が許可されないホストから開くと、HTML・JavaScriptが取得できても設定の読込みが終わらず、モードと開始ボタンが無効のままになる状態を再現しました。`localhost` と、同じサーバーへ向けた別ホストを比較し、開発用WebSocketの拒否を確認しています。
+
+- `next.config.ts` で起動マシンの実際のIPv4アドレスだけを `allowedDevOrigins` へ追加しました。固定された利用者のIP、全ホスト許可、保存データの初期化は使っていません。
+- `npm run check` のLint・型チェック・ユニット647件（26ファイル）・本番ビルドが成功しました。
+- 専用の `npm run test:e2e:lan` で、実際のプライベートIPv4とHTTPを使い、PC・Pixel 7相当の4件が成功しました。`isSecureContext === false`、`crypto.randomUUID` がない環境で設定・ペアの操作・8問全問終了・保存・再読み込みを検証し、通常レッスンとSRSへ書き込まないことを確認しました。
+- 現在のLAN Originに対して開発用JavaScriptが200で届き、未知のOriginには403を返すことを確認しました。ブラウザの例外はありませんでした。
+
+ユーザーのMac・Android実機や家庭内Wi-Fiに直接接続した検証ではありません。実機では修正の取得後に開発サーバーの再起動とスマートフォン側の再読み込みが必要です。マイクのHTTPS要件や、端末のタイ語合成音声の有無は別の制約として残ります。
+
 ## 開発依存の既知事項
 
 開発依存を含む `npm audit --audit-level=high` では、Lint用の `eslint-config-next → @next/eslint-plugin-next → fast-glob → micromatch → braces` に関するhigh報告が5件残っています。根本の報告は [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)（深く入れ子にしたパターンによるスタック枯渇）です。このアプリの本番依存には含まれません。
