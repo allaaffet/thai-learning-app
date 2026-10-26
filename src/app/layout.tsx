@@ -6,6 +6,8 @@ import "./gamification.css";
 import "./character-training.css";
 import "./character-training-entry.css";
 import "./character-pairs.css";
+import "./lesson-games.css";
+import "./lesson-journey.css";
 import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
 import { ReviewProvider } from "@/components/review-provider";

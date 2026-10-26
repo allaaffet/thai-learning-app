@@ -1,0 +1,339 @@
+.lg-discovery,
+.lg-recall {
+  min-width: 0;
+  margin-bottom: 1.5rem;
+}
+
+.lg-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lg-section-head > div {
+  min-width: 0;
+  flex: 1 1 15rem;
+}
+
+.lg-section-head .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.4rem;
+}
+
+.lg-section-head h2 {
+  font-size: 1.25rem;
+  line-height: 1.65;
+  color: var(--forest);
+  overflow-wrap: anywhere;
+}
+
+.lg-small {
+  font-size: var(--text-small);
+  line-height: 1.85;
+  color: #727f6b;
+  overflow-wrap: anywhere;
+}
+
+.lg-discovery-progress,
+.lg-recall-progress {
+  margin-bottom: 1rem;
+  color: #537549;
+  font-size: var(--text-small);
+}
+
+.lg-discovery-progress > span {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.lg-discovery progress,
+.lg-recall progress {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 0.55rem;
+  border: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #e9efe4;
+  accent-color: var(--forest);
+}
+
+.lg-discovery progress::-webkit-progress-bar,
+.lg-recall progress::-webkit-progress-bar {
+  background: #e9efe4;
+  border-radius: 1rem;
+}
+
+.lg-discovery progress::-webkit-progress-value,
+.lg-recall progress::-webkit-progress-value {
+  background: #568064;
+  border-radius: 1rem;
+}
+
+.lg-discovery progress::-moz-progress-bar,
+.lg-recall progress::-moz-progress-bar {
+  background: #568064;
+  border-radius: 1rem;
+}
+
+.lg-discovery-trail {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.lg-discovery-trail button {
+  width: 3rem;
+  min-height: 3rem;
+  border: 1px dashed #c4d3bd;
+  border-radius: 1rem;
+  background: #fbfcf9;
+  color: #7b8d70;
+  display: grid;
+  place-items: center;
+  font-size: var(--text-body);
+  font-weight: 650;
+}
+
+.lg-discovery-trail button > span:first-child {
+  display: grid;
+  place-items: center;
+}
+
+.lg-discovery-trail button[aria-current="step"] {
+  outline: 2px solid #50775b;
+  outline-offset: 3px;
+}
+
+.lg-discovery-trail button[data-checked="true"] {
+  border-style: solid;
+  border-color: #b1c8b2;
+  background: #e2eee2;
+  color: #31614b;
+}
+
+.lg-discovery-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.lg-discovery .learning-block {
+  margin-bottom: 0;
+}
+
+.lg-discovery-all > .learning-block + .learning-block {
+  margin-top: 1rem;
+}
+
+.lg-recall {
+  padding: clamp(1rem, 4vw, 1.8rem);
+  border-color: #dbe6d9;
+}
+
+.lg-round-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.75rem;
+  background: #edf4e9;
+  color: #55764e;
+  font-size: var(--text-small);
+  font-weight: 650;
+  flex-shrink: 0;
+}
+
+.lg-recall-progress p {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.lg-recall-card {
+  min-width: 0;
+  background: linear-gradient(140deg, #fcfdf9, #f5f8f0);
+  border: 1px solid #e0e9d8;
+  border-radius: 1.1rem;
+  padding: clamp(1rem, 4vw, 1.6rem);
+  text-align: center;
+}
+
+.lg-recall-prompt {
+  color: #6d7d61;
+  font-size: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.lg-recall-thai {
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 2.25;
+  margin: 0.5rem 0 0.7rem;
+  color: var(--forest);
+  overflow-wrap: anywhere;
+}
+
+.lg-recall-audio {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.lg-recall-audio .speech-inline {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.lg-recall-audio .speech-inline p {
+  flex-basis: auto;
+  max-width: 100%;
+}
+
+.lg-recall-hidden {
+  padding: 0.8rem 0;
+}
+
+.lg-recall-hidden > span {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  min-height: 3rem;
+  margin: 0 auto 0.6rem;
+  border-radius: 1rem;
+  background: #e8efdf;
+  color: #8a9c7a;
+  font-size: 1.75rem;
+}
+
+.lg-recall-hidden > p {
+  font-size: var(--text-small);
+  margin-bottom: 1rem;
+  color: #728067;
+}
+
+.lg-recall-answer {
+  padding: 1.1rem;
+  background: #fff;
+  border: 1px solid #d9e6d4;
+  border-radius: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.lg-recall-answer-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #6d8761;
+  font-size: var(--text-small);
+  margin-bottom: 0.65rem;
+}
+
+.lg-recall-ipa {
+  font-size: 1.25rem;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+.lg-recall-meaning {
+  font-size: var(--text-learning);
+  font-weight: 650;
+  color: #45663a;
+  margin-bottom: 0.8rem;
+}
+
+.lg-recall-note {
+  text-align: left;
+  font-size: var(--text-learning);
+  line-height: 1.95;
+  color: #68795d;
+  margin-top: 0.8rem;
+}
+
+.lg-recall-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.lg-recall-footnote {
+  margin-top: 1rem;
+}
+
+.lg-recall-finish {
+  padding: 1.3rem 0.4rem;
+  text-align: center;
+}
+
+.lg-recall-emblem {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  min-height: 4rem;
+  margin: 0 auto 1rem;
+  border-radius: 1.2rem;
+  color: #3c7055;
+  background: #e4f0df;
+}
+
+.lg-recall-finish h3 {
+  color: var(--forest);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+.lg-recall-finish p {
+  margin: 0.7rem 0 1rem;
+  color: #74826b;
+}
+
+.lg-discovery button,
+.lg-recall button {
+  min-height: 44px;
+}
+
+@media (max-width: 560px) {
+  .lg-discovery-controls,
+  .lg-recall-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lg-section-head > .button {
+    width: 100%;
+  }
+
+  .lg-recall-answer {
+    padding: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-discovery *,
+  .lg-recall * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

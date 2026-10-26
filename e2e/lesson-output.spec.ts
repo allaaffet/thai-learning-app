@@ -232,6 +232,8 @@ test("既存レッスンの見本を聞き、文字入力で声調記号を区�
   await installSpeechStub(page);
   await installRecognitionStub(page);
   await page.goto("/lessons/sounds-and-letters");
+  // The first discovery card introduces the script; examples are on later cards.
+  await page.getByRole("button", { name: "まとめて読む", exact: true }).click();
   const example = page.locator(".example-card").first();
   const exampleThai = (
     await example.locator(".example-thai").textContent()

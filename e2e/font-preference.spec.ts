@@ -107,6 +107,7 @@ test("選んだフォントが画面移動・再読み込み後も文字と演�
 
   await page.goto(`/lessons/${lessons[0].id}`);
   await expectSelection(page, "loopless");
+  await page.getByRole("button", { name: "まとめて読む", exact: true }).click();
   await expectFont(
     page.locator(".example-thai").first(),
     fontFamilies.loopless,

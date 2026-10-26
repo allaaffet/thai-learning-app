@@ -10,6 +10,8 @@ import {
   CircleCheck,
   Clock3,
   Eye,
+  Flag,
+  Layers2,
   Leaf,
   LockKeyhole,
   RotateCcw,
@@ -35,7 +37,9 @@ import { isThaiSpeechText } from "@/lib/device-speech";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSoundEffects } from "@/components/sound-effects-provider";
-import { ExampleVisual, LearningBlockCard } from "@/components/lesson-visuals";
+import { ExampleVisual } from "@/components/lesson-visuals";
+import { LessonDiscovery } from "@/components/lesson-discovery";
+import { LessonRecallGame } from "@/components/lesson-recall-game";
 import { useGameProgress } from "@/components/use-game-progress";
 import {
   CompletionRewards,
@@ -306,40 +310,72 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <div ref={panel} tabIndex={-1} className="outline-none scroll-mt-6">
         {stage === 0 && (
           <>
-            <section className="objective-card visual-objective-card">
-              <h2>
-                <Target size={17} /> このレッスンで、できるようになること
-              </h2>
-              <ul>
-                {lesson.objectives.map((objective, index) => (
-                  <li key={objective}>
-                    <span className="lesson-objective-icon" aria-hidden="true">
-                      {index === 0 ? (
-                        <Target size={23} />
-                      ) : index === 1 ? (
-                        <ScanEye size={23} />
-                      ) : (
-                        <BookOpen size={23} />
-                      )}
-                    </span>
-                    <span>{objective}</span>
-                  </li>
-                ))}
-              </ul>
-              {lesson.prerequisites.length > 0 && (
-                <div className="lesson-prerequisite-links">
-                  <span>前提レッスン</span>
-                  {lesson.prerequisites.map((id) => {
-                    const prerequisite = lessons.find((item) => item.id === id);
-                    return prerequisite ? (
-                      <Link key={id} href={`/lessons/${id}`}>
-                        <CircleCheck size={15} aria-hidden="true" />
-                        {prerequisite.title}
-                      </Link>
-                    ) : null;
-                  })}
-                </div>
-              )}
+            <section
+              className="lg-mission surface"
+              aria-label="今日のミッション"
+            >
+              <p className="eyebrow">
+                <Flag size={15} aria-hidden="true" /> TODAY’S MISSION
+              </p>
+              <h2>{lesson.objectives[0]}</h2>
+              <ol
+                className="lg-mission-route"
+                aria-label="このレッスンで遊ぶ順番"
+              >
+                <li>
+                  <BookOpen size={22} aria-hidden="true" />
+                  <strong>{lesson.blocks.length}枚</strong>
+                  <span>ひとつずつ発見</span>
+                </li>
+                <li>
+                  <Layers2 size={22} aria-hidden="true" />
+                  <strong>{lesson.explore.length}枚</strong>
+                  <span>めくって確認</span>
+                </li>
+                <li>
+                  <Flag size={22} aria-hidden="true" />
+                  <strong>{lesson.exercises.length}問</strong>
+                  <span>クイズに挑戦</span>
+                </li>
+              </ol>
+              <details className="lg-objectives">
+                <summary>学習目標と前提を見る</summary>
+                <ul>
+                  {lesson.objectives.map((objective, index) => (
+                    <li key={objective}>
+                      <span
+                        className="lesson-objective-icon"
+                        aria-hidden="true"
+                      >
+                        {index === 0 ? (
+                          <Target size={23} />
+                        ) : index === 1 ? (
+                          <ScanEye size={23} />
+                        ) : (
+                          <BookOpen size={23} />
+                        )}
+                      </span>
+                      <span>{objective}</span>
+                    </li>
+                  ))}
+                </ul>
+                {lesson.prerequisites.length > 0 && (
+                  <div className="lesson-prerequisite-links">
+                    <span>前提レッスン</span>
+                    {lesson.prerequisites.map((id) => {
+                      const prerequisite = lessons.find(
+                        (item) => item.id === id,
+                      );
+                      return prerequisite ? (
+                        <Link key={id} href={`/lessons/${id}`}>
+                          <CircleCheck size={15} aria-hidden="true" />
+                          {prerequisite.title}
+                        </Link>
+                      ) : null;
+                    })}
+                  </div>
+                )}
+              </details>
             </section>
             <details className="explore-disclaimer lesson-audio-details">
               <summary>
@@ -349,13 +385,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 例語の再生には端末のタイ語合成音声（未監修）を使います。録音教材ではなく、読み方・声調の自然さは未検証です。タイ語の声がない端末では再生できません。音声提供元への通信が発生する場合があります。
               </p>
             </details>
-            {lesson.blocks.map((block, index) => (
-              <LearningBlockCard
-                block={block}
-                number={index + 1}
-                key={block.id}
-              />
-            ))}
+            <LessonDiscovery blocks={lesson.blocks} />
             <div className="lesson-actions">
               <p>読むペースは、自分に合わせて。</p>
               <Button onClick={() => goToStage(1)}>
@@ -368,6 +398,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
         {stage === 1 && (
           <>
+            <LessonRecallGame
+              items={lesson.explore}
+              disabled={captureActive}
+              beforePlay={pauseRecordedAudio}
+            />
+            <div className="lesson-actions lg-warmup-actions">
+              <p>めくりカードは任意。自分のペースで進めます。</p>
+              <Button onClick={() => goToStage(2)}>
+                練習に進む
+                <ArrowRight size={15} />
+              </Button>
+            </div>
             <div className="explore-intro">
               <p className="eyebrow">
                 <Eye size={14} /> TAKE A CLOSER LOOK
@@ -441,7 +483,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 <ArrowLeft size={15} /> 解説を読み直す
               </Button>
               <Button onClick={() => goToStage(2)}>
-                練習に進む
+                5問にチャレンジ
                 <ArrowRight size={15} />
               </Button>
             </div>
