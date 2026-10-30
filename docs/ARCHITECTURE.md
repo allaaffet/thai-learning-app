@@ -9,7 +9,7 @@
 | 教材   | ローカルのTypeScript構造化データ                  | コンテンツと画面を分離し、参照と型を検査する         |
 | 進捗   | `localStorage` と保存処理のインターフェース       | 外部サービスなしで動作し、将来の移行箇所を限定する   |
 | テスト | Vitest / 必要なReact Testing Library / Playwright | ロジックと実際の学習フローを検証する                 |
-| 配信   | Next.js対応環境、将来Vercel                       | Phase 4まで外部DB・認証・有料APIを必要としない       |
+| 配信   | Next.js対応環境、将来Vercel                       | Phase 5第1段階まで外部DB・認証・有料APIは不要        |
 
 Thaiは `@fontsource-variable/noto-sans-thai-looped`（標準・ループあり）と `@fontsource-variable/noto-sans-thai`（ループなし）、日本語は `@fontsource-variable/noto-sans-jp` をnpmから導入し、アプリの静的ファイルとして自己配信する。描画時の外部フォントAPIへの依存はない。ライセンスは `public/licenses/` に同梱する。
 
@@ -79,7 +79,15 @@ Phase 1は6レッスン・30問、Phase 2・3・4で各8レッスン・40問を�
 
 `VowelPattern` は32形、`SyllableEntry` は32語の独立したデータを持つ。音節カタログは声調規則の教材用であり、一般語彙辞書ではない。Phase 4の `VocabularyEntry` は40語、`GrammarPoint` は8項目を持つ。語彙の音節区切りは教材側で指定し、任意文字列の自動分割に流用しない。SRSは `ReviewCard` の期限と段階を独立した保存領域へ保持する。外部DB・サーバーAPIは不要で、一般語彙辞書や文法の網羅は対象外。
 
-Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPointは出典IDと `source-checked` / `unreviewed` を持ち、資料側に参照可否と確認対象を記録する。現教材は `unreviewed` の教材案であり、専門家の監修は未完了。基本声調表、40語の単語IPA、一部の文法機能の限定照合は、個々の訳・例文の自然さ・説明全体の監修と分けて記録する。例文のIPAは採用した単語IPAを組み合わせた学習用表記で、連続発話を照合した転記ではない。Phase 4の確認範囲とIPAの帰属・継承条件は [PHASE4_SOURCES.md](PHASE4_SOURCES.md) を参照する。運筆例の `source-checked` は記録軌跡・利用条件との限定照合で、`standardStrokeVerified: false` を必須にする。専門家による標準筆順の監修済みという意味には使わない。
+Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPointは出典IDと `source-checked` / `unreviewed` を持ち、資料側に参照可否と確認対象を記録する。現教材は `unreviewed` の教材案であり、専門家の監修は未完了。基本声調表、40語の単語IPA、一部の文法機能の限定照合は、個々の訳・例文の自然さ・説明全体の監修と分けて記録する。既存本編の例文IPAは採用した単語IPAを組み合わせた学習用表記で、連続発話を照合した転記ではない。Phase 5の会話では文全体のIPAを生成せず、単語の読み方だけを参照する。Phase 4の確認範囲とIPAの帰属・継承条件は [PHASE4_SOURCES.md](PHASE4_SOURCES.md) を参照する。運筆例の `source-checked` は記録軌跡・利用条件との限定照合で、`standardStrokeVerified: false` を必須にする。専門家による標準筆順の監修済みという意味には使わない。
+
+## 会話ミッション（Phase 5第1段階）
+
+`src/lib/conversation-types.ts` が `ConversationWord`・`ConversationPhrase`・`ConversationChoice`・`ConversationStep`・`ConversationScenario` を定義し、`src/data/conversations.ts` が4シーン各3ステップ、語のIPA、出典・確認状況を持つ。文全体のIPAは持たず、語の参照IDを教材側で明示する。語のIPAの照合を台本・訳・自然さの監修へ広げない。
+
+`src/lib/conversation.ts` は目的に対する返答の判定、全ステップの終了検証、独立した保存値の検証・重複防止・原文保護を担当する。`use-conversations.ts` がhydration後の復元と明示的な記録・保存通知、`conversation-practice.tsx` が一覧・やりとり・理由・再試行・振り返りを扱う。録音・ASRや外部APIは追加せず、TTSは既存の明示再生と音声優先を使う。
+
+保存キーは `thai-learning.conversation.v1`、版は `1`。`ConversationProgress` はシーンID別の終了回数・最終終了日時と直近100件のセッションIDだけを持つ。回答・会話履歴・音声は保存せず、旧進捗・SRS・XP・前提・クエストへ書き込まない。保存前には全ステップが元の順序でそろい、各選択が受け付ける返答かを検証する。不正・未知の原文は明示的な置換まで保護し、保存不可でもタブ内で続けられる。詳細は [PHASE5_SPEC.md](PHASE5_SPEC.md) を参照する。
 
 ## 学習フロー
 
@@ -136,6 +144,8 @@ Providerは保存直前の再読込と `storage` イベントで通常の別タ�
 
 `src/app/character-practice/page.tsx` は `focus` を既知の文字IDに限定して `CharacterTraining` へ渡す。教材は `src/data/alphabet.ts` を再利用し、練習セット、読み方の表示、確認用の日本語補足を `src/data/character-training.ts`、出題と採点を `src/lib/character-trainer.ts`、保存検証を `src/lib/character-training-progress.ts` に分離する。ブラウザ側の状態と保存通知は `use-character-training.ts`、画面は `character-training.tsx`、表示は `character-training.css` が扱う。`character-audio-prompt.tsx` は共有の `useThaiSpeech` と音声優先の境界を使って完全な字母名を再生する。
 
+`src/lib/character-selection.ts` は19固定セットとは独立して、現用42字から4字・8字を提案する純粋な処理。未練習・直近誤答を優先し、足りない候補を補い、前回と同じ集合なら1字を交換する。seed・記録・前回選択だけを受け取り、保存・時計・音声を呼ばない。提案の生成は下書きで、通常の確認学習・8問の開始まで保存しない。
+
 `TrainerSession` はセッションID・2〜8字の選択・モード・8問を持ち、指定seedから再現できる順序で選択文字を偏りすぎず出題する。画面で選べるのは音声→文字（`audio-to-letter`）と読み方→文字（既存の `name-to-letter`）だけ。音声形式は `name` の完全な字母名を読み上げ、正解を示す字形・字母名を問題文や再生ボタンのラベルへ先に出さず、字形の選択肢を示す。読み方形式は既存 `ipa` の最初の音節と、`unicodeName` の `THAI CHARACTER ` を除いて小文字にした字母名全体の英字表記を示す。ラベルで両者の範囲を区別し、Unicode名を音声転写や字母名全体のIPAと見せない。日本語の名詞の手がかりは確認・解答後の情報だけに使い、問題文には含めない。Unicode文字列・IPAを正規化したり、未知の読み・完全な字母名IPA・カタカナを生成したりしない。
 
 `src/lib/character-pairs.ts` は選択した2〜8字のペア盤面と組合せ判定を扱う純粋なロジック。1周で選択全字を1回ずつ使い、2周目はカードと文字を独立に並べ替える。ペアさがしの画面コンポーネントは選択中の手がかり、正解で固定したペア、誤答の理由、2周の進行、その回の文字コレクションをReactの一時状態だけで保持する。保存モジュールを呼ばず、設定・文字別記録・XP・SRS・クエスト・バッジへ書き込まない。N文字の2周は2Nペアであり、8問分の記録へ変換しない。
@@ -179,6 +189,7 @@ Providerは保存直前の再読込と `storage` イベントで通常の別タ�
 ## 品質確認
 
 - ユニットテスト：44字とクラス内訳・母音対、教材の参照・導入と前提関係、IPA一貫性、150問と4形式の採点、80%境界、前提の解放、1210XPと重複防止、進捗の復元・不正データ、書取りの座標と履歴、声調規則の主要分岐・判定不能・辞書補完。
+- Phase 5第1段階：シーン・語・出典・関連レッスン、受け付ける返答の参照、全ステップの終了検証、完了メタデータの保存・原文保護・重複防止、旧XP・SRSへの非干渉、明示TTSと非対応、狭い画面・文字拡大・キーボード。
 - Phase 4のロジック：40語・8文法項目の参照、入力のUnicode保持、語句IDの重複・欠落、SRSの期限と段階、履歴上限と累積回数、保存の検証と元データ保護、マージ、最新回答による苦手概念とローカル日付の活動集計。
 - E2E：解説から完了まで、誤答の理由、初回回答の固定、再受講、追加章の解放、リロードによる旧進捗継続、単語・文法の検索と関連先、SRSの登録・自己評価・復元・保存失敗・複数タブ、文字検索・分類、書取り入力と操作、4字の参考運筆例の限定表示、発音ラボの登録語・未知語・手動条件。
 - 任意入力・音声：30課題の参照・既習範囲、Unicodeを保持する完全一致、空・不正入力、TTSの対象判定、録音上限・機器終了・URL解放、ASRの非対応・拒否・時間切れ・遅延イベント、相互排他と既存進捗への非干渉。模擬APIによる検証と実端末の音声品質の確認は検証記録で区別する。

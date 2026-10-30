@@ -148,13 +148,9 @@ describe("文字トレーニングの教材参照", () => {
       "น",
       "ง",
     ]);
-    expect(CHARACTER_TRAINING_PRESETS.map((preset) => preset.id)).toEqual([
-      "first-four",
-      "basic-eight",
-      "shape-a",
-      "shape-b",
-      "shape-c",
-    ]);
+    expect(
+      CHARACTER_TRAINING_PRESETS.slice(0, 5).map((preset) => preset.id),
+    ).toEqual(["first-four", "basic-eight", "shape-a", "shape-b", "shape-c"]);
     for (const preset of CHARACTER_TRAINING_PRESETS) {
       expect(preset.characterIds.length).toBeGreaterThanOrEqual(
         MIN_TRAINING_CHARACTERS,

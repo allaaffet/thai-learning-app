@@ -20,6 +20,7 @@ import {
   Languages,
   RotateCcw,
   Gamepad2,
+  MessagesSquare,
 } from "lucide-react";
 import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
@@ -67,6 +68,12 @@ const navigation = [
     label: "単語の復習",
     mobile: "復習",
     icon: RotateCcw,
+  },
+  {
+    href: "/conversations",
+    label: "会話ミッション",
+    mobile: "会話",
+    icon: MessagesSquare,
   },
   {
     href: "/progress",
@@ -203,7 +210,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               学ぶ楽しさを、毎日に。
             </span>
             <span>
-              <Leaf size={13} /> Phase 4 · ローカル保存
+              <Leaf size={13} /> このブラウザに保存
             </span>
           </footer>
         </main>

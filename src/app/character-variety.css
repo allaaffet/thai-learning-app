@@ -1,0 +1,106 @@
+.ct-variety {
+  padding: 1.25rem;
+  margin-block: 1.25rem;
+  border: 1px solid #d5e3d6;
+  background: #f0f6ee;
+  border-radius: 1rem;
+  min-width: 0;
+}
+.ct-variety-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.ct-variety-heading > svg {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+.ct-variety h3 {
+  color: var(--forest);
+  font-weight: 650;
+  line-height: 1.75;
+}
+.ct-variety p {
+  color: #63765e;
+  font-size: var(--text-small);
+  line-height: 1.8;
+}
+.ct-variety-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 1rem;
+  margin-block: 1rem;
+}
+.ct-variety fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.ct-variety legend,
+.ct-variety-scope {
+  font-size: var(--text-small);
+  color: #52684c;
+}
+.ct-variety-count {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+.ct-variety-count label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  background: #fff;
+  border: 1px solid #d6e1d0;
+  border-radius: 0.75rem;
+  font-size: var(--text-body);
+}
+.ct-variety-count input {
+  accent-color: var(--forest);
+}
+.ct-variety-scope {
+  display: grid;
+  gap: 0.375rem;
+  min-width: 0;
+}
+.ct-variety select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem;
+  border: 1px solid #cddbc8;
+  background: white;
+  border-radius: 0.75rem;
+  font-size: var(--text-body);
+}
+.ct-variety > .button {
+  width: 100%;
+  min-height: 44px;
+}
+.ct-more-presets {
+  margin-block: 1.25rem;
+}
+.ct-more-presets > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 0.75rem;
+  border: 1px solid #dce5d6;
+  border-radius: 0.75rem;
+  color: var(--forest);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  gap: 0.75rem;
+}
+.ct-more-presets > p {
+  margin-block: 0.75rem;
+}
+@media (max-width: 600px) {
+  .ct-variety-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

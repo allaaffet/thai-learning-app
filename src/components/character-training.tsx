@@ -17,6 +17,7 @@ import {
   Target,
   Trophy,
   Link2,
+  Shuffle,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,11 @@ import {
 } from "@/data/character-training";
 import type { AlphabetCharacter } from "@/lib/alphabet-types";
 import { getWeakCharacterIds } from "@/lib/character-training-progress";
+import {
+  suggestCharacterSelection,
+  type CharacterSelectionCount,
+  type CharacterSelectionScope,
+} from "@/lib/character-selection";
 import {
   createCharacterTrainingSession,
   gradeCharacterTrainingQuestion,
@@ -149,6 +155,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
   ]);
   const [mode, setMode] = useState<ActivePracticeMode>("audio-to-letter");
   const [draftReady, setDraftReady] = useState(false);
+  const [varietyCount, setVarietyCount] = useState<CharacterSelectionCount>(4);
+  const [varietyScope, setVarietyScope] =
+    useState<CharacterSelectionScope>("common");
   const initialized = useRef(false);
   const [learnIndex, setLearnIndex] = useState(0);
   const [revealed, setRevealed] = useState(true);
@@ -182,6 +191,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
     queueMicrotask(() => {
       setSelectedIds(draft);
       setMode(activePracticeMode(training.state.mode));
+      setVarietyCount(draft.length === 8 ? 8 : 4);
       setDraftReady(true);
     });
   }, [
@@ -249,6 +259,55 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
     setSelectedIds([...ids]);
     setRoundNote(null);
     setError(null);
+  }
+
+  function suggestSet() {
+    if (!draftReady) return;
+    try {
+      const suggestion = suggestCharacterSelection({
+        scope: varietyScope,
+        count: varietyCount,
+        seed: window.crypto.getRandomValues(new Uint32Array(1))[0],
+        records: training.state.records,
+        previousIds: selectedIds,
+      });
+      chooseSet(suggestion.selectedIds);
+      setRoundNote(suggestion.reason);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "文字を組み合わせられませんでした。",
+      );
+    }
+  }
+
+  function presetButton(preset: (typeof CHARACTER_TRAINING_PRESETS)[number]) {
+    const active =
+      preset.characterIds.length === selectedIds.length &&
+      preset.characterIds.every((id) => selectedIds.includes(id));
+    return (
+      <button
+        type="button"
+        className={`ct-preset${active ? " is-selected" : ""}`}
+        key={preset.id}
+        aria-pressed={active}
+        aria-label={preset.title}
+        disabled={!draftReady}
+        onClick={() => chooseSet(preset.characterIds)}
+      >
+        <span className="ct-preset-title">
+          {preset.title}
+          {active && <Check size={16} aria-hidden="true" />}
+        </span>
+        <span className="thai" lang="th">
+          {entriesFor(preset.characterIds)
+            .map((entry) => entry.thai)
+            .join(" ")}
+        </span>
+        <small>{preset.description}</small>
+      </button>
+    );
   }
 
   function startQuiz(
@@ -562,34 +621,66 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 </p>
               )}
             </section>
-            <div className="ct-preset-grid" aria-label="文字セット">
-              {CHARACTER_TRAINING_PRESETS.map((preset) => {
-                const active =
-                  preset.characterIds.length === selectedIds.length &&
-                  preset.characterIds.every((id) => selectedIds.includes(id));
-                return (
-                  <button
-                    type="button"
-                    className={`ct-preset${active ? " is-selected" : ""}`}
-                    key={preset.id}
-                    aria-pressed={active}
-                    aria-label={preset.title}
+            <section className="ct-variety" aria-label="おまかせの組み合わせ">
+              <div className="ct-variety-heading">
+                <Shuffle size={21} aria-hidden="true" />
+                <div>
+                  <h3>今日は、違う組み合わせで。</h3>
+                  <p>普段使う42文字から選びます。</p>
+                </div>
+              </div>
+              <div className="ct-variety-options">
+                <fieldset disabled={!draftReady}>
+                  <legend>おまかせの文字数</legend>
+                  <div className="ct-variety-count">
+                    {([4, 8] as const).map((count) => (
+                      <label key={count}>
+                        <input
+                          type="radio"
+                          name="character-variety-count"
+                          value={count}
+                          checked={varietyCount === count}
+                          onChange={() => setVarietyCount(count)}
+                        />
+                        {count}文字
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <label className="ct-variety-scope">
+                  選び方
+                  <select
+                    aria-label="おまかせの選び方"
+                    value={varietyScope}
                     disabled={!draftReady}
-                    onClick={() => chooseSet(preset.characterIds)}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      if (
+                        value === "common" ||
+                        value === "unpracticed" ||
+                        value === "weak"
+                      )
+                        setVarietyScope(value);
+                    }}
                   >
-                    <span className="ct-preset-title">
-                      {preset.title}
-                      {active && <Check size={16} aria-hidden="true" />}
-                    </span>
-                    <span className="thai" lang="th">
-                      {entriesFor(preset.characterIds)
-                        .map((entry) => entry.thai)
-                        .join(" ")}
-                    </span>
-                    <small>{preset.description}</small>
-                  </button>
-                );
-              })}
+                    <option value="common">全体から</option>
+                    <option value="unpracticed">未練習の文字を多めに</option>
+                    <option value="weak">直近のまちがいを多めに</option>
+                  </select>
+                </label>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!draftReady}
+                onClick={suggestSet}
+              >
+                <Shuffle size={18} aria-hidden="true" />
+                新しい組み合わせ
+              </Button>
+            </section>
+            <div className="ct-preset-grid" aria-label="文字セット">
+              {CHARACTER_TRAINING_PRESETS.slice(0, 5).map(presetButton)}
               <button
                 type="button"
                 className="ct-preset ct-weak-preset"
@@ -614,6 +705,18 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 </small>
               </button>
             </div>
+            <details className="ct-more-presets">
+              <summary>
+                さらに{CHARACTER_TRAINING_PRESETS.length - 5}種類のセット
+                <span aria-hidden="true">＋</span>
+              </summary>
+              <p className="ct-small">
+                子音クラス・似た形・同じ基本音から選べます。廃用字は専用セットで確認できます。
+              </p>
+              <div className="ct-preset-grid" aria-label="追加の文字セット">
+                {CHARACTER_TRAINING_PRESETS.slice(5).map(presetButton)}
+              </div>
+            </details>
             <details className="ct-custom">
               <summary>
                 44文字からカスタム<span aria-hidden="true">＋</span>

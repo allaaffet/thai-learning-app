@@ -464,6 +464,7 @@ test("読み方のIPA・文字名で同音字を見分け、旧モードの保�
     await expect(
       page
         .getByRole("region", { name: setupName, exact: true })
+        .getByRole("group", { name: "練習モード", exact: true })
         .getByRole("radio"),
     ).toHaveCount(2);
     // 旧設定を表示するだけでは保存内容を移行・上書きしない。

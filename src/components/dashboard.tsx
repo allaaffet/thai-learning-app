@@ -31,6 +31,7 @@ import { toneDescriptions } from "@/components/tone-contour";
 import { Button } from "@/components/ui/button";
 import { getNextLesson, getStreak, getTotalXp } from "@/lib/progress";
 import { CharacterTrainingTeaser } from "@/components/character-training-teaser";
+import { ConversationTeaser } from "@/components/conversation-teaser";
 
 function dateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -196,6 +197,7 @@ export function Dashboard() {
       </section>
 
       <DailyQuestBoard />
+      <ConversationTeaser />
       <ReviewSummary />
       <AchievementCollection compact />
       <section className="chapter-section">
