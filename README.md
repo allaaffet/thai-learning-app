@@ -111,6 +111,10 @@ npm run start
 
 ポート3000をすでに使用している場合は、開発サーバーを `npm run dev -- --port 3001` で起動できます。開発・本番のサーバーは同じチェックアウトで同時に動かさず、起動中のものを `Ctrl+C` で停止してから切り替えてください。
 
+## Webアプリを公開する
+
+[Vercelでの公開手順](docs/DEPLOYMENT.md) を用意しています。GitHubの `main` をImportし、Next.js・Node.js 24.xでDeployします。アプリ用APIキーやDBの設定は不要です。クラウド環境の「Publish」とは別の操作で、公開先の学習記録はlocalhost・LANとは別保存になります。
+
 ## テスト
 
 ```bash
