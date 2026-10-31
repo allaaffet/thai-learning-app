@@ -109,6 +109,9 @@ test("解説・確認・誤答の理由・80%合格から次のレッスンへ�
   expect(firstLesson.exercises).toHaveLength(5);
   await page.goto("/");
   await page.getByRole("link", { name: "学習をはじめる", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/play/${firstLesson.id}$`));
+  // The main entry is now the mixed mission; this suite preserves textbook coverage.
+  await page.goto(`/lessons/${firstLesson.id}`);
   await enterPractice(page, firstLesson);
   await answerQuiz(page, firstLesson, new Set([firstLesson.exercises[0].id]));
   const mistakenExercise = firstLesson.exercises[0];

@@ -11,6 +11,8 @@ import "./conversations.css";
 import "./conversation-teaser.css";
 import "./lesson-games.css";
 import "./lesson-journey.css";
+import "./course-mission.css";
+import "./mission-hub.css";
 import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
 import { ReviewProvider } from "@/components/review-provider";

@@ -31,7 +31,7 @@ import { SoundSettings } from "@/components/sound-settings";
 
 const navigation = [
   { href: "/", label: "ホーム", icon: House },
-  { href: "/roadmap", label: "学習ロードマップ", mobile: "学習", icon: Route },
+  { href: "/play", label: "学習の冒険", mobile: "学習", icon: Route },
   {
     href: "/characters",
     label: "タイ文字ノート",
@@ -85,6 +85,13 @@ const navigation = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const activeNavigationHref =
+    pathname === "/play" ||
+    pathname.startsWith("/play/") ||
+    pathname.startsWith("/lessons/") ||
+    pathname === "/roadmap"
+      ? "/play"
+      : pathname;
   const mobileNavigation = useRef<HTMLElement>(null);
   useEffect(() => {
     const nav = mobileNavigation.current;
@@ -128,15 +135,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href={href}
               className={cn(
                 "nav-link",
-                (pathname === href ||
-                  (href === "/roadmap" && pathname.startsWith("/lessons/"))) &&
-                  "active",
+                activeNavigationHref === href && "active",
               )}
-              aria-current={pathname === href ? "page" : undefined}
+              aria-current={activeNavigationHref === href ? "page" : undefined}
             >
               <Icon size={20} strokeWidth={1.8} />
               <span>{label}</span>
-              {pathname === href && <span className="nav-dot" />}
+              {activeNavigationHref === href && <span className="nav-dot" />}
             </Link>
           ))}
         </nav>
@@ -224,12 +229,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link
             key={href}
             href={href}
-            className={cn(
-              (pathname === href ||
-                (href === "/roadmap" && pathname.startsWith("/lessons/"))) &&
-                "active",
-            )}
-            aria-current={pathname === href ? "page" : undefined}
+            className={cn(activeNavigationHref === href && "active")}
+            aria-current={activeNavigationHref === href ? "page" : undefined}
           >
             <Icon size={20} />
             <span>{mobile ?? label}</span>

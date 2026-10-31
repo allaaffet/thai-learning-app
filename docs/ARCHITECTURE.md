@@ -72,6 +72,8 @@ docs/                日本語の設計・カリキュラム・開発計画
 | ReviewCard           | 語彙ID、期限、間隔日数、段階、前回日時、やり直し回数、累積復習回数                           |
 | ReviewAttempt        | 回答ID、語彙ID、日時、自己評価、次の間隔日数                                                 |
 | ReviewState          | 保存版 `1`、語彙ID別カード、直近1000回の自己評価履歴                                         |
+| CourseMission        | 対象Lessonまたは任意復習、開始時に固定したカード列、成績対象のExercise ID。画面内のみ         |
+| MissionCard          | 元の解説・確認項目・問題と、必須／既習復習／想起／再挑戦の用途。画面内のみ                    |
 
 Phase 1は6レッスン・30問、Phase 2・3・4で各8レッスン・40問を追加し、計30レッスン・150問。Exerciseは `multiple-choice`・`character-recognition`・`fill-in-the-blank`・`word-ordering` の判別可能な型とする。`exercise-input.tsx` で形式に応じた入力を表示し、`gradeExercise` で未回答・不正な構成を除外して正誤と保存用IDを返す。空欄は許容綴りと前後空白以外を変えずに比較する。語順は語句IDの順序と重複・欠落・未知IDを検査する。
 
@@ -93,22 +95,29 @@ Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPoi
 
 ```mermaid
 flowchart LR
-  D[Dashboard] --> R[Roadmap]
-  R --> P{前提の完了}
-  P -->|達成| L[Learn]
+  D[Dashboard] --> A[冒険の道]
+  A --> P{前提の完了}
+  P -->|達成| M[発見・例と既習問題]
   P -->|未達| B[前提レッスンの案内]
-  L --> E[Explore]
-  E --> Q[Practice]
-  Q --> F[正誤と理由]
-  F --> V[Review]
-  V -->|80%以上| C[完了・初回XP付与]
-  V -->|80%未満| Q
+  M --> Q[確認5問・間を空けた想起]
+  Q --> F[正誤と理由・各1回の再挑戦]
+  F --> V[明示的な受講記録]
+  V -->|初回回答80%以上| C[完了・初回XP付与]
+  V -->|80%未満| N[新しい受講回へ]
   C --> S[保存・次レッスン解放]
+  A --> R[任意のミックス練習・保存なし]
+  D --> T[教科書形式]
 ```
 
-回答を確定した問題は同じ受講回で書き換えない。再挑戦は新しい受講回として始める。教材の `prerequisites` が前提の唯一の定義で、URL順やXPから前提を推測しない。
+回答を確定した問題の成績は同じ受講回で書き換えない。ミッション内の再挑戦は成績に含めず、成績を更新する場合は新しい受講回として始める。教材の `prerequisites` が前提の唯一の定義で、URL順やXPから前提を推測しない。
 
-Learnの `LessonDiscovery` は `Lesson.blocks` を1枚ずつ表示し、番号選択・前後移動・画面内だけのチェックと全カードの表示切替を担当する。Exploreの `LessonRecallGame` は既存の `Lesson.explore` を使う任意のめくり練習で、元の比較カードと入力・録音練習を置き換えない。`src/lib/lesson-recall.ts` は対象ID、初回・読み返し・終了の段階、位置、答えの表示、初めてめくったID、読み返し対象を扱う純粋な状態遷移。答えを開いてから進み、選んだ対象だけ1回読み返す。進行やチェックを保存・採点・XPへ送らず、音声・SE・時計へ依存しない。詳細は [LESSON_GAMES.md](LESSON_GAMES.md) を参照する。
+`src/lib/course-mission.ts` は既存教材と進捗からカード列を作る純粋なモジュール。`buildLessonMission` は現在の全ブロック・確認項目を保持し、完了済みの既知レッスンから最大2問を挟み、全ての新しい説明を提示してから現在の課の確認5問（`core`）を出す。画面では「チェックポイント」と示す。現在の問題の想起を2問含め、`appendMissionRetry` は同じ問題の再挑戦を1回まで追加する。解説と問題の未定義な対応を推測しない。`getMissionExercise` は既存の文字列・正答・入力仕様を保って選択肢の順序だけを変える。
+
+`buildMixedReviewMission` は前提を満たして完了した既知レッスンから、最新の誤答・範囲の広がり・古さを基に最大6問を選ぶ。seedは再現可能な選択と画面内の組み合わせ変更に使い、保存しない。どちらの生成処理もReact・音声・時計・保存APIへ依存しない。
+
+`/play` の道は次に可能な課と完了状態を既存の進捗から導出する。`/play/[lessonId]` は開始時の出題列、カード位置、練習の回答と現在の課の確認5問それぞれの初回回答を分けて保持する。先に既習問題が出るため、画面に最初に出る5問ではなく `purpose: core` の5問を成績対象とする。明示的な受講終了時にその初回回答だけを `LearningProvider.finishLesson` へ渡し、二重操作を防ぐ。結果は「確認5問の初回正解」、条件は「確認5問の初回回答で4問以上正解」と示す。`/play/mix` はProviderの記録処理を呼ばない。新しい保存キー・版、XP、SRS予定は設けない。詳しくは [MISSIONS.md](MISSIONS.md) を参照する。
+
+教科書形式の `/lessons/[lessonId]` は既存の `LessonPlayer` と4段階を維持する。Learnの `LessonDiscovery` は `Lesson.blocks` を1枚ずつ表示し、番号選択・前後移動・画面内だけのチェックと全カードの表示切替を担当する。Exploreの `LessonRecallGame` は既存の `Lesson.explore` を使う任意のめくり練習で、元の比較カードと入力・録音練習を置き換えない。`src/lib/lesson-recall.ts` は対象ID、初回・読み返し・終了の段階、位置、答えの表示、初めてめくったID、読み返し対象を扱う純粋な状態遷移。答えを開いてから進み、選んだ対象だけ1回読み返す。進行やチェックを保存・採点・XPへ送らず、音声・SE・時計へ依存しない。詳細は [LESSON_GAMES.md](LESSON_GAMES.md) を参照する。
 
 ## 進捗と保存
 

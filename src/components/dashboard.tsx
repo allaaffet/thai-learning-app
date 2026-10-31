@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Leaf,
   MoveUpRight,
+  RotateCcw,
   Sparkles,
   Target,
 } from "lucide-react";
@@ -80,13 +81,11 @@ export function Dashboard() {
         </span>
       </div>
 
-      <CharacterTrainingTeaser />
-
       <section className="dashboard-hero-grid" aria-label="今日の学習">
         <div className="hero-card visual-next-lesson">
           <div className="hero-copy">
             <span className="hero-kicker">
-              <span /> {next ? "次のレッスン" : "全レッスンを完了しました"}
+              <span /> {next ? "今日のミッション" : "全レッスンを完了しました"}
             </span>
             <h2>{next ? active.title : "学んだことを、もう一度。"}</h2>
             <div className="hero-lesson-tag">
@@ -96,9 +95,20 @@ export function Dashboard() {
                 レッスン {String(active.number).padStart(2, "0")}
               </span>
             </div>
+            <div className="mh-home-loop" aria-label="ミッションの楽しみ方">
+              <span>
+                <Sparkles size={15} aria-hidden="true" /> 発見
+              </span>
+              <span>
+                <Target size={15} aria-hidden="true" /> チャレンジ
+              </span>
+              <span>
+                <RotateCcw size={15} aria-hidden="true" /> また出会う
+              </span>
+            </div>
             <Button size="lg" asChild={ready} disabled={!ready}>
               {ready ? (
-                <Link href={next ? `/lessons/${next.id}` : "/roadmap"}>
+                <Link href={next ? `/play/${next.id}` : "/play/mix"}>
                   {completed === lessons.length
                     ? "学んだことを復習する"
                     : completed
@@ -197,6 +207,7 @@ export function Dashboard() {
       </section>
 
       <DailyQuestBoard />
+      <CharacterTrainingTeaser />
       <ConversationTeaser />
       <ReviewSummary />
       <AchievementCollection compact />

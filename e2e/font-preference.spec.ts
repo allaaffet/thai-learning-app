@@ -88,8 +88,8 @@ test("選んだフォントが画面移動・再読み込み後も文字と演�
   await page.getByRole("switch", { name: switchName }).click();
   await expectSelection(page, "loopless");
 
-  await page.getByRole("link", { name: /^(学習ロードマップ|学習)$/ }).click();
-  await expect(page).toHaveURL(/\/roadmap$/);
+  await page.getByRole("link", { name: /^(学習の冒険|学習)$/ }).click();
+  await expect(page).toHaveURL(/\/play$/);
   await expectSelection(page, "loopless");
   await page.reload();
   await expectSelection(page, "loopless");
