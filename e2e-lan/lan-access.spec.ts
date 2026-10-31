@@ -106,7 +106,9 @@ test("LANのHTTPでも設定を操作でき、ペアと8問の練習・再読込
       .locator("..")
       .click();
     await quiz.getByRole("button", { name: "答えを確認", exact: true }).click();
-    await expect(quiz.getByRole("status")).toContainText("そのとおり！");
+    await expect(quiz.locator('.ct-feedback[role="status"]')).toContainText(
+      "そのとおり！",
+    );
     await quiz
       .getByRole("button", {
         name: index === 8 ? "結果を見る" : "次の文字へ",

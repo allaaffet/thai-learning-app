@@ -194,6 +194,9 @@ export function ReviewPage() {
           <p className="page-description">
             答えを見る前の、ひと呼吸。思い出す練習を、自分のペースで。
           </p>
+          <p className="language-muted">
+            音声は端末の合成音声（未監修）です。利用時に音声提供元へ通信する場合があります。
+          </p>
         </div>
         <Button asChild variant="outline">
           <Link href="/vocabulary">
@@ -296,6 +299,7 @@ export function ReviewPage() {
           >
             {entry.thai}
           </h2>
+          <SpeakButton key={entry.id} text={entry.thai} />
           {!session.revealed ? (
             <div className="review-reveal">
               <p>声に出しても、心の中で答えても大丈夫です。</p>
@@ -320,7 +324,6 @@ export function ReviewPage() {
                     <p className="language-muted">{entry.example.note}</p>
                   )}
                 </div>
-                <SpeakButton text={entry.thai} />
               </div>
               <fieldset
                 className="review-rating"

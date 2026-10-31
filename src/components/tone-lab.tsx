@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -17,7 +17,11 @@ import {
 } from "@/data/syllables";
 import { determineTone } from "@/lib/tone-engine";
 import type { SyllableAnalysis, Tone } from "@/lib/tone-types";
-import { SpeakButton, SpeechPractice } from "@/components/speech-practice";
+import {
+  SpeakButton,
+  SpeechPractice,
+  type SpeakButtonHandle,
+} from "@/components/speech-practice";
 import { Button } from "@/components/ui/button";
 import { ToneContour, toneDescriptions } from "@/components/tone-contour";
 
@@ -200,6 +204,7 @@ function ManualConditions() {
 }
 
 export function ToneLab() {
+  const modelAudio = useRef<SpeakButtonHandle>(null);
   const [entryId, setEntryId] = useState(
     syllableEntries.find((entry) => entry.thai === "กา")?.id ??
       syllableEntries[0].id,
@@ -218,13 +223,24 @@ export function ToneLab() {
   );
 
   function selectEntry(id: string) {
+    const selected = syllableEntries.find((item) => item.id === id);
+    if (!selected) return;
     setEntryId(id);
     setSearchedWord(null);
     setQuery("");
+    if (analyzeEntry(selected).status === "determined")
+      modelAudio.current?.play(selected.thai);
+    else modelAudio.current?.stop();
   }
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (query.trim()) setSearchedWord(query.trim());
+    const value = query.trim();
+    if (!value) return;
+    setSearchedWord(value);
+    const selected = lookupSyllable(value);
+    if (selected && analyzeEntry(selected).status === "determined")
+      modelAudio.current?.play(selected.thai);
+    else modelAudio.current?.stop();
   }
 
   return (
@@ -247,10 +263,14 @@ export function ToneLab() {
             <span className="pronunciation-small-tag">登録済みの1音節</span>
           </div>
           <h2 id="syllable-explorer-heading">ひとつの音節を、分けてみる</h2>
+          <p className="pronunciation-section-copy" id="syllable-audio-help">
+            登録語を選ぶと、音声も聞けます。端末の合成音声は未監修で、利用時に音声提供元へ通信する場合があります。
+          </p>
           <label className="pronunciation-field" htmlFor="syllable-select">
             単語を選ぶ
             <select
               id="syllable-select"
+              aria-describedby="syllable-audio-help"
               value={entry?.id ?? ""}
               onChange={(event) => selectEntry(event.target.value)}
             >
@@ -285,6 +305,10 @@ export function ToneLab() {
               </Button>
             </div>
           </form>
+
+          <div hidden={!entry || result?.status !== "determined"}>
+            <SpeakButton ref={modelAudio} text={entry?.thai ?? ""} />
+          </div>
 
           {entry ? (
             <section
@@ -338,9 +362,6 @@ export function ToneLab() {
               </p>
               {entry.note && (
                 <p className="pronunciation-entry-note">{entry.note}</p>
-              )}
-              {result?.status === "determined" && (
-                <SpeakButton key={entry.id} text={entry.thai} />
               )}
               {result && <RuleResult result={result} />}
               <details className="source-note pronunciation-sources">
@@ -429,7 +450,7 @@ export function ToneLab() {
                 <span>
                   {comparisonEntry.meaning}
                   <br />
-                  <small>この語を解析する</small>
+                  <small>音を聞いて解析する</small>
                 </span>
                 <ArrowRight size={17} aria-hidden="true" />
               </button>

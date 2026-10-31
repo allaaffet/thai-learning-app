@@ -207,7 +207,7 @@ async function answerQuestion(page: Page, action: AnswerAction = "correct") {
     await expect(option).toBeChecked();
     await quiz.getByRole("button", { name: "答えを確認", exact: true }).click();
   }
-  const feedback = quiz.getByRole("status");
+  const feedback = quiz.locator('.ct-feedback[role="status"]');
   await expect(feedback).toBeVisible();
   await expect(feedback).toContainText(target.name);
   await expect(feedback).toContainText(
@@ -367,8 +367,12 @@ test("最初の誤答を選び直さず、わからない回答も理由を確�
   await expect(
     quiz.locator(`[data-option-id=${JSON.stringify(first.targetId)}]`),
   ).not.toBeChecked();
-  await expect(quiz.getByRole("status")).toContainText("今回の文字");
-  await expect(quiz.getByRole("status")).toContainText("選んだ文字");
+  await expect(quiz.locator('.ct-feedback[role="status"]')).toContainText(
+    "今回の文字",
+  );
+  await expect(quiz.locator('.ct-feedback[role="status"]')).toContainText(
+    "選んだ文字",
+  );
   await advanceQuestion(page, 0);
   await finishRound(page, "skip", 1);
   const completed = await savedTraining(page);
@@ -520,7 +524,7 @@ test("文字を指定したURLと不正なURLに対応し、320px幅・字体切
   await expect(firstOption).toBeChecked();
   await quiz.getByRole("button", { name: "答えを確認", exact: true }).focus();
   await page.keyboard.press("Enter");
-  await expect(quiz.getByRole("status")).toBeVisible();
+  await expect(quiz.locator('.ct-feedback[role="status"]')).toBeVisible();
   await expectNoOverflow(page);
   await page.evaluate(() =>
     window.scrollTo({ top: 0, left: 0, behavior: "instant" }),

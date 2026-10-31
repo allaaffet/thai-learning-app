@@ -19,6 +19,7 @@ import {
   Sparkles,
   Target,
   Trophy,
+  Volume2,
 } from "lucide-react";
 import { courseLessons as lessons, getCourseChapter } from "@/data/course";
 import type { Lesson } from "@/lib/content-types";
@@ -28,7 +29,10 @@ import {
   type ExerciseAttempt,
 } from "@/lib/progress";
 import { useLearning } from "@/components/learning-provider";
-import { SpeakButton } from "@/components/speech-practice";
+import {
+  SpeakButton,
+  type SpeakButtonHandle,
+} from "@/components/speech-practice";
 import { LessonOutputPractice } from "@/components/lesson-output-practice";
 import { ExerciseInput } from "@/components/exercise-input";
 import { gradeExercise, type ExerciseResponse } from "@/lib/exercise-grading";
@@ -65,6 +69,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [stage, setStage] = useState(0);
   const [captureActive, setCaptureActive] = useState(false);
   const [exploreId, setExploreId] = useState(lesson.explore[0].id);
+  const exploreAudio = useRef<SpeakButtonHandle>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [response, setResponse] = useState<ExerciseResponse | null>(null);
   const [answers, setAnswers] = useState<ExerciseAttempt[]>([]);
@@ -415,8 +420,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 <Eye size={14} /> TAKE A CLOSER LOOK
               </p>
               <h2>見比べると、違いが見えてくる。</h2>
-              <p>カードを選び、文字・音・意味を見比べましょう。</p>
+              <p id="lesson-explore-listen-help">
+                スピーカー付きのカードをタップすると、音を聞いて見比べられます。
+              </p>
             </div>
+            <p className="explore-disclaimer">
+              見本は端末の合成音声（未監修）です。声によって読み方が異なります。音声提供元への通信が発生する場合があります。発音・声調の自動採点は行いません。
+            </p>
             <div
               className="explore-grid"
               role="group"
@@ -431,13 +441,25 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                   )}
                   aria-pressed={exploreId === item.id}
                   aria-label={`${item.thai} の説明`}
+                  aria-describedby={
+                    isThaiSpeechText(item.thai)
+                      ? "lesson-explore-listen-help"
+                      : undefined
+                  }
                   aria-controls="explore-detail"
-                  onClick={() => setExploreId(item.id)}
+                  onClick={() => {
+                    setExploreId(item.id);
+                    if (!captureActive && isThaiSpeechText(item.thai))
+                      exploreAudio.current?.play(item.thai);
+                  }}
                 >
                   <span className="thai" lang="th">
                     {item.thai}
                   </span>
                   <span className="ipa">{item.ipa}</span>
+                  {isThaiSpeechText(item.thai) && (
+                    <Volume2 size={16} aria-hidden="true" />
+                  )}
                 </button>
               ))}
             </div>
@@ -455,22 +477,20 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               </div>
               <ExampleVisual example={explored} />
               <p>{explored.note}</p>
-              {isThaiSpeechText(explored.thai) ? (
+              <div hidden={!isThaiSpeechText(explored.thai)}>
                 <SpeakButton
-                  key={explored.id}
+                  ref={exploreAudio}
                   text={explored.thai}
                   disabled={captureActive}
                   beforePlay={pauseRecordedAudio}
                 />
-              ) : (
+              </div>
+              {!isThaiSpeechText(explored.thai) && (
                 <p className="output-help">
                   これは綴りの模式表記です。下の語の練習で音声を確認できます。
                 </p>
               )}
             </div>
-            <p className="explore-disclaimer">
-              見本は端末の合成音声（未監修）です。声によって読み方が異なります。音声提供元への通信が発生する場合があります。発音・声調の自動採点は行いません。
-            </p>
             {outputTask && (
               <LessonOutputPractice
                 key={outputTask.id}

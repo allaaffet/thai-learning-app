@@ -18,10 +18,14 @@ import {
   Trophy,
   Link2,
   Shuffle,
+  Volume2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SpeakButton } from "@/components/speech-practice";
+import {
+  SpeakButton,
+  type SpeakButtonHandle,
+} from "@/components/speech-practice";
 import { CharacterPairGame } from "@/components/character-pair-game";
 import {
   CharacterAudioPrompt,
@@ -161,6 +165,7 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
   const initialized = useRef(false);
   const [learnIndex, setLearnIndex] = useState(0);
   const [revealed, setRevealed] = useState(true);
+  const learnAudio = useRef<SpeakButtonHandle>(null);
   const [session, setSession] = useState<TrainerSession | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -917,6 +922,10 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
               </Button>
             </div>
             <div className="ct-learn-details">
+              <p className="ct-small" id="ct-listen-help">
+                文字をタップして、文字の名前を聞こう。
+              </p>
+              <AudioNotice />
               <div className="ct-letter-tabs" aria-label="確認する文字">
                 {selectedEntries.map((entry, index) => (
                   <button
@@ -924,15 +933,18 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                     key={entry.id}
                     className={index === learnIndex ? "is-selected" : ""}
                     aria-label={`${entry.thai} を確認`}
+                    aria-describedby="ct-listen-help"
                     aria-pressed={index === learnIndex}
                     onClick={() => {
                       setLearnIndex(index);
                       setRevealed(true);
+                      learnAudio.current?.play(entry.name);
                     }}
                   >
                     <span className="thai" lang="th">
                       {entry.thai}
                     </span>
+                    <Volume2 size={14} aria-hidden="true" />
                   </button>
                 ))}
               </div>
@@ -941,10 +953,9 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                   <Headphones size={22} aria-hidden="true" />
                   まず、音を聞いてみよう
                 </p>
-                <AudioNotice />
                 <div className="ct-name-audio">
                   <SpeakButton
-                    key={`name-${learnEntry.id}`}
+                    ref={learnAudio}
                     text={learnEntry.name}
                     label="文字の名前を聞く"
                   />
@@ -1144,15 +1155,14 @@ export function CharacterTraining({ initialFocus }: { initialFocus?: string }) {
                 <p className="ct-small">
                   英字名は発音記号ではありません。同じ音の文字は、英字名も手がかりに選びましょう。
                 </p>
-                <details className="ct-reading-audio">
-                  <summary>読み方を音声で確認する</summary>
+                <div className="ct-reading-audio">
                   <AudioNotice />
                   <SpeakButton
                     key={question.id}
                     text={target.name}
                     label="読み方を聞く"
                   />
-                </details>
+                </div>
               </div>
             ) : (
               <>

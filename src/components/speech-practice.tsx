@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+} from "react";
 import { Headphones, Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { speechQuestions } from "@/data/speech-practice";
@@ -47,11 +55,27 @@ export function useThaiSpeech() {
   const stop = useCallback(() => {
     controller.current?.stop(owner);
   }, [owner]);
-  function play(text: string, complete?: () => void) {
-    if (!voice || !controller.current) return;
+  function play(text: string, complete?: () => void): boolean {
+    // Resolve voices in the gesture too: a just-available Thai voice need not wait
+    // for another render or another click. Never queue playback for a later effect.
+    const instance = controller.current;
+    let selectedVoice: SpeechVoice | undefined;
+    try {
+      selectedVoice = instance && selectThaiVoice(instance.backend.voices());
+    } catch {
+      setStatus("unavailable");
+      return false;
+    }
+    if (!instance || !selectedVoice) {
+      setVoice(undefined);
+      if (status !== "checking") setStatus("unavailable");
+      return false;
+    }
+    setVoice(selectedVoice);
+    setStatus("ready");
     setMessage(null);
     setPlaying(true);
-    controller.current.play(owner, text, voice, {
+    instance.play(owner, text, selectedVoice, {
       start: () => setPlaying(true),
       complete: () => {
         setPlaying(false);
@@ -63,6 +87,7 @@ export function useThaiSpeech() {
         setMessage(error);
       },
     });
+    return true;
   }
   return { voice, status, playing, message, play, stop };
 }
@@ -70,22 +95,46 @@ export function useThaiSpeech() {
 const voiceUnavailable =
   "この端末ではタイ語の合成音声を利用できません。端末の音声設定でタイ語を追加するか、対応するブラウザでお試しください。";
 
+export interface SpeakButtonHandle {
+  /** Explicit listening targets can select a word and play it in the same gesture. */
+  play: (text?: string) => boolean;
+  stop: () => void;
+}
+
 export function SpeakButton({
   text,
   label = "合成音声で確認",
   disabled = false,
   compact = false,
   beforePlay,
+  ref,
 }: {
   text: string;
   label?: string;
   disabled?: boolean;
   compact?: boolean;
   beforePlay?: () => void;
+  ref?: Ref<SpeakButtonHandle>;
 }) {
   const speech = useThaiSpeech();
   const stop = speech.stop;
-  useEffect(() => () => stop(), [text, stop]); // Changing an example must stop its previous speech.
+  const activeText = useRef<string | null>(null);
+  useEffect(() => {
+    // A selection may already have played the new text synchronously, before
+    // React commits its props. Cancel only an actually different old example.
+    if (activeText.current !== null && activeText.current !== text) {
+      activeText.current = null;
+      stop();
+    }
+  }, [text, stop]);
+  function playText(nextText = text) {
+    if (disabled) return false;
+    stop();
+    beforePlay?.();
+    activeText.current = nextText;
+    return speech.play(nextText);
+  }
+  useImperativeHandle(ref, () => ({ play: playText, stop }));
   return (
     <div className="speech-inline">
       <Button
@@ -96,10 +145,7 @@ export function SpeakButton({
         title={speech.status === "unavailable" ? voiceUnavailable : undefined}
         onClick={() => {
           if (speech.playing) speech.stop();
-          else {
-            beforePlay?.();
-            speech.play(text);
-          }
+          else playText();
         }}
       >
         {speech.playing ? <Square size={15} /> : <Volume2 size={16} />}

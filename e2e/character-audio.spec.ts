@@ -336,7 +336,9 @@ async function answerAudioQuestion(
       exact: true,
     })
     .click();
-  const feedback = quiz.getByRole("status").filter({ hasText: target.name });
+  const feedback = quiz
+    .locator('.ct-feedback[role="status"]')
+    .filter({ hasText: target.name });
   await expect(feedback).toContainText("対応する文字は");
   await expect(feedback).toContainText(
     action === "correct" ? "そのとおり！" : "ペナルティはありません",
@@ -563,7 +565,9 @@ test("タイ語音声がない場合は日本語で代用せず、文字だけ�
     quiz.getByRole("button", { name: "答えを確認", exact: true }),
   ).toBeEnabled();
   await quiz.getByRole("button", { name: "答えを確認", exact: true }).click();
-  await expect(quiz.getByRole("status")).toContainText(target.name);
+  await expect(quiz.locator('.ct-feedback[role="status"]')).toContainText(
+    target.name,
+  );
   expect((await speechState(page)).calls).toHaveLength(0);
   expect((await savedTraining(page)).mode).toBe("name-to-letter");
   expect((await savedTraining(page)).records).toEqual({});
@@ -619,7 +623,9 @@ test("遅れて利用可能になった音声を自動再生せず、320px幅・
   await check.focus();
   await page.keyboard.press("Enter");
   await expect(
-    quiz.getByRole("status").filter({ hasText: target.name }),
+    quiz
+      .locator('.ct-feedback[role="status"]')
+      .filter({ hasText: target.name }),
   ).toContainText("そのとおり！");
   expect(
     await page.evaluate(

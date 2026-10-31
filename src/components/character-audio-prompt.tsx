@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+} from "react";
 import { Check, Headphones, Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useThaiSpeech } from "@/components/speech-practice";
@@ -17,6 +23,13 @@ interface CharacterAudioPromptProps {
   questionId: string;
   text: string;
   onReadyChange: (state: CharacterAudioReadiness) => void;
+  active?: boolean;
+  ref?: Ref<CharacterAudioPromptHandle>;
+}
+
+export interface CharacterAudioPromptHandle {
+  play: (questionId: string, text: string) => boolean;
+  stop: () => void;
 }
 
 /** The source name is spoken only; it must not reveal the answer in the UI. */
@@ -24,61 +37,134 @@ export function CharacterAudioPrompt({
   questionId,
   text,
   onReadyChange,
+  active = true,
+  ref,
 }: CharacterAudioPromptProps) {
   const speech = useThaiSpeech();
   const [heard, setHeard] = useState(false);
+  const [playTarget, setPlayTarget] = useState<{
+    questionId: string;
+    text: string;
+  } | null>(null);
   const [attempt, setAttempt] = useState(0);
   const mounted = useRef(false);
+  const sequence = useRef(0);
+  const current = useRef<{
+    questionId: string;
+    text: string;
+    token: number;
+  } | null>(null);
   const available =
     speech.status === "checking" ? null : speech.status === "ready";
+  const heardCurrent = Boolean(
+    active &&
+      heard &&
+      playTarget?.questionId === questionId &&
+      playTarget.text === text,
+  );
 
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
+      sequence.current += 1;
     };
   }, []);
 
+  const stop = speech.stop;
+  useEffect(
+    () => () => {
+      // A gesture can already have requested the new target before props commit.
+      // Only cancel the old target owned by this effect's props.
+      if (
+        current.current?.questionId === questionId &&
+        current.current.text === text
+      ) {
+        sequence.current += 1;
+        current.current = null;
+        stop();
+      }
+    },
+    [questionId, text, stop],
+  );
+
   useEffect(() => {
+    if (!active) return;
     onReadyChange({
       questionId,
-      heard,
+      heard: heardCurrent,
       playing: speech.playing,
       available,
     });
   }, [
     questionId,
-    heard,
+    heardCurrent,
     speech.playing,
     speech.message,
     available,
     attempt,
     onReadyChange,
+    active,
   ]);
 
-  function togglePlayback() {
-    // Lock the answer in the same user event, before asynchronous speech starts.
+  function stopPlayback() {
+    sequence.current += 1;
+    const previousId = current.current?.questionId ?? questionId;
+    current.current = null;
+    setPlayTarget(null);
     setHeard(false);
-    // Publish the final state even when a synchronous error batches playing back to false.
     setAttempt((current) => current + 1);
-    if (speech.playing) {
-      onReadyChange({ questionId, heard: false, playing: false, available });
-      speech.stop();
-      return;
-    }
-    if (available !== true) return;
-    onReadyChange({ questionId, heard: false, playing: true, available: true });
-    speech.play(text, () => {
-      if (!mounted.current) return;
+    speech.stop();
+    onReadyChange({
+      questionId: previousId,
+      heard: false,
+      playing: false,
+      available,
+    });
+  }
+
+  function play(nextId: string, nextText: string): boolean {
+    const token = ++sequence.current;
+    current.current = { questionId: nextId, text: nextText, token };
+    setPlayTarget({ questionId: nextId, text: nextText });
+    setHeard(false);
+    setAttempt((value) => value + 1);
+    speech.stop();
+    // Lock synchronously, including replays of the same card and voice errors.
+    onReadyChange({
+      questionId: nextId,
+      heard: false,
+      playing: true,
+      available,
+    });
+    const started = speech.play(nextText, () => {
+      if (!mounted.current || sequence.current !== token) return;
       setHeard(true);
       onReadyChange({
-        questionId,
+        questionId: nextId,
         heard: true,
         playing: false,
         available: true,
       });
     });
+    if (!started)
+      onReadyChange({
+        questionId: nextId,
+        heard: false,
+        playing: false,
+        available,
+      });
+    return started;
   }
+
+  useImperativeHandle(ref, () => ({ play, stop: stopPlayback }));
+
+  function togglePlayback() {
+    if (speech.playing) stopPlayback();
+    else play(questionId, text);
+  }
+
+  if (!active) return null;
 
   return (
     <div className="ct-listen-prompt">
@@ -125,7 +211,7 @@ export function CharacterAudioPrompt({
           {speech.message}
         </p>
       )}
-      {heard && !speech.playing && (
+      {heardCurrent && !speech.playing && (
         <p className="ct-listen-status ct-small" role="status">
           <Check size={16} aria-hidden="true" />{" "}
           音声を確認しました。文字を選びましょう。

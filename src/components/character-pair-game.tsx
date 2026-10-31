@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   CharacterAudioPrompt,
+  type CharacterAudioPromptHandle,
   type CharacterAudioReadiness,
 } from "@/components/character-audio-prompt";
 import { SpeakButton } from "@/components/speech-practice";
@@ -141,6 +142,7 @@ export function CharacterPairGame({
   const readinessRef = useRef<CharacterAudioReadiness | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const audioHeading = useRef<HTMLHeadingElement>(null);
+  const audioPrompt = useRef<CharacterAudioPromptHandle>(null);
   const { playEffect } = useSoundEffects();
 
   useEffect(() => {
@@ -189,6 +191,7 @@ export function CharacterPairGame({
 
   function clearSelection() {
     activePromptId.current = null;
+    audioPrompt.current?.stop();
     cueRef.current = null;
     readinessRef.current = null;
     setSelectedCueId(null);
@@ -226,8 +229,9 @@ export function CharacterPairGame({
   }
 
   function selectCue(id: string) {
-    if (!game || !lap || matchedRef.current.includes(id)) return;
-    if (cueRef.current === id) {
+    if (!game || !lap || leaving.current || matchedRef.current.includes(id))
+      return;
+    if (game.mode !== "audio-to-letter" && cueRef.current === id) {
       setFeedback(null);
       return;
     }
@@ -240,14 +244,8 @@ export function CharacterPairGame({
     setFeedback(null);
     setError(null);
     if (game.mode === "audio-to-letter") {
-      window.requestAnimationFrame(() => {
-        const node = audioHeading.current;
-        if (!node) return;
-        node.focus({ preventScroll: true });
-        const bounds = node.getBoundingClientRect();
-        if (bounds.top < 0 || bounds.bottom > window.innerHeight)
-          node.scrollIntoView({ block: "start", behavior: "instant" });
-      });
+      const entry = characters.get(id);
+      if (entry) audioPrompt.current?.play(nextPromptId, entry.name);
     }
   }
 
@@ -315,6 +313,7 @@ export function CharacterPairGame({
     if (leaving.current) return;
     leaving.current = true;
     activePromptId.current = null;
+    audioPrompt.current?.stop();
     cueRef.current = null;
     onBack();
   }
@@ -424,19 +423,17 @@ export function CharacterPairGame({
               ? `音声${lap.cueIds.indexOf(selectedCue.id) + 1}を聞いてみよう`
               : "音声カードを選ぼう"}
           </h3>
-          {selectedCue && promptId ? (
-            <>
-              <AudioNotice />
-              <CharacterAudioPrompt
-                key={promptId}
-                questionId={promptId}
-                text={selectedCue.name}
-                onReadyChange={handleReadiness}
-              />
-            </>
-          ) : (
+          <AudioNotice />
+          <CharacterAudioPrompt
+            ref={audioPrompt}
+            active={Boolean(selectedCue && promptId)}
+            questionId={promptId ?? ""}
+            text={selectedCue?.name ?? ""}
+            onReadyChange={handleReadiness}
+          />
+          {!selectedCue && (
             <p className="cp-small">
-              カードを選ぶと、ここで文字の名前を再生できます。
+              音声カードを押すと、そのまま文字の名前が流れます。
             </p>
           )}
           <Button
@@ -455,7 +452,7 @@ export function CharacterPairGame({
         <div className="cp-column cp-cue-column">
           <h3>
             {game.mode === "audio-to-letter"
-              ? "1. 音声を選ぶ"
+              ? "1. タップして聞く"
               : "1. 読み方を選ぶ"}
           </h3>
           {lap.cueIds.map((id, index) => {
@@ -492,7 +489,7 @@ export function CharacterPairGame({
                         </span>
                       </span>
                     ) : (
-                      <span className="cp-small">選んで、聞く</span>
+                      <span className="cp-small">タップして再生</span>
                     )}
                   </>
                 ) : (
@@ -555,15 +552,14 @@ export function CharacterPairGame({
 
       {feedback && <PairFeedback match={feedback} />}
       {!lapComplete && game.mode === "name-to-letter" && selectedCue && (
-        <details className="cp-reading-audio">
-          <summary>選んだ文字の名前を音声でも聞く</summary>
+        <div className="cp-reading-audio">
           <AudioNotice />
           <SpeakButton
             key={selectedCue.id}
             text={selectedCue.name}
             label="選んだ文字の名前を聞く"
           />
-        </details>
+        </div>
       )}
 
       {lapComplete && (

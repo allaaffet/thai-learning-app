@@ -278,7 +278,9 @@ async function finishQuiz(page: Page) {
       .locator("..")
       .click();
     await quiz.getByRole("button", { name: "答えを確認", exact: true }).click();
-    await expect(quiz.getByRole("status")).toContainText(entry.name);
+    await expect(quiz.locator('.ct-feedback[role="status"]')).toContainText(
+      entry.name,
+    );
     expect((await savedTraining(page)).sessionsCompleted).toBe(0);
     await quiz
       .getByRole("button", {
@@ -296,75 +298,88 @@ async function finishQuiz(page: Page) {
 }
 
 // 合成音声の通知を制御するだけで、Thaiの発音や実機の音質は検証しない。
-async function installSpeechStub(page: Page, noThai = false) {
-  await page.addInitScript((noThai) => {
-    class Utterance {
-      text: string;
-      lang = "";
-      voice: { lang: string } | null = null;
-      rate = 1;
-      pitch = 1;
-      onstart: (() => void) | null = null;
-      onend: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      constructor(text: string) {
-        this.text = text;
+async function installSpeechStub(page: Page, noThai = false, delayed = false) {
+  await page.addInitScript(
+    ({ noThai, delayed }) => {
+      class Utterance {
+        text: string;
+        lang = "";
+        voice: { lang: string } | null = null;
+        rate = 1;
+        pitch = 1;
+        onstart: (() => void) | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) {
+          this.text = text;
+        }
       }
-    }
-    const utterances: Utterance[] = [];
-    const state = {
-      calls: [] as { text: string; lang: string; voice: string | null }[],
-      cancels: 0,
-    };
-    class Synthesis extends EventTarget {
-      getVoices() {
-        const japanese = {
-          name: "Japanese test voice",
-          lang: "ja-JP",
-          voiceURI: "ja",
-          default: true,
-          localService: true,
-        };
-        const thai = {
-          name: "Thai test voice",
-          lang: "th-TH",
-          voiceURI: "th",
-          default: false,
-          localService: true,
-        };
-        return noThai ? [japanese] : [japanese, thai];
+      const utterances: Utterance[] = [];
+      const state = {
+        calls: [] as { text: string; lang: string; voice: string | null }[],
+        clicks: [] as boolean[],
+        cancels: 0,
+      };
+      let voicesReady = !delayed;
+      class Synthesis extends EventTarget {
+        getVoices() {
+          const japanese = {
+            name: "Japanese test voice",
+            lang: "ja-JP",
+            voiceURI: "ja",
+            default: true,
+            localService: true,
+          };
+          const thai = {
+            name: "Thai test voice",
+            lang: "th-TH",
+            voiceURI: "th",
+            default: false,
+            localService: true,
+          };
+          return noThai || !voicesReady ? [japanese] : [japanese, thai];
+        }
+        speak(utterance: Utterance) {
+          utterances.push(utterance);
+          state.calls.push({
+            text: utterance.text,
+            lang: utterance.lang,
+            voice: utterance.voice?.lang ?? null,
+          });
+          const click = window.event;
+          state.clicks.push(click?.type === "click" && click.isTrusted);
+          utterance.onstart?.();
+        }
+        cancel() {
+          state.cancels += 1;
+        }
       }
-      speak(utterance: Utterance) {
-        utterances.push(utterance);
-        state.calls.push({
-          text: utterance.text,
-          lang: utterance.lang,
-          voice: utterance.voice?.lang ?? null,
-        });
-        utterance.onstart?.();
-      }
-      cancel() {
-        state.cancels += 1;
-      }
-    }
-    Object.defineProperty(window, "speechSynthesis", {
-      configurable: true,
-      value: new Synthesis(),
-    });
-    Object.defineProperty(window, "SpeechSynthesisUtterance", {
-      configurable: true,
-      value: Utterance,
-    });
-    Object.defineProperty(window, "__pairSpeech", { value: state });
-    Object.defineProperty(window, "__pairSpeechEvent", {
-      value: (event: "end" | "error", index?: number) => {
-        const utterance = utterances[index ?? utterances.length - 1];
-        if (!utterance) throw new Error("Missing speech call");
-        if (event === "end") utterance.onend?.();
-        else utterance.onerror?.();
-      },
-    });
-  }, noThai);
+      const synthesis = new Synthesis();
+      Object.defineProperty(window, "speechSynthesis", {
+        configurable: true,
+        value: synthesis,
+      });
+      Object.defineProperty(window, "SpeechSynthesisUtterance", {
+        configurable: true,
+        value: Utterance,
+      });
+      Object.defineProperty(window, "__pairSpeech", { value: state });
+      Object.defineProperty(window, "__pairSpeechEvent", {
+        value: (event: "end" | "error" | "voices", index?: number) => {
+          if (event === "voices") {
+            voicesReady = true;
+            synthesis.dispatchEvent(new Event("voiceschanged"));
+            return;
+          }
+          const utterance = utterances[index ?? utterances.length - 1];
+          if (!utterance) throw new Error("Missing speech call");
+          if (event === "end") utterance.onend?.();
+          else utterance.onerror?.();
+        },
+      });
+    },
+    { noThai, delayed },
+  );
 }
 
 async function speechState(page: Page) {
@@ -374,10 +389,17 @@ async function speechState(page: Page) {
       throw new Error("Missing pair speech stub");
     const cancels: unknown = Reflect.get(value, "cancels");
     const calls: unknown = Reflect.get(value, "calls");
-    if (typeof cancels !== "number" || !Array.isArray(calls))
+    const clicks: unknown = Reflect.get(value, "clicks");
+    if (
+      typeof cancels !== "number" ||
+      !Array.isArray(calls) ||
+      !Array.isArray(clicks) ||
+      !clicks.every((entry: unknown) => typeof entry === "boolean")
+    )
       throw new Error("Invalid speech probe");
     return {
       cancels,
+      clicks: clicks.map(Boolean),
       calls: calls.map((call: unknown) => {
         if (typeof call !== "object" || call === null)
           throw new Error("Invalid speech call");
@@ -396,7 +418,11 @@ async function speechState(page: Page) {
   });
 }
 
-async function speechEvent(page: Page, event: "end" | "error", index?: number) {
+async function speechEvent(
+  page: Page,
+  event: "end" | "error" | "voices",
+  index?: number,
+) {
   await page.evaluate(
     ({ event, index }) => {
       const control: unknown = Reflect.get(window, "__pairSpeechEvent");
@@ -406,6 +432,23 @@ async function speechEvent(page: Page, event: "end" | "error", index?: number) {
     },
     { event, index },
   );
+}
+
+/** Selecting an audio card is itself the playback gesture; no second button. */
+async function hearCue(page: Page, id: string) {
+  const before = (await speechState(page)).calls.length;
+  await cueButton(page, id).click();
+  await expect
+    .poll(async () => (await speechState(page)).calls.length)
+    .toBe(before + 1);
+  const state = await speechState(page);
+  expect(state.calls.at(-1)).toEqual({
+    text: character(id).name,
+    lang: "th-TH",
+    voice: "th-TH",
+  });
+  expect(state.clicks.at(-1)).toBe(true);
+  return before;
 }
 
 test("読み方と文字を2周つなぎ、誤答はやり直せて、8問の確認だけを独立した記録に残す", async ({
@@ -465,7 +508,7 @@ test("読み方と文字を2周つなぎ、誤答はやり直せて、8問の確
   expect(after[REVIEW_STORAGE_KEY]).toBe(before[REVIEW_STORAGE_KEY]);
 });
 
-test("音声ペアは聞き終えたカードだけ回答でき、切替・停止・エラー・遅延通知では解放しない", async ({
+test("音声カードを1回押すと再生し、切替・停止・再生し直し・エラー・遅延通知では誤って回答を解放しない", async ({
   page,
 }) => {
   await installSpeechStub(page);
@@ -474,67 +517,199 @@ test("音声ペアは聞き終えたカードだけ回答でき、切替・停�
   const before = await storageSnapshot(page);
   await startPairs(page, "audio-to-letter");
   expect((await speechState(page)).calls).toHaveLength(0);
+  await expect(pairs(page)).toContainText("未監修");
+  await expect(pairs(page)).toContainText("通信する場合があります");
   const [first, second, third] = defaultIds;
   for (const button of await pairs(page).locator("[data-letter-id]").all())
     await expect(button).toBeDisabled();
-  await cueButton(page, first).click();
+  const firstAttempt = await hearCue(page, first);
   await expect(cueButton(page, first)).toHaveAccessibleName(/音声\dのカード/);
   await expect(pairs(page)).toContainText("未監修");
   await expect(pairs(page)).toContainText("通信する場合があります");
   await expect(pairs(page)).not.toContainText(character(first).name);
-  await pairs(page)
-    .getByRole("button", { name: "問題の音声を聞く", exact: true })
-    .click();
   await expect(letterButton(page, first)).toBeDisabled();
   const beforeSwitch = await speechState(page);
-  await cueButton(page, second).click();
+  const secondAttempt = await hearCue(page, second);
   expect((await speechState(page)).cancels).toBeGreaterThan(
     beforeSwitch.cancels,
   );
-  await speechEvent(page, "end", 0);
+  await speechEvent(page, "end", firstAttempt);
   await expect(letterButton(page, second)).toBeDisabled();
   const play = pairs(page).getByRole("button", {
     name: "問題の音声を聞く",
     exact: true,
   });
-  await play.click();
   await pairs(page)
     .getByRole("button", { name: "問題の音声を停止", exact: true })
     .click();
-  await speechEvent(page, "end", 1);
+  await speechEvent(page, "end", secondAttempt);
   await expect(letterButton(page, second)).toBeDisabled();
-  await play.click();
-  await speechEvent(page, "error", 2);
+  const errorAttempt = await hearCue(page, second);
+  await speechEvent(page, "error", errorAttempt);
   await expect(
     pairs(page)
       .getByRole("status")
       .filter({ hasText: "合成音声を再生できませんでした" }),
   ).toBeVisible();
   await expect(letterButton(page, second)).toBeDisabled();
+  await speechEvent(page, "end", errorAttempt);
+  await expect(letterButton(page, second)).toBeDisabled();
+  // The standalone play button remains a one-click retry/stop control.
   await play.click();
-  await speechEvent(page, "end", 3);
+  const retryAttempt = (await speechState(page)).calls.length - 1;
+  await speechEvent(page, "end", retryAttempt);
   await expect(letterButton(page, second)).toBeEnabled();
   expect((await speechState(page)).calls.at(-1)).toEqual({
     text: character(second).name,
     lang: "th-TH",
     voice: "th-TH",
   });
+  // The same selected card replays immediately and locks its answer again.
+  const replayAttempt = await hearCue(page, second);
+  await expect(letterButton(page, second)).toBeDisabled();
+  const latestAttempt = await hearCue(page, second);
+  await speechEvent(page, "end", replayAttempt);
+  await expect(letterButton(page, second)).toBeDisabled();
+  await speechEvent(page, "end", latestAttempt);
+  await expect(letterButton(page, second)).toBeEnabled();
   await letterButton(page, second).click();
   await expect(cueButton(page, second)).toBeDisabled();
   await expect(letterButton(page, second)).toBeDisabled();
   await expect(pairProgress(page)).toHaveJSProperty("value", 1);
-  await cueButton(page, third).click();
-  await play.click();
+  const lastAttempt = await hearCue(page, third);
   await pairs(page)
     .getByRole("button", { name: "読み方でペアさがし", exact: true })
     .click();
-  await speechEvent(page, "end", 4);
+  await speechEvent(page, "end", lastAttempt);
   await expect(pairs(page)).toHaveAttribute("data-game-mode", "name-to-letter");
   await expect(pairs(page)).toHaveAttribute("data-lap", "1");
   await expect(pairProgress(page)).toHaveJSProperty("value", 0);
   await expectReadingCue(page, third);
   expect(await storageSnapshot(page)).toEqual(before);
   expect(await storageWrites(page)).toEqual([]);
+});
+
+test("音声が後から準備されても勝手に再生せず、カードを1回押して2周を聞き分ける", async ({
+  page,
+}) => {
+  await installSpeechStub(page, false, true);
+  await seedLearningAndWatchWrites(page);
+  await openTraining(page, "audio");
+  const before = await storageSnapshot(page);
+  await startPairs(page, "audio-to-letter");
+  const first = defaultIds[0];
+  await cueButton(page, first).click();
+  expect((await speechState(page)).calls).toHaveLength(0);
+  await speechEvent(page, "voices");
+  await expect(
+    pairs(page).getByRole("button", { name: "問題の音声を聞く", exact: true }),
+  ).toBeEnabled();
+  expect((await speechState(page)).calls).toHaveLength(0);
+
+  await cueButton(page, first).focus();
+  await page.keyboard.press("Space");
+  const firstState = await speechState(page);
+  expect(firstState.calls).toEqual([
+    { text: character(first).name, lang: "th-TH", voice: "th-TH" },
+  ]);
+  expect(firstState.clicks).toEqual([true]);
+  await expect(letterButton(page, first)).toBeDisabled();
+  await speechEvent(page, "end");
+  await letterButton(page, first).click();
+
+  for (const id of defaultIds.slice(1)) {
+    const index = await hearCue(page, id);
+    await expect(letterButton(page, id)).toBeDisabled();
+    await speechEvent(page, "end", index);
+    await letterButton(page, id).click();
+  }
+  expect((await speechState(page)).calls).toHaveLength(defaultIds.length);
+  await secondLap(page);
+  expect((await speechState(page)).calls).toHaveLength(defaultIds.length);
+  for (const button of await pairs(page).locator("[data-letter-id]").all())
+    await expect(button).toBeDisabled();
+  for (const id of defaultIds) {
+    const index = await hearCue(page, id);
+    await speechEvent(page, "end", index);
+    await letterButton(page, id).click();
+  }
+  await expect(
+    pairs(page).getByRole("heading", { name: "2周クリア！", exact: true }),
+  ).toBeVisible();
+  expect((await speechState(page)).calls).toHaveLength(defaultIds.length * 2);
+  expect(await storageSnapshot(page)).toEqual(before);
+  expect(await storageWrites(page)).toEqual([]);
+  await pairs(page)
+    .getByRole("button", { name: "もう一度ペアさがし", exact: true })
+    .click();
+  await expect(pairProgress(page)).toHaveJSProperty("value", 0);
+  expect((await speechState(page)).calls).toHaveLength(defaultIds.length * 2);
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "ペアさがしで遊ぶ", exact: true }),
+  ).toBeEnabled();
+  expect((await speechState(page)).calls).toHaveLength(0);
+  expect(await storageSnapshot(page)).toEqual(before);
+});
+
+test("読み方の補助音声は展開せず1回で聞けて、ペア・問題の表示だけでは鳴らない", async ({
+  page,
+}) => {
+  await installSpeechStub(page);
+  await seedLearningAndWatchWrites(page);
+  await openTraining(page);
+  const before = await storageSnapshot(page);
+  await startPairs(page);
+  const first = defaultIds[0];
+  await cueButton(page, first).click();
+  expect((await speechState(page)).calls).toHaveLength(0);
+  const play = pairs(page).getByRole("button", {
+    name: "選んだ文字の名前を聞く",
+    exact: true,
+  });
+  await expect(play).toBeVisible();
+  await play.click();
+  expect((await speechState(page)).calls).toEqual([
+    { text: character(first).name, lang: "th-TH", voice: "th-TH" },
+  ]);
+  await expect(letterButton(page, first)).toBeEnabled();
+  await letterButton(page, first).click();
+  expect(await storageSnapshot(page)).toEqual(before);
+  expect(await storageWrites(page)).toEqual([]);
+  await pairs(page)
+    .getByRole("button", { name: "文字を選び直す", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "すぐに8問チャレンジ", exact: true })
+    .click();
+  const quiz = page.getByRole("region", {
+    name: "文字チャレンジ",
+    exact: true,
+  });
+  const targetId = await quiz.getAttribute("data-character-id");
+  if (!targetId) throw new Error("Missing reading question target");
+  const target = character(targetId);
+  await expect(quiz).toHaveAttribute("data-kind", "name-to-letter");
+  await expect(quiz).not.toContainText(target.name);
+  expect((await speechState(page)).calls).toHaveLength(1);
+  const questionAudio = quiz.getByRole("button", {
+    name: "読み方を聞く",
+    exact: true,
+  });
+  await expect(questionAudio).toBeVisible();
+  await questionAudio.click();
+  expect((await speechState(page)).calls.at(-1)).toEqual({
+    text: target.name,
+    lang: "th-TH",
+    voice: "th-TH",
+  });
+  expect((await speechState(page)).clicks).toEqual([true, true]);
+  await expect(quiz).not.toContainText(target.name);
+  expect((await savedTraining(page)).records).toEqual({});
+  expect((await savedTraining(page)).sessionsCompleted).toBe(0);
+  const after = await storageSnapshot(page);
+  expect(after[PROGRESS_STORAGE_KEY]).toEqual(before[PROGRESS_STORAGE_KEY]);
+  expect(after[REVIEW_STORAGE_KEY]).toEqual(before[REVIEW_STORAGE_KEY]);
 });
 
 test("2文字と8文字の両方で全ての文字を各周1回ずつ扱い、ゲーム終了や再読込みで記録を増やさない", async ({
