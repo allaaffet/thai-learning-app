@@ -14,6 +14,8 @@ import "./lesson-journey.css";
 import "./course-mission.css";
 import "./mission-hub.css";
 import "./course-dialogue.css";
+import "./romance.css";
+import "./romance-teaser.css";
 import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
 import { ReviewProvider } from "@/components/review-provider";

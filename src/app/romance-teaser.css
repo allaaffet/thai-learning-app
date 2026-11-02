@@ -1,0 +1,83 @@
+.romance-portrait {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  width: 100%;
+  min-width: 0;
+  background: #e7ede1;
+  border-radius: 20px;
+}
+.romance-teaser {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 300px);
+  align-items: center;
+  gap: 28px;
+  padding: 28px;
+  margin-block: 24px;
+  border-color: #ead7cf;
+  background: linear-gradient(110deg, #fff9f2, #f7eee8);
+}
+.romance-teaser-copy {
+  min-width: 0;
+}
+.romance-teaser h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.8;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+.romance-teaser p {
+  line-height: 1.9;
+}
+.romance-teaser .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #985d58;
+}
+.romance-teaser .button {
+  margin-top: 18px;
+  white-space: normal;
+  height: auto;
+  min-height: 48px;
+}
+.romance-teaser small {
+  display: block;
+  margin-top: 14px;
+  font-size: var(--text-small);
+  color: var(--muted);
+  line-height: 1.8;
+}
+.romance-teaser-cast {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  transform: rotate(-3deg);
+}
+.romance-teaser-cast .romance-portrait {
+  border: 4px solid #fff;
+  box-shadow: 0 6px 18px #75594b14;
+}
+@media (max-width: 850px) {
+  .romance-teaser {
+    grid-template-columns: 1fr;
+  }
+  .romance-teaser-cast {
+    max-width: 340px;
+    width: 100%;
+    justify-self: center;
+  }
+}
+@media (max-width: 600px) {
+  .romance-teaser {
+    padding: 22px 18px;
+  }
+  .romance-teaser .button {
+    width: 100%;
+  }
+  .romance-teaser-cast {
+    transform: none;
+  }
+}

@@ -21,6 +21,7 @@ import {
   RotateCcw,
   Gamepad2,
   MessagesSquare,
+  Heart,
 } from "lucide-react";
 import { useLearning } from "@/components/learning-provider";
 import { getStreak, getTotalXp } from "@/lib/progress";
@@ -74,6 +75,12 @@ const navigation = [
     label: "会話ミッション",
     mobile: "会話",
     icon: MessagesSquare,
+  },
+  {
+    href: "/romance",
+    label: "恋するタイ語",
+    mobile: "恋愛",
+    icon: Heart,
   },
   {
     href: "/progress",

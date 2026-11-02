@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { getNextLesson, getStreak, getTotalXp } from "@/lib/progress";
 import { CharacterTrainingTeaser } from "@/components/character-training-teaser";
 import { ConversationTeaser } from "@/components/conversation-teaser";
+import { RomanceTeaser } from "@/components/romance-teaser";
 import { getCourseConversation } from "@/data/course-conversations";
 
 function dateKey(date: Date) {
@@ -220,6 +221,7 @@ export function Dashboard() {
       <DailyQuestBoard />
       <CharacterTrainingTeaser />
       <ConversationTeaser />
+      <RomanceTeaser />
       <ReviewSummary />
       <AchievementCollection compact />
       <section className="chapter-section">
