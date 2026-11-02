@@ -16,9 +16,11 @@ import type { Lesson } from "@/lib/content-types";
 import { useLearning } from "@/components/learning-provider";
 import { isLessonUnlocked } from "@/lib/progress";
 import { cn } from "@/lib/utils";
+import { getCourseConversation } from "@/data/course-conversations";
 
 export function LessonCard({ lesson }: { lesson: Lesson }) {
   const { progress, ready } = useLearning();
+  const conversation = getCourseConversation(lesson.id);
   const record = progress.lessons[lesson.id];
   const completed = Boolean(record?.completedAt);
   const unlocked = ready && isLessonUnlocked(progress, lesson);
@@ -70,6 +72,12 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
         レッスン {String(lesson.number).padStart(2, "0")}
       </span>
       <h3>{lesson.title}</h3>
+      {conversation && (
+        <p className="course-talk-card-goal">
+          <MessageCircle size={16} aria-hidden="true" />
+          {conversation.objective}
+        </p>
+      )}
       <div className="lesson-card-bottom">
         <span>
           <Clock3 size={14} aria-hidden="true" /> 約{lesson.durationMinutes}分{" "}

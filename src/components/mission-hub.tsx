@@ -9,8 +9,8 @@ import {
   Flag,
   Gamepad2,
   LockKeyhole,
+  MessagesSquare,
   RotateCcw,
-  Sparkles,
   Star,
   Trophy,
 } from "lucide-react";
@@ -23,11 +23,13 @@ import { useLearning } from "@/components/learning-provider";
 import { Button } from "@/components/ui/button";
 import { getNextLesson, isLessonUnlocked } from "@/lib/progress";
 import { cn } from "@/lib/utils";
+import { getCourseConversation } from "@/data/course-conversations";
 
 /** The path is a view of the existing curriculum, never a separate progression. */
 export function MissionHub() {
   const { progress, ready } = useLearning();
   const next = getNextLesson(progress, courseLessons);
+  const conversation = next ? getCourseConversation(next.id) : undefined;
   const completed = courseLessons.filter(
     (lesson) => progress.lessons[lesson.id]?.completedAt,
   ).length;
@@ -55,11 +57,14 @@ export function MissionHub() {
             {next ? "次のミッション" : "もう一度、つないでみよう"}
           </span>
           <h2 id="mh-start-heading">
-            {next ? next.title : "学んだことをミックス！"}
+            {next
+              ? (conversation?.title ?? next.title)
+              : "学んだことをミックス！"}
           </h2>
           <p>
             {next
-              ? "新しい発見と、おさらいをひとつのコースで。"
+              ? (conversation?.objective ??
+                "新しい発見と、おさらいをひとつのコースで。")
               : "文字・音・ことば。いろいろな問題で思い出そう。"}
           </p>
           <Button size="lg" asChild={ready} disabled={!ready}>
@@ -73,15 +78,15 @@ export function MissionHub() {
             )}
           </Button>
         </div>
-        <div className="mh-loop" aria-label="発見、チャレンジ、おさらい">
+        <div className="mh-loop" aria-label="会話、しくみ、おさらい">
           <span>
-            <Sparkles size={25} aria-hidden="true" />
-            発見
+            <MessagesSquare size={25} aria-hidden="true" />
+            会話で使う
           </span>
           <ArrowRight size={18} aria-hidden="true" />
           <span>
             <Star size={25} aria-hidden="true" />
-            チャレンジ
+            しくみを発見
           </span>
           <ArrowRight size={18} aria-hidden="true" />
           <span>
@@ -171,6 +176,7 @@ export function MissionHub() {
                 aria-label={`${chapter.title}のミッション`}
               >
                 {chapterLessons.map((lesson, index) => {
+                  const talk = getCourseConversation(lesson.id);
                   const done =
                     ready && Boolean(progress.lessons[lesson.id]?.completedAt);
                   const unlocked = ready && isLessonUnlocked(progress, lesson);
@@ -195,7 +201,10 @@ export function MissionHub() {
                       </span>
                       <span className="mh-node-copy">
                         <small>{status}</small>
-                        <strong>{lesson.title}</strong>
+                        <strong>{talk?.title ?? lesson.title}</strong>
+                        {talk && (
+                          <small>文字・音のテーマ：{lesson.title}</small>
+                        )}
                         {current && (
                           <span className="mh-node-go">
                             ここから遊ぶ{" "}
@@ -221,7 +230,7 @@ export function MissionHub() {
                             done && "is-done",
                             current && "is-current",
                           )}
-                          aria-label={`${lesson.title}：${status}`}
+                          aria-label={`${talk?.title ?? lesson.title}：${status}（${lesson.title}）`}
                           aria-current={current ? "step" : undefined}
                         >
                           {contents}
@@ -229,7 +238,7 @@ export function MissionHub() {
                       ) : (
                         <div
                           className="mh-node-target is-locked"
-                          aria-label={`${lesson.title}：${ready ? status : "記録を読み込み中"}`}
+                          aria-label={`${talk?.title ?? lesson.title}：${ready ? status : "記録を読み込み中"}（${lesson.title}）`}
                         >
                           {contents}
                         </div>

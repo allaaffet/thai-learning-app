@@ -4,6 +4,10 @@ import type {
   LearningBlock,
   Lesson,
 } from "@/lib/content-types";
+import {
+  getCourseConversation,
+  type CourseConversationUnit,
+} from "@/data/course-conversations";
 import { isLessonUnlocked, type LearningProgress } from "@/lib/progress";
 
 export type MissionQuestionPurpose = "core" | "review" | "recall" | "retry";
@@ -14,6 +18,14 @@ export interface MissionQuestionCard {
   lessonId: string;
   exercise: Exercise;
   purpose: MissionQuestionPurpose;
+}
+
+export interface MissionConversationCard {
+  id: string;
+  kind: "conversation";
+  lessonId: string;
+  unit: CourseConversationUnit;
+  mode: "learn" | "recall";
 }
 
 export type MissionCard =
@@ -30,7 +42,8 @@ export type MissionCard =
       lessonId: string;
       item: ExploreItem;
     }
-  | MissionQuestionCard;
+  | MissionQuestionCard
+  | MissionConversationCard;
 
 /** 計画・復習・再挑戦は画面内のみ。保存する初回問題のIDは分離する。 */
 export interface CourseMission {
@@ -157,9 +170,24 @@ function question(
   };
 }
 
+function conversation(
+  unit: CourseConversationUnit,
+  mode: MissionConversationCard["mode"],
+  seed: number,
+): MissionConversationCard {
+  return {
+    id: `${seed}:conversation:${mode}:${unit.lessonId}`,
+    kind: "conversation",
+    lessonId: unit.lessonId,
+    unit,
+    mode,
+  };
+}
+
 /**
  * 説明と確認例を交互に扱う。概念と設問の対応を推測せず、新しい課の
- * 初回問題より前に全説明・例を置く。間に混ぜる問題は既に完了した課だけ。
+ * 初回問題より前に全説明・例を置く。会話は先にモデルを使い、途中で想起する。
+ * 間に混ぜる既存問題は既に完了した課だけ。
  */
 export function buildLessonMission(
   lesson: Lesson,
@@ -171,6 +199,9 @@ export function buildLessonMission(
     throw new Error("前提レッスンを完了してください。");
   const runSeed = safeSeed(seed);
   const cards: MissionCard[] = [];
+  const conversationUnit = getCourseConversation(lesson.id);
+  if (conversationUnit)
+    cards.push(conversation(conversationUnit, "learn", runSeed));
   const review = selectReview(allLessons, progress, 2, runSeed, lesson.id);
   const teachingCount = Math.max(lesson.blocks.length, lesson.explore.length);
   for (let index = 0; index < teachingCount; index += 1) {
@@ -206,8 +237,11 @@ export function buildLessonMission(
   const firstRecallAfter = Math.min(2, lesson.exercises.length - 1);
   for (const [index, exercise] of lesson.exercises.entries()) {
     cards.push(question(lesson.id, exercise, "core", runSeed));
-    if (index === firstRecallAfter)
+    if (index === firstRecallAfter) {
+      if (conversationUnit)
+        cards.push(conversation(conversationUnit, "recall", runSeed));
       cards.push(question(lesson.id, lesson.exercises[0], "recall", runSeed));
+    }
   }
   const middle = lesson.exercises[Math.floor(lesson.exercises.length / 2)];
   if (middle && middle.id !== lesson.exercises[0]?.id)

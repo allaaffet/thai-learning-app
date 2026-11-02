@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { courseLessons, getCourseLesson } from "@/data/course";
 import { CourseMissionPlayer } from "@/components/course-mission-player";
+import { getCourseConversation } from "@/data/course-conversations";
 
 export function generateStaticParams() {
   return courseLessons.map((lesson) => ({ lessonId: lesson.id }));
@@ -14,7 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lessonId } = await params;
   return {
-    title: `${getCourseLesson(lessonId)?.title ?? "ミッション"} — 冒険`,
+    title: `${getCourseConversation(lessonId)?.title ?? getCourseLesson(lessonId)?.title ?? "ミッション"} — 冒険`,
   };
 }
 

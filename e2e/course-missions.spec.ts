@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { courseLessons } from "../src/data/course";
 import { vocabularyEntries } from "../src/data/language";
+import { conversationScenarios } from "../src/data/conversations";
 import type { Exercise } from "../src/lib/content-types";
 import { INCORRECT_INPUT_ID } from "../src/lib/exercise-grading";
 import {
@@ -249,6 +250,47 @@ interface SeenCard {
   purpose: string | null;
   lessonId: string | null;
   exerciseId: string | null;
+  dialogueTexts?: string[];
+}
+
+async function finishDialogue(page: Page) {
+  const region = mission(page).getByRole("region", {
+    name: "会話チャレンジ",
+    exact: true,
+  });
+  const spoken: string[] = [];
+  for (let count = 0; count < 10; count += 1) {
+    const phase = await region.getAttribute("data-dialogue-phase");
+    if (phase === "complete") return spoken;
+    if (phase === "model") {
+      await region
+        .getByRole("button", { name: "会話で使ってみる", exact: true })
+        .click();
+      continue;
+    }
+    if (phase !== "practice") throw new Error("Unexpected dialogue phase");
+    const id = await region.getAttribute("data-step-id");
+    const step = conversationScenarios
+      .flatMap((scenario) => scenario.steps)
+      .find((item) => item.id === id);
+    if (!step) throw new Error("Unknown dialogue step");
+    const choice = step.choices.find((item) => item.id === step.answerIds[0]);
+    if (!choice) throw new Error("Missing accepted dialogue reply");
+    await region
+      .getByRole("radio", { name: choice.phrase.thai, exact: true })
+      .click();
+    spoken.push(choice.phrase.thai);
+    await region
+      .getByRole("button", { name: "返答を確認", exact: true })
+      .click();
+    await expect(region.locator('.cd-feedback[role="status"]')).toContainText(
+      step.explanation,
+    );
+    await region
+      .getByRole("button", { name: /^(次のやりとりへ|会話を終える)$/ })
+      .click();
+  }
+  throw new Error("Dialogue exceeded the finite turn limit");
 }
 
 /** Finite walk; a repeat bug cannot silently turn this into an endless test. */
@@ -267,7 +309,12 @@ async function finishCards(
       lessonId: await region.getAttribute("data-lesson-id"),
       exerciseId: await region.getAttribute("data-exercise-id"),
     };
-    if (kind === "explore") {
+    if (kind === "conversation") {
+      await expect(
+        region.getByRole("button", { name: "次のカードへ", exact: true }),
+      ).toBeDisabled();
+      card.dialogueTexts = await finishDialogue(page);
+    } else if (kind === "explore") {
       const reveal = region.getByRole("button", {
         name: "意味をめくる",
         exact: true,
@@ -336,7 +383,13 @@ test("冒険の入口から全カードを遊び、5問の初回回答と一度�
   expect(seen.filter((card) => card.purpose === "recall")).toHaveLength(2);
   expect(await snapshot(page)).toEqual(before);
   expect((await probe(page)).writes).toEqual([]);
-  expect((await probe(page)).calls).toEqual([]);
+  const speech = (await probe(page)).calls;
+  expect(speech.map((call) => call.text)).toEqual(
+    seen.flatMap((card) => card.dialogueTexts ?? []),
+  );
+  expect(speech.every((call) => call.trusted && call.lang === "th-TH")).toBe(
+    true,
+  );
   await saveTwice(page);
   await expect(
     mission(page).getByRole("heading", {
@@ -392,7 +445,7 @@ test("まちがいは有限の再挑戦で確かめられ、解き直しても�
 }) => {
   await prepare(page);
   await page.goto(`/play/${first.id}`);
-  await expect(mission(page)).toHaveAttribute("data-card-kind", "learn");
+  await expect(mission(page)).toHaveAttribute("data-card-kind", "conversation");
   const seen = await finishCards(
     page,
     (card, previous) =>
@@ -434,7 +487,7 @@ test("既習を混ぜて思い出しつつ、新しい課の初回5問だけで�
   const original = await prepare(page, 2);
   const target = courseLessons[2];
   await page.goto(`/play/${target.id}`);
-  await expect(mission(page)).toHaveAttribute("data-card-kind", "learn");
+  await expect(mission(page)).toHaveAttribute("data-card-kind", "conversation");
   const before = await snapshot(page);
   const seen = await finishCards(page);
   const old = seen.filter((card) => card.purpose === "review");
@@ -533,7 +586,7 @@ test("空欄と並べ替えも混ぜて学べ、保存不可でも入力の生�
     (exercise) => exercise.type === "fill-in-the-blank",
   )!;
   await page.goto(`/play/${target.id}`);
-  await expect(mission(page)).toHaveAttribute("data-card-kind", "learn");
+  await expect(mission(page)).toHaveAttribute("data-card-kind", "conversation");
   const before = await snapshot(page);
   const seen = await finishCards(
     page,
@@ -614,11 +667,19 @@ test("前提を飛ばせず、320px・文字拡大・キーボードでも1回�
   ).toBeVisible();
   await expect(mission(page)).toHaveCount(0);
   await page.goto(`/play/${first.id}`);
+  await expect(mission(page)).toHaveAttribute("data-card-kind", "conversation");
+  expect((await probe(page)).calls).toEqual([]);
+  const dialogueTexts = await finishDialogue(page);
+  await mission(page)
+    .getByRole("button", { name: "次のカードへ", exact: true })
+    .click();
   await expect(mission(page)).toHaveAttribute("data-card-kind", "learn");
   await page.evaluate(() => {
     document.documentElement.style.fontSize = "32px";
   });
-  expect((await probe(page)).calls).toEqual([]);
+  expect((await probe(page)).calls.map((call) => call.text)).toEqual(
+    dialogueTexts,
+  );
   const next = mission(page).getByRole("button", {
     name: "次のカードへ",
     exact: true,
@@ -637,6 +698,7 @@ test("前提を飛ばせず、320px・文字拡大・キーボードでも1回�
   await play.focus();
   await page.keyboard.press("Enter");
   expect((await probe(page)).calls).toEqual([
+    ...dialogueTexts.map((text) => ({ text, lang: "th-TH", trusted: true })),
     { text: entry.thai, lang: "th-TH", trusted: true },
   ]);
   const cancels = (await probe(page)).cancels;
@@ -644,7 +706,7 @@ test("前提を飛ばせず、320px・文字拡大・キーボードでも1回�
     .getByRole("button", { name: "意味をめくる", exact: true })
     .click();
   await next.click();
-  expect((await probe(page)).calls).toHaveLength(1);
+  expect((await probe(page)).calls).toHaveLength(dialogueTexts.length + 1);
   expect((await probe(page)).cancels).toBeGreaterThan(cancels);
   await expect
     .poll(() =>

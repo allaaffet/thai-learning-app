@@ -3,6 +3,79 @@
   margin-inline: auto;
   min-width: 0;
 }
+.course-talk-preview {
+  padding: 28px;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+.course-talk-preview h2 {
+  margin-top: 12px;
+  font-size: 1.4rem;
+  line-height: 1.8;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.course-talk-preview > p {
+  margin-block: 12px;
+  line-height: 1.9;
+}
+.course-talk-preview details {
+  margin-block: 20px;
+}
+.course-talk-preview summary {
+  cursor: pointer;
+  padding-block: 12px;
+  font-weight: 600;
+}
+.course-talk-preview .button {
+  white-space: normal;
+  height: auto;
+  min-height: 48px;
+}
+.course-talk-context {
+  color: var(--muted);
+  font-size: var(--text-small);
+}
+.course-talk-model {
+  margin-block: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.course-talk-model > div {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--sage);
+  margin-top: 12px;
+  min-width: 0;
+}
+.course-talk-model .thai {
+  font-size: 1.5rem;
+  line-height: 2;
+  overflow-wrap: anywhere;
+}
+.course-talk-card-goal {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--text-small);
+  line-height: 1.8;
+  color: var(--forest);
+  margin-block: 14px;
+}
+.course-talk-card-goal svg {
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.course-talk-home-goal {
+  font-size: var(--text-body);
+  line-height: 1.8;
+  margin-block: 14px;
+}
+@media (max-width: 600px) {
+  .course-talk-preview {
+    padding: 22px 18px;
+  }
+}
 .mission-topline,
 .mission-context {
   display: flex;

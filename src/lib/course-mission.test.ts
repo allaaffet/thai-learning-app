@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { courseLessons } from "@/data/course";
+import { getCourseConversation } from "@/data/course-conversations";
 import type { Lesson } from "@/lib/content-types";
 import {
   appendMissionRetry,
@@ -72,7 +73,11 @@ describe("体系的な教材を混ぜて進める本編ミッション", () => {
       expect(
         mission.cards
           .slice(firstCore)
-          .every((card) => card.kind === "question"),
+          .every(
+            (card) =>
+              card.kind === "question" ||
+              (card.kind === "conversation" && card.mode === "recall"),
+          ),
       ).toBe(true);
       const core = questions(mission.cards).filter(
         (card) => card.purpose === "core",
@@ -89,6 +94,59 @@ describe("体系的な教材を混ぜて進める本編ミッション", () => {
       );
       expect(JSON.stringify(courseLessons)).toBe(before);
       expect(JSON.stringify(progress)).toBe(saved);
+    },
+  );
+
+  it.each(courseLessons)(
+    "$id は会話から始め、確認3問の後に同じ会話を思い出しても元の5問と採点を分離する",
+    (lesson) => {
+      const progress = completed(courseLessons);
+      const before = JSON.stringify(progress);
+      const unit = getCourseConversation(lesson.id);
+      const beforeUnit = JSON.stringify(unit);
+      const { cards, coreExerciseIds } = buildLessonMission(
+        lesson,
+        courseLessons,
+        progress,
+        13,
+      );
+      expect(unit).toBeDefined();
+      const dialogues = cards.filter((card) => card.kind === "conversation");
+      expect(dialogues).toHaveLength(2);
+      expect(dialogues.map((card) => card.mode)).toEqual(["learn", "recall"]);
+      expect(dialogues.every((card) => card.unit === unit)).toBe(true);
+      expect(dialogues.every((card) => card.lessonId === lesson.id)).toBe(true);
+      expect(cards[0]).toBe(dialogues[0]);
+
+      const recallIndex = cards.indexOf(dialogues[1]);
+      const coreBeforeRecall = questions(cards.slice(0, recallIndex)).filter(
+        (card) => card.purpose === "core",
+      );
+      expect(coreBeforeRecall).toHaveLength(3);
+      expect(cards[recallIndex + 1]).toMatchObject({
+        kind: "question",
+        purpose: "recall",
+      });
+      expect(
+        cards.slice(1, recallIndex).some((card) => card.kind === "learn"),
+      ).toBe(true);
+      expect(coreExerciseIds).toEqual(
+        lesson.exercises.map((exercise) => exercise.id),
+      );
+      expect(
+        questions(cards).filter((card) => card.purpose === "core"),
+      ).toHaveLength(5);
+      expect(
+        questions(cards).filter((card) => card.purpose === "recall"),
+      ).toHaveLength(2);
+      expect(new Set(cards.map((card) => card.id)).size).toBe(cards.length);
+      for (const dialogue of dialogues)
+        expect(appendMissionRetry(cards, dialogue)).toEqual(cards);
+      expect(JSON.stringify(progress)).toBe(before);
+      expect(JSON.stringify(unit)).toBe(beforeUnit);
+      expect(buildLessonMission(lesson, courseLessons, progress, 13)).toEqual(
+        buildLessonMission(lesson, courseLessons, progress, 13),
+      );
     },
   );
 
@@ -196,6 +254,7 @@ describe("体系的な教材を混ぜて進める本編ミッション", () => {
     expect(mission.coreExerciseIds).toEqual([]);
     expect(cards).toHaveLength(6);
     expect(cards.every((card) => card.purpose === "review")).toBe(true);
+    expect(mission.cards.every((card) => card.kind === "question")).toBe(true);
     expect(cards[0].exercise.id).toBe(exercise.id);
     expect(new Set(cards.map((card) => card.lessonId)).size).toBe(4);
     expect(new Set(cards.map((card) => card.exercise.id)).size).toBe(6);
@@ -387,6 +446,7 @@ describe("体系的な教材を混ぜて進める本編ミッション", () => {
   it("空のカタログ・最小の教材にも対応し、存在しない補足や音声を作らない", () => {
     const empty: Lesson = {
       ...courseLessons[0],
+      id: "empty-lesson-without-a-conversation",
       blocks: [],
       explore: [],
       exercises: [],

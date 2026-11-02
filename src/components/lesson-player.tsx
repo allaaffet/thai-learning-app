@@ -50,6 +50,7 @@ import {
   type RewardBaseline,
 } from "@/components/completion-rewards";
 import { LessonCelebration } from "@/components/lesson-celebration";
+import { CourseConversationPreview } from "@/components/course-conversation-preview";
 
 const stages = [
   { label: "理解する", english: "LEARN" },
@@ -315,6 +316,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <div ref={panel} tabIndex={-1} className="outline-none scroll-mt-6">
         {stage === 0 && (
           <>
+            <CourseConversationPreview lessonId={lesson.id} />
             <section
               className="lg-mission surface"
               aria-label="今日のミッション"

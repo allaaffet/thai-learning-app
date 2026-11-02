@@ -9,7 +9,7 @@
 | 教材   | ローカルのTypeScript構造化データ                  | コンテンツと画面を分離し、参照と型を検査する         |
 | 進捗   | `localStorage` と保存処理のインターフェース       | 外部サービスなしで動作し、将来の移行箇所を限定する   |
 | テスト | Vitest / 必要なReact Testing Library / Playwright | ロジックと実際の学習フローを検証する                 |
-| 配信   | Next.js対応環境、将来Vercel                       | Phase 5第1段階まで外部DB・認証・有料APIは不要        |
+| 配信   | Next.js / Vercel（利用者から公開URL提示）          | 公開環境の独立確認状況は `DEPLOYMENT.md` を参照       |
 
 Thaiは `@fontsource-variable/noto-sans-thai-looped`（標準・ループあり）と `@fontsource-variable/noto-sans-thai`（ループなし）、日本語は `@fontsource-variable/noto-sans-jp` をnpmから導入し、アプリの静的ファイルとして自己配信する。描画時の外部フォントAPIへの依存はない。ライセンスは `public/licenses/` に同梱する。
 
@@ -73,7 +73,8 @@ docs/                日本語の設計・カリキュラム・開発計画
 | ReviewAttempt        | 回答ID、語彙ID、日時、自己評価、次の間隔日数                                                 |
 | ReviewState          | 保存版 `1`、語彙ID別カード、直近1000回の自己評価履歴                                         |
 | CourseMission        | 対象Lessonまたは任意復習、開始時に固定したカード列、成績対象のExercise ID。画面内のみ         |
-| MissionCard          | 元の解説・確認項目・問題と、必須／既習復習／想起／再挑戦の用途。画面内のみ                    |
+| MissionCard          | 元の解説・確認項目・問題・会話。会話の導入／想起と必須／既習復習／再挑戦を区別。画面内のみ |
+| CourseConversationUnit | Lesson ID、会話ゴール、場面、所属ScenarioとStep ID、注目する語句ID。既存会話を再利用 |
 
 Phase 1は6レッスン・30問、Phase 2・3・4で各8レッスン・40問を追加し、計30レッスン・150問。Exerciseは `multiple-choice`・`character-recognition`・`fill-in-the-blank`・`word-ordering` の判別可能な型とする。`exercise-input.tsx` で形式に応じた入力を表示し、`gradeExercise` で未回答・不正な構成を除外して正誤と保存用IDを返す。空欄は許容綴りと前後空白以外を変えずに比較する。語順は語句IDの順序と重複・欠落・未知IDを検査する。
 
@@ -83,7 +84,15 @@ Phase 1は6レッスン・30問、Phase 2・3・4で各8レッスン・40問を�
 
 Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPointは出典IDと `source-checked` / `unreviewed` を持ち、資料側に参照可否と確認対象を記録する。現教材は `unreviewed` の教材案であり、専門家の監修は未完了。基本声調表、40語の単語IPA、一部の文法機能の限定照合は、個々の訳・例文の自然さ・説明全体の監修と分けて記録する。既存本編の例文IPAは採用した単語IPAを組み合わせた学習用表記で、連続発話を照合した転記ではない。Phase 5の会話では文全体のIPAを生成せず、単語の読み方だけを参照する。Phase 4の確認範囲とIPAの帰属・継承条件は [PHASE4_SOURCES.md](PHASE4_SOURCES.md) を参照する。運筆例の `source-checked` は記録軌跡・利用条件との限定照合で、`standardStrokeVerified: false` を必須にする。専門家による標準筆順の監修済みという意味には使わない。
 
-## 会話ミッション（Phase 5第1段階）
+## 本編の会話ゴール
+
+`src/data/course-conversations.ts` は全30課の `CourseConversationUnit` を持ち、既存の4シーン・12ステップ・34語句を参照する。教材の文字列は元の会話から取得し、全文IPAや新しい台本を生成しない。ホーム・冒険マップは会話ゴールと従来の基礎テーマを示し、教科書のLearnからも導入を参照できる。
+
+`buildLessonMission` は先頭に会話の `learn` カード、後に `recall` カードを含める。`course-dialogue-card.tsx` が場面・モデルと日本語訳、選択・即時の理由、有限のステップ移動を担当する。返答は既存の `gradeConversationChoice` を使い、複数の正答IDを保持する。モデルを見てから使い、後の想起にはヒントを用意する。
+
+組込み会話の回答・終了はカード内だけに保持し、`ExerciseAttempt`・確認5問の成績・XP・SRS・独立会話の終了回数へ送らない。部分ステップから `recordConversationCompletion` を呼ばない。出典は所属Scenarioの確認範囲を示し、元のLessonのUnicode資料とは分ける。詳細は [EARLY_CONVERSATIONS.md](EARLY_CONVERSATIONS.md)。
+
+## 独立した会話ミッション（Phase 5第1段階）
 
 `src/lib/conversation-types.ts` が `ConversationWord`・`ConversationPhrase`・`ConversationChoice`・`ConversationStep`・`ConversationScenario` を定義し、`src/data/conversations.ts` が4シーン各3ステップ、語のIPA、出典・確認状況を持つ。文全体のIPAは持たず、語の参照IDを教材側で明示する。語のIPAの照合を台本・訳・自然さの監修へ広げない。
 
@@ -97,9 +106,10 @@ Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPoi
 flowchart LR
   D[Dashboard] --> A[冒険の道]
   A --> P{前提の完了}
-  P -->|達成| M[発見・例と既習問題]
+  P -->|達成| H[会話の場面・お手本・返答]
+  H --> M[発見・例と既習問題]
   P -->|未達| B[前提レッスンの案内]
-  M --> Q[確認5問・間を空けた想起]
+  M --> Q[確認5問・会話と問題の想起]
   Q --> F[正誤と理由・各1回の再挑戦]
   F --> V[明示的な受講記録]
   V -->|初回回答80%以上| C[完了・初回XP付与]
@@ -193,7 +203,7 @@ Providerは保存直前の再読込と `storage` イベントで通常の別タ�
 
 任意のタイ語の形態素解析、一般的な音節分割、網羅的な例外辞書は未実装。現在の明示的な分析条件を受け取る境界を保ち、後で辞書や解析器を追加する場合も、確認状況と判定不能の扱いを省略しない。
 
-正式な筆順教材は参考運筆例とは別の監修工程を必要とし、字形から手順を自動生成しない。配布する録音教材は `AudioAsset` のライセンスと確認状況を満たす必要がある。利用者の短時間録音は任意練習で扱い、SRSはPhase 4の独立した予定管理として実装する。発音・声調の自動評価、Supabase、認証、AI会話、PWA・オフライン対応、公開デプロイは未実装。
+正式な筆順教材は参考運筆例とは別の監修工程を必要とし、字形から手順を自動生成しない。配布する録音教材は `AudioAsset` のライセンスと確認状況を満たす必要がある。利用者の短時間録音は任意練習で扱い、SRSはPhase 4の独立した予定管理として実装する。発音・声調の自動評価、Supabase、認証、AI会話、PWA・オフライン対応は未実装。公開URLは利用者から提示されており、公開環境の確認状況は [DEPLOYMENT.md](DEPLOYMENT.md) を参照する。
 
 ## 品質確認
 

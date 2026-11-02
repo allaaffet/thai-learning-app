@@ -1,0 +1,357 @@
+.cd-card {
+  padding: 28px;
+  min-width: 0;
+  border-bottom: 5px solid #d9e7df;
+}
+.cd-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.cd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  background: #e7f0eb;
+  color: var(--forest);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+.cd-badge svg,
+.cd-card .button svg,
+.cd-learning-note svg {
+  flex-shrink: 0;
+}
+.cd-context {
+  font-size: var(--text-body);
+  line-height: 1.9;
+  margin-bottom: 12px;
+}
+.cd-disclosure,
+.cd-small {
+  font-size: var(--text-small);
+  color: var(--muted);
+  line-height: 1.9;
+}
+.cd-disclosure {
+  margin-bottom: 22px;
+}
+.cd-npc {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.cd-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin-top: 8px;
+  border-radius: 15px;
+  background: #dbe9df;
+  color: var(--forest);
+}
+.cd-bubble {
+  min-width: 0;
+  flex: 1;
+  padding: 22px;
+  border: 1px solid #d8e2d5;
+  border-bottom-width: 4px;
+  border-radius: 6px 22px 22px;
+  background: #f1f6ed;
+}
+.cd-speaker,
+.cd-model-label {
+  display: block;
+  font-size: var(--text-small);
+  color: var(--forest);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.cd-phrase {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  line-height: 2;
+  color: var(--forest);
+}
+.cd-bubble > p + p,
+.cd-model-reply > p + p {
+  margin-top: 8px;
+}
+.cd-card .speech-inline {
+  margin-top: 14px;
+}
+.cd-goal {
+  margin: 26px 0 16px;
+  font-size: 1.2rem;
+  font-weight: 750;
+  line-height: 1.9;
+  outline: none;
+}
+.cd-goal:focus-visible,
+.cd-complete h2:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 6px;
+}
+.cd-model-replies {
+  display: grid;
+  gap: 14px;
+  margin-block: 18px;
+}
+.cd-model-reply {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #d9e4e2;
+  border-radius: 20px 6px 20px 20px;
+  background: #f4f9f6;
+}
+.cd-hint-actions,
+.cd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.cd-actions {
+  margin-top: 24px;
+  justify-content: flex-end;
+}
+.cd-card .button {
+  min-height: 46px;
+  height: auto;
+  white-space: normal;
+  text-align: left;
+}
+.cd-hint-actions {
+  margin-bottom: 14px;
+}
+.cd-choice-help {
+  margin-bottom: 14px;
+}
+.cd-choices {
+  display: grid;
+  gap: 13px;
+  min-width: 0;
+}
+.cd-choice {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+  min-height: 80px;
+  padding: 17px 20px;
+  text-align: left;
+  border: 2px solid #dbe1d5;
+  border-bottom-width: 5px;
+  border-radius: 17px;
+  background: #fff;
+  cursor: pointer;
+}
+.cd-choice:hover:not(:disabled),
+.cd-choice.is-selected {
+  border-color: #789b83;
+  background: #eef5e9;
+}
+.cd-choice:focus-visible {
+  outline: 3px solid var(--forest);
+  outline-offset: 4px;
+}
+.cd-choice:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 3px;
+}
+.cd-choice:disabled {
+  cursor: default;
+}
+.cd-choice.is-accepted {
+  border-color: #8faf91;
+  background: #edf6e9;
+}
+.cd-choice-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #6f8f78;
+}
+.cd-choice-copy {
+  display: block;
+  min-width: 0;
+}
+.cd-choice-thai {
+  display: block;
+  font-size: 1.55rem;
+  line-height: 1.9;
+  color: var(--forest);
+}
+.cd-choice-meaning {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.9;
+}
+.cd-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 24px;
+  padding: 22px;
+  border-radius: 18px;
+  color: #2f4e39;
+  background: #edf5e9;
+}
+.cd-feedback.is-review {
+  background: #fff3dc;
+  color: #75552b;
+}
+.cd-feedback > svg {
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.cd-feedback > div {
+  min-width: 0;
+}
+.cd-feedback h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.9;
+}
+.cd-feedback p {
+  margin-top: 10px;
+  line-height: 1.9;
+}
+.cd-accepted-replies {
+  margin-top: 16px;
+}
+.cd-accepted-replies p > span {
+  display: block;
+}
+.cd-accepted-replies .thai {
+  font-size: 1.35rem;
+  line-height: 2;
+}
+.cd-sources,
+.cd-words {
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 18px;
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.9;
+}
+.cd-sources summary,
+.cd-words summary {
+  cursor: pointer;
+  padding-block: 6px;
+  color: var(--forest);
+  font-weight: 600;
+}
+.cd-sources summary svg,
+.cd-words summary svg {
+  display: inline-block;
+  vertical-align: -3px;
+  margin-right: 5px;
+}
+.cd-sources p,
+.cd-words p {
+  margin-top: 14px;
+}
+.cd-sources > div {
+  margin-top: 20px;
+}
+.cd-sources a {
+  color: var(--forest);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cd-words ul {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+.cd-words li {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f4f7f1;
+}
+.cd-words li > span {
+  display: block;
+}
+.cd-words li > .thai {
+  font-size: 1.3rem;
+  line-height: 2;
+  color: var(--forest);
+}
+.cd-complete {
+  text-align: center;
+  padding: 28px 0 12px;
+}
+.cd-complete > svg {
+  margin-inline: auto;
+  margin-bottom: 18px;
+  color: var(--forest);
+}
+.cd-complete h2 {
+  font-size: 1.3rem;
+  line-height: 1.9;
+  font-weight: 750;
+  outline: none;
+}
+.cd-complete p {
+  margin-top: 14px;
+  line-height: 1.9;
+}
+.cd-learning-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 22px;
+}
+.cd-learning-note svg {
+  margin-top: 5px;
+}
+.cd-card p,
+.cd-card h2,
+.cd-card h3,
+.cd-card span,
+.cd-card a,
+.cd-card summary {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .cd-card {
+    padding: 22px 18px;
+  }
+  .cd-avatar {
+    display: none;
+  }
+  .cd-npc {
+    gap: 0;
+  }
+  .cd-bubble,
+  .cd-model-reply {
+    padding: 18px 16px;
+  }
+  .cd-choice {
+    padding: 15px 13px;
+    gap: 11px;
+  }
+  .cd-feedback {
+    padding: 18px 14px;
+    gap: 10px;
+  }
+  .cd-actions > .button {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cd-choice:active:not(:disabled) {
+    transform: none;
+  }
+}

@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Leaf,
   MoveUpRight,
+  MessagesSquare,
   RotateCcw,
   Sparkles,
   Target,
@@ -33,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { getNextLesson, getStreak, getTotalXp } from "@/lib/progress";
 import { CharacterTrainingTeaser } from "@/components/character-training-teaser";
 import { ConversationTeaser } from "@/components/conversation-teaser";
+import { getCourseConversation } from "@/data/course-conversations";
 
 function dateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -46,6 +48,7 @@ export function Dashboard() {
   ).length;
   const next = getNextLesson(progress, lessons);
   const active = next ?? lessons[0];
+  const conversation = getCourseConversation(active.id);
   const activeChapter = getCourseChapter(active.chapterId)!;
   const chapterLessons = getChapterLessons(active.chapterId);
   const chapterCompleted = chapterLessons.filter(
@@ -87,17 +90,25 @@ export function Dashboard() {
             <span className="hero-kicker">
               <span /> {next ? "今日のミッション" : "全レッスンを完了しました"}
             </span>
-            <h2>{next ? active.title : "学んだことを、もう一度。"}</h2>
+            <h2>
+              {next
+                ? (conversation?.title ?? active.title)
+                : "学んだことを、もう一度。"}
+            </h2>
+            {next && conversation && (
+              <p className="course-talk-home-goal">{conversation.objective}</p>
+            )}
             <div className="hero-lesson-tag">
               <BookOpen size={14} />
               <span>
                 第{activeChapter.number}章 <span className="separator">/</span>{" "}
                 レッスン {String(active.number).padStart(2, "0")}
+                {conversation && <> · {active.title}</>}
               </span>
             </div>
             <div className="mh-home-loop" aria-label="ミッションの楽しみ方">
               <span>
-                <Sparkles size={15} aria-hidden="true" /> 発見
+                <MessagesSquare size={15} aria-hidden="true" /> 会話で使う
               </span>
               <span>
                 <Target size={15} aria-hidden="true" /> チャレンジ
@@ -121,7 +132,7 @@ export function Dashboard() {
               )}
             </Button>
             <span className="hero-time">
-              <Clock3 size={16} /> 約{active.durationMinutes}分
+              <Clock3 size={16} /> 会話と文字を、少しずつ
             </span>
           </div>
           <div className="next-lesson-visual" aria-hidden="true">

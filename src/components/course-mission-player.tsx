@@ -11,12 +11,15 @@ import {
   Layers2,
   Leaf,
   LockKeyhole,
+  MessagesSquare,
   RotateCcw,
   Sparkles,
   Trophy,
   Volume2,
 } from "lucide-react";
 import { courseLessons } from "@/data/course";
+import { getCourseConversation } from "@/data/course-conversations";
+import { CourseDialogueCard } from "@/components/course-dialogue-card";
 import type { Lesson } from "@/lib/content-types";
 import {
   appendMissionRetry,
@@ -117,6 +120,8 @@ function MissionRun({
   const [revealed, setRevealed] = useState(false);
   const [answers, setAnswers] = useState<ExerciseAttempt[]>([]);
   const [practiceCount, setPracticeCount] = useState(0);
+  const [dialogueDone, setDialogueDone] = useState(false);
+  const [dialogueCount, setDialogueCount] = useState(0);
   const [chain, setChain] = useState(0);
   const [result, setResult] = useState<{
     passed: boolean;
@@ -128,6 +133,8 @@ function MissionRun({
   const committed = useRef(new Set<string>());
   const advanced = useRef(new Set<string>());
   const saved = useRef(false);
+  const completedDialogues = useRef(new Set<string>());
+  const activeCardId = useRef(mission.cards[0]?.id ?? null);
   const heading = useRef<HTMLHeadingElement>(null);
   const exploreAudio = useRef<SpeakButtonHandle>(null);
   const card = cards[index];
@@ -137,6 +144,7 @@ function MissionRun({
   const question = card?.kind === "question" ? getMissionExercise(card) : null;
   const pending = question ? gradeExercise(question, response) : undefined;
   const next = getNextLesson(progress, courseLessons);
+  const conversation = lesson ? getCourseConversation(lesson.id) : undefined;
 
   useEffect(() => {
     const node = heading.current;
@@ -184,12 +192,15 @@ function MissionRun({
     if (!card || advanced.current.has(card.id)) return;
     if (card.kind === "question" && !feedback) return;
     if (card.kind === "explore" && !revealed) return;
+    if (card.kind === "conversation" && !dialogueDone) return;
     advanced.current.add(card.id);
+    activeCardId.current = cards[index + 1]?.id ?? null;
     exploreAudio.current?.stop();
     setIndex((value) => value + 1);
     setResponse(null);
     setFeedback(null);
     setRevealed(false);
+    setDialogueDone(false);
   }
 
   function recordResult() {
@@ -246,17 +257,21 @@ function MissionRun({
 
   const purpose = card?.kind === "question" ? card.purpose : undefined;
   const badge =
-    card?.kind === "learn"
-      ? "新しい発見"
-      : card?.kind === "explore"
-        ? "めくって思い出す"
-        : purpose === "review"
-          ? "前の冒険から"
-          : purpose === "recall"
-            ? "もう一度、思い出そう"
-            : purpose === "retry"
-              ? "仕上げのもう一度"
-              : "チェックポイント";
+    card?.kind === "conversation"
+      ? card.mode === "learn"
+        ? "まずは、会話で使ってみよう"
+        : "もう一度、会話で思い出そう"
+      : card?.kind === "learn"
+        ? "新しい発見"
+        : card?.kind === "explore"
+          ? "めくって思い出す"
+          : purpose === "review"
+            ? "前の冒険から"
+            : purpose === "recall"
+              ? "もう一度、思い出そう"
+              : purpose === "retry"
+                ? "仕上げのもう一度"
+                : "チェックポイント";
   const sourceLesson = card
     ? courseLessons.find((item) => item.id === card.lessonId)
     : lesson;
@@ -272,6 +287,9 @@ function MissionRun({
       data-lesson-id={card?.lessonId ?? lesson?.id}
       data-explore-id={card?.kind === "explore" ? card.item.id : undefined}
       data-step-index={index}
+      data-conversation-mode={
+        card?.kind === "conversation" ? card.mode : undefined
+      }
     >
       <div className="mission-topline">
         <Link href="/play" className="text-link">
@@ -293,11 +311,13 @@ function MissionRun({
         max={baseCount}
       />
       <div className="mission-context">
-        <span>{lesson ? lesson.title : "おまかせミックス"}</span>
+        <span>
+          {conversation?.title ?? lesson?.title ?? "おまかせミックス"}
+        </span>
         {chain >= 2 && !finished && (
           <span className="mission-chain">
             <Sparkles size={16} />
-            この回で{chain}問連続正解
+            クイズで{chain}問連続正解
           </span>
         )}
       </div>
@@ -312,7 +332,9 @@ function MissionRun({
             <span
               className={`mission-kind mission-kind-${purpose ?? card.kind}`}
             >
-              {card.kind === "learn" ? (
+              {card.kind === "conversation" ? (
+                <MessagesSquare size={19} />
+              ) : card.kind === "learn" ? (
                 <Sparkles size={19} />
               ) : card.kind === "explore" ? (
                 <Layers2 size={19} />
@@ -334,13 +356,32 @@ function MissionRun({
               tabIndex={-1}
               className="mission-title"
             >
-              {card.kind === "learn"
-                ? "小さな発見を、ひとつ。"
-                : card.kind === "explore"
-                  ? "めくって、確かめよう。"
-                  : question?.prompt}
+              {card.kind === "conversation"
+                ? card.unit.objective
+                : card.kind === "learn"
+                  ? "小さな発見を、ひとつ。"
+                  : card.kind === "explore"
+                    ? "めくって、確かめよう。"
+                    : question?.prompt}
             </h1>
           </div>
+          {card.kind === "conversation" && (
+            <CourseDialogueCard
+              key={card.id}
+              unit={card.unit}
+              mode={card.mode}
+              onComplete={() => {
+                if (
+                  activeCardId.current !== card.id ||
+                  completedDialogues.current.has(card.id)
+                )
+                  return;
+                completedDialogues.current.add(card.id);
+                setDialogueDone(true);
+                setDialogueCount((value) => value + 1);
+              }}
+            />
+          )}
           {card.kind === "learn" && (
             <LearningBlockCard
               key={card.id}
@@ -457,7 +498,10 @@ function MissionRun({
             ) : (
               <Button
                 size="lg"
-                disabled={card.kind === "explore" && !revealed}
+                disabled={
+                  (card.kind === "explore" && !revealed) ||
+                  (card.kind === "conversation" && !dialogueDone)
+                }
                 onClick={advance}
               >
                 次のカードへ
@@ -496,6 +540,12 @@ function MissionRun({
                   : "思い出すたびに、少しずつ慣れていきます。"}
             </p>
             <div className="mission-summary-stats">
+              {dialogueCount > 0 && (
+                <div>
+                  <strong>{dialogueCount}</strong>
+                  <span>会話を練習したラウンド</span>
+                </div>
+              )}
               {lesson && (
                 <div>
                   <strong>
