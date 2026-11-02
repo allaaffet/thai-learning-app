@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -44,6 +45,11 @@ import {
   isRomanceEpisodeUnlocked,
 } from "@/lib/romance";
 import { useRomance } from "@/components/use-romance";
+import { useRomanceLearning } from "@/components/use-romance-learning";
+import { RomanceJourneyPlayer } from "@/components/romance-journey-player";
+import { RomancePassport } from "@/components/romance-passport";
+import { getJourneyChapter } from "@/data/romance-journey";
+import { getJourneyLearningProgress } from "@/lib/romance-journey";
 import { RomancePortrait } from "@/components/romance-portrait";
 import {
   SpeakButton,
@@ -73,7 +79,13 @@ const preferences: { id: RomancePreference; label: string; detail: string }[] =
 const preferenceName = (id: RomancePreference) =>
   preferences.find((item) => item.id === id)?.label ?? id;
 type Stage =
-  "setup" | "roster" | "character" | "episode" | "story" | "review" | "result";
+  | "setup"
+  | "roster"
+  | "character"
+  | "episode"
+  | "story"
+  | "review"
+  | "result";
 type RomanceState = ReturnType<typeof useRomance>["state"];
 type Receipt = NonNullable<
   ReturnType<ReturnType<typeof useRomance>["finishEpisode"]>
@@ -278,19 +290,21 @@ function RomanceSources() {
   );
 }
 
-export function RomanceCourse() {
+export function RomanceCourse({ classic = false }: { classic?: boolean }) {
   const progress = useRomance();
+  const learning = useRomanceLearning();
   const [stage, setStage] = useState<Stage>("roster");
   const [characterId, setCharacterId] = useState<string | null>(null);
   const [episodeId, setEpisodeId] = useState<RomanceEpisodeId | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const recovery = useRef<HTMLDialogElement>(null);
+  const learningRecovery = useRef<HTMLDialogElement>(null);
   const character = characterId ? getRomanceCharacter(characterId) : undefined;
   const compatible = Boolean(
     character &&
-    progress.state.profile &&
-    character.gender !== progress.state.profile.gender,
+      progress.state.profile &&
+      character.gender !== progress.state.profile.gender,
   );
   const visibleStage: Stage =
     !progress.state.profile || stage === "setup"
@@ -327,19 +341,22 @@ export function RomanceCourse() {
     setStage("episode");
   }
 
-  if (!progress.ready)
+  if (!progress.ready || (!classic && !learning.ready))
     return <p role="status">物語のしおりを読み込んでいます…</p>;
   const people = getAvailableRomanceCharacters(progress.state);
   const ending = active ? getRomanceEnding(progress.state, active.id) : null;
 
   return (
     <section
-      className="romance-course"
+      className={`romance-course${!classic && !["setup", "roster", "character"].includes(visibleStage) ? " is-journey-playing" : ""}`}
       aria-label="恋するタイ語"
       data-romance-stage={visibleStage}
       data-character-id={active?.id}
       data-episode-id={episodeId ?? undefined}
     >
+      {!classic && !["setup", "roster", "character"].includes(visibleStage) && (
+        <h1 className="sr-only">恋するタイ語 — 会話の冒険</h1>
+      )}
       <header className="rc-page-header">
         <div>
           <p className="eyebrow">
@@ -377,6 +394,30 @@ export function RomanceCourse() {
         </div>
       )}
 
+      {!classic && learning.message && (
+        <div
+          className="rc-storage-notice"
+          role="status"
+          data-testid="romance-learning-notice"
+        >
+          <p>{learning.message}</p>
+          {learning.status === "invalid" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => learningRecovery.current?.showModal()}
+            >
+              会話パスポートの保存を置き換える
+            </Button>
+          )}
+        </div>
+      )}
+      {classic && (
+        <p className="rc-small">
+          以前の3問練習を表示しています。
+          <Link href="/romance">新しい物語と会話の冒険へ</Link>
+        </p>
+      )}
       {visibleStage === "setup" ? (
         <RomanceSetup
           key={
@@ -400,6 +441,22 @@ export function RomanceCourse() {
             <p>
               気になる相手を選びましょう。好みのタイプに近い人には、おすすめの印を付けています。
             </p>
+            {!classic && (
+              <div
+                className="rjp-howto"
+                aria-label="会話を身につける3つのステップ"
+              >
+                <span>
+                  <BookOpen size={18} /> 見つける
+                </span>
+                <span>
+                  <MessageCircle size={18} /> 組んで、使う
+                </span>
+                <span>
+                  <Sparkles size={18} /> また思い出す
+                </span>
+              </div>
+            )}
           </section>
           <div className="rc-roster">
             {people.map((person) => {
@@ -409,7 +466,7 @@ export function RomanceCourse() {
               );
               const recommended = Boolean(
                 progress.state.profile &&
-                person.traits.includes(progress.state.profile.preference),
+                  person.traits.includes(progress.state.profile.preference),
               );
               return (
                 <button
@@ -508,12 +565,23 @@ export function RomanceCourse() {
               </p>
             </section>
           </div>
+          {!classic && (
+            <RomancePassport character={active} state={learning.state} />
+          )}
           <section
             className="rc-episodes"
             aria-label={`${active.name} のエピソード`}
           >
-            <h2>ふたりの、小さなエピソード</h2>
-            <p>各話の3つの返答を確かめ、最後に物語の行動を選びます。</p>
+            <h2>
+              {classic
+                ? "ふたりの、小さなエピソード"
+                : "5つの出会い、5つの会話ゴール"}
+            </h2>
+            <p>
+              {classic
+                ? "各話の3つの返答を確かめ、最後に物語の行動を選びます。"
+                : "行き先を選んで物語へ。ことばを組み、会話をつなぎ、以前のひと言を使ってみよう。"}
+            </p>
             {romanceEpisodes.map((episode) => {
               const unlocked = isRomanceEpisodeUnlocked(
                 progress.state,
@@ -521,18 +589,25 @@ export function RomanceCourse() {
                 episode.id,
               );
               const completed = Boolean(record.episodes[episode.id]);
+              const practiced = getJourneyLearningProgress(
+                learning.state,
+                active.id,
+                episode.id,
+              );
+              const chapter = getJourneyChapter(episode.id);
+              const displayCompleted = classic ? completed : Boolean(practiced);
               return (
                 <button
                   type="button"
                   key={episode.id}
                   data-episode-id={episode.id}
-                  className={`rc-episode-button surface${completed ? " is-complete" : ""}`}
+                  className={`rc-episode-button surface${displayCompleted ? " is-complete" : ""}`}
                   aria-label={`${episode.title} をはじめる`}
                   disabled={!unlocked}
                   onClick={() => startEpisode(episode.id)}
                 >
                   <span className="rc-episode-number">
-                    {completed ? (
+                    {displayCompleted ? (
                       <Check size={23} />
                     ) : unlocked ? (
                       episode.number
@@ -542,10 +617,25 @@ export function RomanceCourse() {
                   </span>
                   <span>
                     <strong>{episode.title}</strong>
-                    <small>{episode.objective}</small>
+                    <small>
+                      {classic
+                        ? episode.objective
+                        : `${chapter?.level}. ${chapter?.skillTitle} — ${chapter?.canDo}`}
+                    </small>
+                    {!classic && practiced && (
+                      <small className="rjp-route-record">
+                        思い出 {practiced.routes.length} / 2 ・会話練習{" "}
+                        {practiced.plays}回
+                      </small>
+                    )}
+                    {!classic && completed && !practiced && (
+                      <small className="rjp-route-record">
+                        物語の記録あり・新しい練習はこれから
+                      </small>
+                    )}
                   </span>
                   <span className="rc-episode-status">
-                    {completed
+                    {displayCompleted
                       ? "もう一度"
                       : unlocked
                         ? "はじめる"
@@ -556,6 +646,15 @@ export function RomanceCourse() {
               );
             })}
           </section>
+          {!classic && (
+            <details className="rjp-classic-link">
+              <summary>以前の練習について</summary>
+              <p>
+                これまでの好感度・完了記録は引き継いでいます。新しい会話練習の記録は、実際に取り組んでから増えます。
+              </p>
+              <Link href="/romance?view=classic">以前の3問練習を使う</Link>
+            </details>
+          )}
           {ending?.unlocked && (
             <section className="rc-ending surface">
               <Heart size={27} aria-hidden="true" />
@@ -568,21 +667,40 @@ export function RomanceCourse() {
           )}
         </>
       ) : active && episodeId && sessionId && progress.state.profile ? (
-        <RomanceEpisodePlayer
-          key={sessionId}
-          character={active}
-          episodeId={episodeId}
-          sessionId={sessionId}
-          gender={progress.state.profile.gender}
-          state={progress.state}
-          status={progress.status}
-          message={progress.message}
-          onStage={setStage}
-          onSave={progress.finishEpisode}
-          onBack={() => setStage("character")}
-          onRoster={roster}
-          onReplay={() => startEpisode(episodeId)}
-        />
+        classic ? (
+          <RomanceEpisodePlayer
+            key={sessionId}
+            character={active}
+            episodeId={episodeId}
+            sessionId={sessionId}
+            gender={progress.state.profile.gender}
+            state={progress.state}
+            status={progress.status}
+            message={progress.message}
+            onStage={setStage}
+            onSave={progress.finishEpisode}
+            onBack={() => setStage("character")}
+            onRoster={roster}
+            onReplay={() => startEpisode(episodeId)}
+          />
+        ) : (
+          <RomanceJourneyPlayer
+            key={sessionId}
+            character={active}
+            episodeId={episodeId}
+            sessionId={sessionId}
+            gender={progress.state.profile.gender}
+            state={progress.state}
+            status={progress.status}
+            message={progress.message}
+            learning={learning}
+            onStage={setStage}
+            onSave={progress.finishEpisode}
+            onBack={() => setStage("character")}
+            onRoster={roster}
+            onReplay={() => startEpisode(episodeId)}
+          />
+        )
       ) : null}
       <RomanceSources />
       <dialog
@@ -604,6 +722,31 @@ export function RomanceCourse() {
             }}
           >
             このコースの記録で置き換える
+          </Button>
+        </div>
+      </dialog>
+      <dialog
+        ref={learningRecovery}
+        className="rc-recovery"
+        aria-labelledby="rjp-recovery-title"
+      >
+        <h2 id="rjp-recovery-title">会話パスポートの保存を置き換えますか</h2>
+        <p>
+          会話パスポートと新しい思い出の保存だけを、このタブの記録で置き換えます。好感度・以前の完了記録・本編には触れません。
+        </p>
+        <div className="rc-actions">
+          <Button
+            variant="outline"
+            onClick={() => learningRecovery.current?.close()}
+          >
+            戻る
+          </Button>
+          <Button
+            onClick={() => {
+              if (learning.replaceSaved()) learningRecovery.current?.close();
+            }}
+          >
+            会話パスポートの記録で置き換える
           </Button>
         </div>
       </dialog>

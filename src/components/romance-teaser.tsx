@@ -15,8 +15,10 @@ export function RomanceTeaser() {
           <Heart size={17} aria-hidden="true" />
           実践編・恋するタイ語
         </p>
-        <h2>ことばで近づく、小さな恋の物語。</h2>
-        <p>6人の登場人物と、会話を通してタイ語を使ってみよう。</p>
+        <h2>会話をつないで、ふたりの物語へ。</h2>
+        <p>
+          選んだ道で、表情も思い出も変わる。挨拶から一歩ずつ、6人の登場人物とタイ語を使ってみよう。
+        </p>
         <Button asChild variant="outline">
           <Link href="/romance">
             <MessagesSquare size={17} aria-hidden="true" />

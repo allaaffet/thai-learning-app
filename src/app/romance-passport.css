@@ -1,0 +1,179 @@
+.rjp-passport,
+.rjp-keepsakes {
+  padding: clamp(1rem, 3vw, 1.8rem);
+  min-width: 0;
+}
+.rjp-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+.rjp-section-heading > div {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.rjp-section-heading h2 {
+  margin: 0.25rem 0;
+}
+.rjp-heading-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.8rem;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 1rem;
+  background: #f9e9ec;
+  color: #a44766;
+}
+.rjp-total {
+  font-size: 1.65rem;
+  font-weight: 750;
+  color: #8d3f59;
+}
+.rjp-total small {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.rjp-goals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  list-style: none;
+  padding: 0;
+  gap: 0.75rem;
+  margin: 1.15rem 0;
+}
+.rjp-goals > li {
+  border: 1px solid var(--border);
+  background: #faf9f5;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  min-width: 0;
+}
+.rjp-goals > li[data-practiced="true"] {
+  background: #f0f6ee;
+  border-color: #b9cfb7;
+}
+.rjp-goal-number {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: white;
+  color: #8d3f59;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+.rjp-goals strong {
+  display: block;
+}
+.rjp-goals p {
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.rjp-goal-state {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+.rjp-goals details {
+  margin-top: 0.7rem;
+  font-size: 0.8rem;
+}
+.rjp-goals summary,
+.rjp-memory-grid summary,
+.rjp-classic-link summary {
+  cursor: pointer;
+  line-height: 1.8;
+}
+.rjp-note {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+.rjp-note svg {
+  flex: 0 0 auto;
+  margin-top: 0.25rem;
+}
+.rjp-memory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  padding: 0;
+  gap: 0.8rem;
+  list-style: none;
+  margin: 1rem 0 0;
+}
+.rjp-memory-grid > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border: 1px solid #ecd7d9;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #fff9f7;
+  min-width: 0;
+}
+.rjp-memory-grid svg {
+  flex: 0 0 auto;
+  color: #b26b62;
+  margin-top: 0.25rem;
+}
+.rjp-memory-grid details {
+  min-width: 0;
+}
+.rjp-memory-grid summary {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.rjp-memory-grid p {
+  font-size: 0.9rem;
+}
+.rjp-empty-memories {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0 0;
+  color: var(--muted-foreground);
+}
+.rjp-empty-memories > svg {
+  flex: 0 0 auto;
+  color: #b58b86;
+}
+.rjp-howto {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.rjp-howto span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 2rem;
+  background: #f7e8e9;
+  color: #8b425a;
+  font-size: 0.85rem;
+}
+.rjp-route-record {
+  color: #8b425a;
+}
+.rjp-classic-link {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #f4f2ed;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.rjp-classic-link a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.romance-course.is-journey-playing > .rc-page-header,
+.romance-course.is-journey-playing > .rc-course-note {
+  display: none;
+}

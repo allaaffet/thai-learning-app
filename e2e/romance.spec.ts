@@ -355,7 +355,7 @@ test("主人公と好みを選ぶと成人の異性3人・おすすめ2人が現
   page,
 }) => {
   await prepare(page);
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   await expect(course(page)).toHaveAttribute("data-romance-stage", "setup");
   const before = await snapshot(page);
   expect((await probe(page)).writes).toEqual([]);
@@ -408,7 +408,7 @@ test("会話と物語の選択を終えてから一度だけ記録し、再読�
   page,
 }) => {
   await prepare(page);
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   await setup(page, "male", "calm");
   await openCharacter(page, "mali");
   const before = await snapshot(page);
@@ -452,7 +452,7 @@ test("誤答と配慮を欠く選択では小さく下がり、翌日の継続�
     affinity: 40,
   };
   await prepare(page, { raw: JSON.stringify(initial) });
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   await openCharacter(page, "mali");
   await expect(
     course(page).locator('button[data-episode-id="cafe"]'),
@@ -480,7 +480,7 @@ test("女性主人公では男性の相手が話し、両方の丁寧な返答�
   page,
 }) => {
   await prepare(page);
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   await setup(page, "female", "curious");
   await openCharacter(page, "kiet");
   await openEpisode(page);
@@ -525,7 +525,7 @@ test("不正・未知版の元データを読込みや設定選択では壊さ�
 }) => {
   await prepare(page);
   for (const raw of ["{broken-romance", '{"version":99,"future":"keep"}']) {
-    await page.goto("/romance");
+    await page.goto("/romance?view=classic");
     await page.evaluate(({ key, raw }) => localStorage.setItem(key, raw), {
       key: ROMANCE_STORAGE_KEY,
       raw,
@@ -567,7 +567,7 @@ test("保存拒否で主人公の性別変更が未保存でも、新しい相�
 }) => {
   const initial = setRomanceProfile(createEmptyRomance(), "male", "warm");
   await prepare(page, { raw: JSON.stringify(initial), denyWrites: true });
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   const before = await snapshot(page);
   await course(page)
     .getByRole("button", { name: "主人公の設定を変更", exact: true })
@@ -596,7 +596,7 @@ test("未保存の設定がある場合も、別タブで性別を変更した�
 }) => {
   const initial = setRomanceProfile(createEmptyRomance(), "male", "warm");
   await prepare(page, { raw: JSON.stringify(initial), denyWrites: true });
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   await course(page)
     .getByRole("button", { name: "主人公の設定を変更", exact: true })
     .click();
@@ -608,11 +608,11 @@ test("未保存の設定がある場合も、別タブで性別を変更した�
   await chooseStory(page, "mali", "meet");
   const elsewhere = setRomanceProfile(initial, "female", "curious");
   const otherTab = await page.context().newPage();
-  await otherTab.goto("/romance");
-  await otherTab.evaluate(
-    ({ key, raw }) => localStorage.setItem(key, raw),
-    { key: ROMANCE_STORAGE_KEY, raw: JSON.stringify(elsewhere) },
-  );
+  await otherTab.goto("/romance?view=classic");
+  await otherTab.evaluate(({ key, raw }) => localStorage.setItem(key, raw), {
+    key: ROMANCE_STORAGE_KEY,
+    raw: JSON.stringify(elsewhere),
+  });
   await otherTab.close();
   await course(page)
     .getByRole("button", { name: "今日の会話を記録する", exact: true })
@@ -631,7 +631,7 @@ test("保存拒否でも320px・文字200%で1操作の音声と会話を続け�
   const initial = setRomanceProfile(createEmptyRomance(), "male", "warm");
   await prepare(page, { raw: JSON.stringify(initial), denyWrites: true });
   await page.setViewportSize({ width: 320, height: 900 });
-  await page.goto("/romance");
+  await page.goto("/romance?view=classic");
   await page.evaluate(() => {
     document.documentElement.style.fontSize = "32px";
   });

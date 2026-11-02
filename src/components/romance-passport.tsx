@@ -1,0 +1,137 @@
+import { BookOpen, Check, Compass, Heart, Sparkles } from "lucide-react";
+import { journeyChapters } from "@/data/romance-journey";
+import {
+  getJourneyKeepsakes,
+  getJourneyLearningProgress,
+  type RomanceLearningState,
+} from "@/lib/romance-journey";
+import type { RomanceCharacter } from "@/lib/romance-types";
+
+export function RomancePassport({
+  character,
+  state,
+}: {
+  character: RomanceCharacter;
+  state: RomanceLearningState;
+}) {
+  const practiced = journeyChapters.filter((chapter) =>
+    getJourneyLearningProgress(state, character.id, chapter.episodeId),
+  ).length;
+  const keepsakes = getJourneyKeepsakes(state, character.id);
+  return (
+    <>
+      <section
+        className="rjp-passport surface"
+        aria-label="会話のパスポート"
+        data-testid="romance-passport"
+      >
+        <div className="rjp-section-heading">
+          <span className="rjp-heading-icon">
+            <Compass size={24} aria-hidden="true" />
+          </span>
+          <div>
+            <p className="eyebrow">CONVERSATION PASSPORT</p>
+            <h2>ひと言から、会話をつなぐ。</h2>
+          </div>
+          <span className="rjp-total">
+            {practiced}
+            <small> / 5 場面</small>
+          </span>
+        </div>
+        <p>
+          挨拶から街歩きへ。新しい表現を使いながら、前の出会いのひと言も思い出します。
+        </p>
+        <ol className="rjp-goals">
+          {journeyChapters.map((chapter) => {
+            const entry = getJourneyLearningProgress(
+              state,
+              character.id,
+              chapter.episodeId,
+            );
+            return (
+              <li key={chapter.episodeId} data-practiced={Boolean(entry)}>
+                <span className="rjp-goal-number">
+                  {entry ? (
+                    <Check size={20} aria-label="練習した" />
+                  ) : (
+                    chapter.level
+                  )}
+                </span>
+                <strong>{chapter.skillTitle}</strong>
+                <p>{chapter.canDo}</p>
+                <span className="rjp-goal-state">
+                  {entry ? "練習した" : "これから"}
+                </span>
+                {entry && (
+                  <details>
+                    <summary>直近の練習を見る</summary>
+                    <p>
+                      会話 {entry.last.coreCorrect} / {entry.last.coreTotal}{" "}
+                      問・組立 {entry.last.buildCorrect} /{" "}
+                      {entry.last.buildTotal} 問
+                    </p>
+                    {entry.last.recallTotal > 0 && (
+                      <p>
+                        以前の会話の想起 {entry.last.recallCorrect} /{" "}
+                        {entry.last.recallTotal} 問
+                      </p>
+                    )}
+                    <p>
+                      追加ヒントを開いた問題 {entry.last.hints} 問。練習{" "}
+                      {entry.plays} 回。
+                    </p>
+                  </details>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        <p className="rjp-note">
+          <BookOpen size={16} aria-hidden="true" />{" "}
+          取り組んだ練習の記録です。会話能力や発音の認定ではありません。
+        </p>
+      </section>
+      <section
+        className="rjp-keepsakes surface"
+        aria-label="ふたりの思い出"
+        data-testid="romance-keepsakes"
+      >
+        <div className="rjp-section-heading">
+          <span className="rjp-heading-icon">
+            <Heart size={23} aria-hidden="true" />
+          </span>
+          <div>
+            <p className="eyebrow">OUR LITTLE MEMORIES</p>
+            <h2>ふたりの思い出</h2>
+          </div>
+          <span className="rjp-total">
+            {keepsakes.length}
+            <small> / 10</small>
+          </span>
+        </div>
+        {keepsakes.length ? (
+          <ul className="rjp-memory-grid">
+            {keepsakes.map((memory) => (
+              <li key={memory.id}>
+                <Sparkles size={21} aria-hidden="true" />
+                <details>
+                  <summary>{memory.title}</summary>
+                  <p>{memory.detail}</p>
+                </details>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rjp-empty-memories">
+            <Sparkles size={27} aria-hidden="true" />
+            <p>
+              {character.name}と選んだ行き先が、思い出のカードになります。
+              <br />
+              各話に2つのルート。気になる方から出かけよう。
+            </p>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
