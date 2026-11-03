@@ -3,11 +3,12 @@ import {
   getRomanceQuestions,
   romanceWords,
 } from "@/data/romance";
+import { getJourneyChapter } from "@/data/romance-journey";
 import {
-  getJourneyChapter,
-  getJourneyRoute,
-  getJourneyScene,
-} from "@/data/romance-journey";
+  getStoryJourneyScene,
+  getStoryJourneyRoute,
+} from "@/data/romance-story";
+import { isRomanceSetting, type RomanceSetting } from "@/lib/romance-setting";
 import type { ConversationWord } from "@/lib/conversation-types";
 import type {
   JourneyChapter,
@@ -63,6 +64,7 @@ export interface JourneyAttempt {
   usedHint: boolean;
 }
 export interface JourneyPlan {
+  setting: RomanceSetting;
   characterId: string;
   episodeId: RomanceEpisodeId;
   routeId: JourneyRouteId;
@@ -163,11 +165,14 @@ export function getJourneyPlan(
   episodeId: string,
   routeId: JourneyRouteId,
   gender: RomanceGender,
+  setting: RomanceSetting = "city",
 ): JourneyPlan {
   const character = getRomanceCharacter(characterId);
   const chapter = getJourneyChapter(episodeId);
-  const scene = getJourneyScene(characterId, episodeId);
-  const route = getJourneyRoute(characterId, episodeId, routeId);
+  if (!isRomanceSetting(setting))
+    throw new Error("物語の舞台を確認してください。");
+  const scene = getStoryJourneyScene(characterId, episodeId, setting);
+  const route = getStoryJourneyRoute(characterId, episodeId, routeId, setting);
   if (
     !character ||
     !chapter ||
@@ -249,6 +254,7 @@ export function getJourneyPlan(
       ? [model, recall, build, ...core]
       : [model, build, ...core, ...(recall ? [recall] : [])];
   return {
+    setting,
     characterId,
     episodeId: chapter.episodeId,
     routeId,
@@ -415,6 +421,7 @@ export interface RomanceLearningState {
   recentSessionIds: string[];
 }
 export interface JourneyLearningInput {
+  setting?: RomanceSetting;
   characterId: string;
   episodeId: string;
   routeId: JourneyRouteId;
@@ -455,13 +462,19 @@ export function getJourneyLearningProgress(
 export function getJourneyKeepsakes(
   state: RomanceLearningState,
   characterId: string,
+  setting: RomanceSetting = "city",
 ) {
   const episodes = Object.hasOwn(state.characters, characterId)
     ? state.characters[characterId].episodes
     : {};
   return Object.entries(episodes).flatMap(([episodeId, progress]) =>
     progress.routes.flatMap((routeId) => {
-      const route = getJourneyRoute(characterId, episodeId, routeId);
+      const route = getStoryJourneyRoute(
+        characterId,
+        episodeId,
+        routeId,
+        setting,
+      );
       return route ? [{ episodeId, routeId, ...route.keepsake }] : [];
     }),
   );
@@ -559,7 +572,7 @@ export function isRomanceLearningState(
             return false;
           return (
             progress.routes.every((routeId) =>
-              Boolean(getJourneyRoute(characterId, episodeId, routeId)),
+              Boolean(getStoryJourneyRoute(characterId, episodeId, routeId)),
             ) && validSummary(progress.last, chapter)
           );
         },
@@ -578,6 +591,7 @@ export function completeRomanceLearning(
     !isSession(input.sessionId) ||
     !isRoute(input.routeId) ||
     !isGender(input.gender) ||
+    (input.setting !== undefined && !isRomanceSetting(input.setting)) ||
     typeof input.characterId !== "string" ||
     typeof input.episodeId !== "string"
   )
@@ -587,6 +601,7 @@ export function completeRomanceLearning(
     input.episodeId,
     input.routeId,
     input.gender,
+    input.setting ?? "city",
   );
   const checked = validateAttempts(plan, input.attempts);
   const now = input.now ?? new Date().toISOString();

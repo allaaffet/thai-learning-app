@@ -92,6 +92,8 @@ Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPoi
 
 組込み会話の回答・終了はカード内だけに保持し、`ExerciseAttempt`・確認5問の成績・XP・SRS・独立会話の終了回数へ送らない。部分ステップから `recordConversationCompletion` を呼ばない。出典は所属Scenarioの確認範囲を示し、元のLessonのUnicode資料とは分ける。詳細は [EARLY_CONVERSATIONS.md](EARLY_CONVERSATIONS.md)。
 
+全30課の `word-builder` は、`course-word-builders.ts` の明示対応と `course-word-builder.ts` の語句バンク・複数正答判定を使う。`buildLessonMission` が会話モデル・解説の後、確認5問の前へ配置し、`CourseWordBuilderCard` が語句選択・戻す・ヒント・音声・初回確定を扱う。進行と `builderCount` は画面内だけで、確認5問や保存へ混ぜない。詳細は [COURSE_WORD_BUILDERS.md](COURSE_WORD_BUILDERS.md)。
+
 ## 独立した会話ミッション（Phase 5第1段階）
 
 `src/lib/conversation-types.ts` が `ConversationWord`・`ConversationPhrase`・`ConversationChoice`・`ConversationStep`・`ConversationScenario` を定義し、`src/data/conversations.ts` が4シーン各3ステップ、語のIPA、出典・確認状況を持つ。文全体のIPAは持たず、語の参照IDを教材側で明示する。語のIPAの照合を台本・訳・自然さの監修へ広げない。
@@ -102,15 +104,17 @@ Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPoi
 
 ## 恋愛シミュレーションの実践編
 
-`/romance` は既存の本編と独立した画面で、`romance-course.tsx` と `romance.css` が主人公の設定、相手の一覧、会話、物語の選択、結果を表示する。`romance-types.ts` が役・好み・人物・エピソード・会話問題・物語の選択の型を持ち、`src/data/romance.ts` が6人の成人、5話、既存会話の参照と限定した追加例・出典を管理する。画面へThaiや好感度計算を直接埋め込まない。
+`/romance`（街）と `/romance/campus`（キャンパス）は既存の本編と独立した画面で、`romance-course.tsx` と `romance.css` が主人公の設定、相手の一覧、会話、物語の選択、結果を表示する。`romance-types.ts` が役・好み・人物・エピソード・会話問題・物語の選択の型を持ち、`src/data/romance.ts` が6人の成人、5話、既存会話の参照と限定した追加例・出典を管理する。画面へThaiや好感度計算を直接埋め込まない。
 
-標準のストーリーでは `romance-journey-types.ts` と `src/data/romance-journey.ts` が5段階の会話機能・支援、人物ごとの2ルート、思い出と表情を持つ。`src/lib/romance-journey.ts` がモデル・語句の組み立て・本番3問・既習の想起の活動を計画し、登録IDによる判定と本番回答の抽出を行う。`romance-journey-player.tsx` と `romance-journey.css` が活動と分岐を表示する。旧3問プレイヤーは `?view=classic` で利用する。
+標準のストーリーでは `romance-journey-types.ts` と `src/data/romance-journey.ts` が5段階の会話機能・支援とルート構築を持つ。街の日本語物語は `romance-stories-female.ts`・`romance-stories-male.ts` と `romance-story-types.ts`、学園の物語は `romance-campus.ts` に分け、`data/romance-story.ts` が舞台に合う場面と反応を選ぶ。`src/lib/romance-journey.ts` がモデル・語句の組み立て・本番3問・既習の想起の活動を計画し、登録IDによる判定と本番回答の抽出を行う。`romance-journey-player.tsx` と `romance-journey.css` が活動と分岐を表示する。旧3問プレイヤーは `?view=classic` で利用する。
 
 `src/lib/romance.ts` は言語問題の判定、前話の終了による解放、初回分の好感度、相手ごとの日次ボーナス、関係段階、保存検証・重複防止を扱う。言語の正答数と物語選択の影響は別の内訳を返し、好感度を0〜100へ収める。同じ話の再演で初回分を重ねず、同日の複数操作、時計の逆行・未来の日付から日次報酬を重複生成しない。欠席では好感度を減らさない。
 
 `use-romance.ts` は独立した `thai-learning.romance.v1`、版 `1` とブラウザ状態を扱う。役の設定、相手別の好感度・話の終了と最良正答数、学習日・ボーナス日・重複防止用の記録を保持する。読込みだけでは保存せず、不正・未知版は元の内容を保護し、明示的な置換と保存不可時のメモリ内継続を分ける。通常の他タブ更新と保存直前の再読込みを扱い、設定変更後の古い相手の操作を検証する。
 
 `use-romance-learning.ts` は新しい `thai-learning.romance-learning.v1`、版 `1` に実際に終了したルートと活動・ヒントの集計を保持する。旧完了だけで新練習を完了とせず、パスポートや思い出はこの記録から導出する。旧終了処理で本番3問と物語選択が受理された後に新しい終了処理を呼ぶ。保存は独立しているため一括書込みを保証せず、それぞれの失敗を表示する。新記録でも未知版・不正原文・保存拒否・他タブと重複セッションを検証する。
+
+`romance-setting.ts` が舞台の説明・URL・保存キーと、旧保存APIのキーを現在の舞台へ対応させるアダプターを持つ。`useRomance`・`useRomanceLearning` は舞台を受け取り、学園では `thai-learning.romance-campus.v1` と `thai-learning.romance-campus-learning.v1` を使う。画面は舞台のキーでマウントし直し、StorageEvent・原文保護・明示置換も舞台ごとに扱う。既存の街の2キーとスキーマを変更しない。詳細は [ROMANCE_SETTINGS.md](ROMANCE_SETTINGS.md)。
 
 現在の会話回答は画面内だけで扱い、終了時に各問題のID・選択IDと物語の選択を検証する。本編の `ExerciseAttempt`、XP・前提、SRS、独立会話の終了回数へ送らない。プロフィールの変更は保存済みの相手別履歴を消さない。性別はこの物語の役設定であり、本編の学習者登録へ追加しない。
 

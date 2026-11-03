@@ -6,6 +6,8 @@
 
 学習の軸は「何を伝えるかを知る→登録された語句で組み立てる→相手への返答を選ぶ→前の場面で使った表現を思い出す」。物語の好感度、活動を行った記録、その回のヒントなしの確認を区別し、会話能力や発音の保証にはしない。
 
+街のデート編 `/romance` は、二人だけの時間、率直な誘い、好意を伝える選択を人物別に描く。新しいキャンパス恋愛編 `/romance/campus` は、大学の社会人向け夜間講座を舞台に、隣席から放課後・学園祭・帰り道へ関係が進む。どちらも成人6人と24表情、同じ会話機能を使い、物語と記録は分ける。舞台別の仕様は [ROMANCE_SETTINGS.md](ROMANCE_SETTINGS.md)。
+
 ## 5段階のカリキュラム
 
 | 話 | 会話の機能 | 本番での既定の支援 | 積み上げる練習 |
@@ -60,9 +62,12 @@ Thaiは既存の登録表現・36語句と、既存の出典・確認状況を�
 
 新しい保存も読込みだけでは書き込まない。未知の版・不正な原文を明示的な置換まで保護し、保存できない場合はタブ内で継続する。終了セッションの重複、活動や語句の不正な参照、未完了の活動を検証する。既存の本編30課・150問・1210XP、前提、SRS、独立会話、文字練習、クエストやバッジへの書込みは行わない。
 
+キャンパスの記録は同じ版 `1` の `thai-learning.romance-campus.v1` と `thai-learning.romance-campus-learning.v1` へ分ける。街の既存キーを維持し、舞台の切替で画面をキー付きで再マウントする。保存アダプターとStorageEventも舞台を指定し、原文の保護や明示置換を他の物語へ広げない。
+
 ## 実装の責務と検証
 
-- `romance-journey-types.ts` と `src/data/romance-journey.ts`：会話機能、支援段階、人物ごとの分岐、思い出、表情を管理する。
+- `romance-journey-types.ts` と `src/data/romance-journey.ts`：会話機能、支援段階、街のルート構築を管理する。日本語の物語は `romance-stories-female.ts`・`romance-stories-male.ts` と `romance-story-types.ts` に分ける。
+- `romance-setting.ts` と `data/romance-story.ts`：舞台・保存キーと場面の選択を管理し、キャンパスの場面を `romance-campus.ts` から取得する。
 - `src/lib/romance-journey.ts`：活動計画、組み立てと返答の判定、旧本番3問の抽出、新しい活動記録と保存検証を扱う。
 - `use-romance-learning.ts`：新しいブラウザ保存とタブ内状態を管理する。
 - `romance-journey-player.tsx` と `romance-journey.css`：分岐と学習、表情、振り返りを表示する。

@@ -6,18 +6,21 @@ import {
   type RomanceLearningState,
 } from "@/lib/romance-journey";
 import type { RomanceCharacter } from "@/lib/romance-types";
+import type { RomanceSetting } from "@/lib/romance-setting";
 
 export function RomancePassport({
+  setting = "city",
   character,
   state,
 }: {
+  setting?: RomanceSetting;
   character: RomanceCharacter;
   state: RomanceLearningState;
 }) {
   const practiced = journeyChapters.filter((chapter) =>
     getJourneyLearningProgress(state, character.id, chapter.episodeId),
   ).length;
-  const keepsakes = getJourneyKeepsakes(state, character.id);
+  const keepsakes = getJourneyKeepsakes(state, character.id, setting);
   return (
     <>
       <section

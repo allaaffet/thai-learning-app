@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { courseLessons } from "../src/data/course";
 import { conversationScenarios } from "../src/data/conversations";
+import { getCourseWordBuilder } from "../src/lib/course-word-builder";
 import {
   getCourseConversation,
   getCourseConversationSteps,
@@ -297,9 +298,10 @@ async function finishMission(page: Page, missCore = false) {
   const box = mission(page);
   let missed = false;
   let conversationCards = 0;
+  const spoken: string[] = [];
   for (let index = 0; index < 70; index += 1) {
     const kind = await box.getAttribute("data-card-kind");
-    if (kind === "summary") return conversationCards;
+    if (kind === "summary") return { conversationCards, spoken };
     if (kind === "conversation") {
       const recall =
         (await box.getAttribute("data-conversation-mode")) === "recall";
@@ -307,8 +309,30 @@ async function finishMission(page: Page, missCore = false) {
         "data-dialogue-phase",
         recall ? "practice" : "model",
       );
-      await completeDialogue(page, recall ? 1 : 0);
+      spoken.push(...(await completeDialogue(page, recall ? 1 : 0)));
       conversationCards += 1;
+    } else if (kind === "word-builder") {
+      const lessonId = await box.getAttribute("data-lesson-id");
+      const builder = lessonId ? getCourseWordBuilder(lessonId) : undefined;
+      if (!builder) throw new Error("Missing course word builder");
+      const words = box.getByTestId("course-word-builder");
+      await expect(words).toHaveAttribute("data-step-id", builder.step.id);
+      await expect(
+        box.getByRole("button", { name: "次のカードへ", exact: true }),
+      ).toBeDisabled();
+      for (const id of builder.acceptedWordIds[0]) {
+        const word = builder.bank.find((entry) => entry.id === id);
+        if (!word) throw new Error("Missing registered builder word");
+        await words.locator(`button[data-word-id="${id}"]`).click();
+        spoken.push(word.thai);
+      }
+      await words
+        .getByRole("button", { name: "組み立てた返答を確認", exact: true })
+        .click();
+      await expect(words).toContainText(builder.step.explanation);
+      await expect(
+        box.getByRole("button", { name: "次のカードへ", exact: true }),
+      ).toBeEnabled();
     } else if (kind === "explore") {
       await box
         .getByRole("button", { name: "意味をめくる", exact: true })
@@ -362,12 +386,14 @@ test("初回から挨拶のお手本を使い、2つの丁寧表現を1操作で
   await page.evaluate(() => {
     document.documentElement.style.fontSize = "16px";
   });
-  expect(await finishMission(page)).toBe(1);
+  const completed = await finishMission(page);
+  expect(completed.conversationCards).toBe(1);
   const recall = step.choices.find((choice) => choice.id === step.answerIds[1]);
   if (!recall) throw new Error("Missing second accepted polite form");
+  expect(completed.spoken.at(-1)).toBe(recall.phrase.thai);
   expect((await probe(page)).calls.map((call) => call.text)).toEqual([
     ...learned,
-    recall.phrase.thai,
+    ...completed.spoken,
   ]);
   expect((await probe(page)).writes).toEqual([]);
   expect((await probe(page)).micRequests).toBe(0);
@@ -405,7 +431,7 @@ test("会話は誤答でも理由を見て有限に進め、確認5問の80%と�
   await mission(page)
     .getByRole("button", { name: "次のカードへ", exact: true })
     .click();
-  expect(await finishMission(page, true)).toBe(1);
+  expect((await finishMission(page, true)).conversationCards).toBe(1);
   expect((await probe(page)).writes).toEqual([]);
   await mission(page)
     .getByRole("button", { name: "結果を記録する", exact: true })
@@ -472,8 +498,11 @@ test("最初の6課から会話の目標が見え、文脈付きのお礼と後�
   ).toBeVisible();
   await page.goto(`/play/${later.id}`);
   const before = await snapshot(page);
-  expect(await finishMission(page)).toBe(2);
-  expect((await probe(page)).calls).toHaveLength(laterUnit.stepIds.length * 2);
+  const completed = await finishMission(page);
+  expect(completed.conversationCards).toBe(2);
+  expect((await probe(page)).calls.map((call) => call.text)).toEqual(
+    completed.spoken,
+  );
   expect((await probe(page)).micRequests).toBe(0);
   expect((await probe(page)).writes).toEqual([]);
   expect(await snapshot(page)).toEqual(before);

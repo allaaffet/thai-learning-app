@@ -476,8 +476,8 @@ export function getRomanceRelationship(affinity: number) {
     label: [
       "出会ったばかり",
       "気になる存在",
-      "親しい友だち",
-      "二人でお出かけ",
+      "心が近づくふたり",
+      "ふたりだけの約束",
       "特別な人",
     ][level],
   };
@@ -500,14 +500,14 @@ export function getRomanceEnding(state: RomanceState, characterId: string) {
       unlocked: true,
       title: "また、ふたりで",
       description:
-        "ふたりは、また一緒に出かけたいと気持ちを伝え合いました。これからも、短い会話を重ねていきます。",
+        "言葉の練習を口実にしなくても、会いたいと伝え合えるふたりになりました。次の約束は、ふたりだけのデート。待ち合わせの時間まで、届いた短いメッセージを何度も読み返してしまいます。",
     };
   if (progress.affinity >= 40)
     return {
       unlocked: true,
       title: "次の約束",
       description:
-        "気軽に声をかけられる仲になりました。次の会話も、ゆっくり楽しみましょう。",
+        "練習の続きだけではない、ふたりで過ごす次の約束ができました。『また会いたい』と言ったあとの少し照れた笑顔が、帰り道にも心に残っています。",
     };
   return {
     unlocked: true,

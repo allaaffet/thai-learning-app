@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { courseLessons } from "../src/data/course";
 import { vocabularyEntries } from "../src/data/language";
 import { conversationScenarios } from "../src/data/conversations";
+import { getCourseWordBuilder } from "../src/lib/course-word-builder";
 import type { Exercise } from "../src/lib/content-types";
 import { INCORRECT_INPUT_ID } from "../src/lib/exercise-grading";
 import {
@@ -251,6 +252,33 @@ interface SeenCard {
   lessonId: string | null;
   exerciseId: string | null;
   dialogueTexts?: string[];
+  builderTexts?: string[];
+}
+
+async function finishWordBuilder(page: Page, lessonId: string | null) {
+  const builder = lessonId ? getCourseWordBuilder(lessonId) : undefined;
+  if (!builder) throw new Error("Missing course word builder");
+  const region = mission(page);
+  const box = region.getByTestId("course-word-builder");
+  await expect(box).toHaveAttribute("data-step-id", builder.step.id);
+  await expect(
+    region.getByRole("button", { name: "次のカードへ", exact: true }),
+  ).toBeDisabled();
+  const spoken: string[] = [];
+  for (const id of builder.acceptedWordIds[0]) {
+    const word = builder.bank.find((entry) => entry.id === id);
+    if (!word) throw new Error("Missing registered builder word");
+    await box.locator(`button[data-word-id="${id}"]`).click();
+    spoken.push(word.thai);
+  }
+  await box
+    .getByRole("button", { name: "組み立てた返答を確認", exact: true })
+    .click();
+  await expect(box).toContainText(builder.step.explanation);
+  await expect(
+    region.getByRole("button", { name: "次のカードへ", exact: true }),
+  ).toBeEnabled();
+  return spoken;
 }
 
 async function finishDialogue(page: Page) {
@@ -314,6 +342,8 @@ async function finishCards(
         region.getByRole("button", { name: "次のカードへ", exact: true }),
       ).toBeDisabled();
       card.dialogueTexts = await finishDialogue(page);
+    } else if (kind === "word-builder") {
+      card.builderTexts = await finishWordBuilder(page, card.lessonId);
     } else if (kind === "explore") {
       const reveal = region.getByRole("button", {
         name: "意味をめくる",
@@ -385,7 +415,10 @@ test("冒険の入口から全カードを遊び、5問の初回回答と一度�
   expect((await probe(page)).writes).toEqual([]);
   const speech = (await probe(page)).calls;
   expect(speech.map((call) => call.text)).toEqual(
-    seen.flatMap((card) => card.dialogueTexts ?? []),
+    seen.flatMap((card) => [
+      ...(card.dialogueTexts ?? []),
+      ...(card.builderTexts ?? []),
+    ]),
   );
   expect(speech.every((call) => call.trusted && call.lang === "th-TH")).toBe(
     true,

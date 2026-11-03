@@ -13,5 +13,5 @@ export default async function RomancePage({
   searchParams: Promise<{ view?: string | string[] }>;
 }) {
   const { view } = await searchParams;
-  return <RomanceCourse classic={view === "classic"} />;
+  return <RomanceCourse key="city" classic={view === "classic"} />;
 }

@@ -9,6 +9,10 @@ import {
   type CourseConversationUnit,
 } from "@/data/course-conversations";
 import { isLessonUnlocked, type LearningProgress } from "@/lib/progress";
+import {
+  getCourseWordBuilder,
+  type CourseWordBuilder,
+} from "@/lib/course-word-builder";
 
 export type MissionQuestionPurpose = "core" | "review" | "recall" | "retry";
 
@@ -28,6 +32,13 @@ export interface MissionConversationCard {
   mode: "learn" | "recall";
 }
 
+export interface MissionWordBuilderCard {
+  id: string;
+  kind: "word-builder";
+  lessonId: string;
+  builder: CourseWordBuilder;
+}
+
 export type MissionCard =
   | {
       id: string;
@@ -43,7 +54,8 @@ export type MissionCard =
       item: ExploreItem;
     }
   | MissionQuestionCard
-  | MissionConversationCard;
+  | MissionConversationCard
+  | MissionWordBuilderCard;
 
 /** 計画・復習・再挑戦は画面内のみ。保存する初回問題のIDは分離する。 */
 export interface CourseMission {
@@ -233,6 +245,17 @@ export function buildLessonMission(
     cards.push(
       question(retrieval.lesson.id, retrieval.exercise, "review", runSeed),
     );
+
+  // Rebuild a reply already introduced in the opening conversation, after the
+  // foundation cards. This practice never enters the five graded checkpoints.
+  const builder = getCourseWordBuilder(lesson.id, runSeed);
+  if (builder)
+    cards.push({
+      id: `${runSeed}:word-builder:${lesson.id}`,
+      kind: "word-builder",
+      lessonId: lesson.id,
+      builder,
+    });
 
   const firstRecallAfter = Math.min(2, lesson.exercises.length - 1);
   for (const [index, exercise] of lesson.exercises.entries()) {

@@ -20,6 +20,7 @@ import {
 import { courseLessons } from "@/data/course";
 import { getCourseConversation } from "@/data/course-conversations";
 import { CourseDialogueCard } from "@/components/course-dialogue-card";
+import { CourseWordBuilderCard } from "@/components/course-word-builder-card";
 import type { Lesson } from "@/lib/content-types";
 import {
   appendMissionRetry,
@@ -122,6 +123,8 @@ function MissionRun({
   const [practiceCount, setPracticeCount] = useState(0);
   const [dialogueDone, setDialogueDone] = useState(false);
   const [dialogueCount, setDialogueCount] = useState(0);
+  const [builderDone, setBuilderDone] = useState(false);
+  const [builderCount, setBuilderCount] = useState(0);
   const [chain, setChain] = useState(0);
   const [result, setResult] = useState<{
     passed: boolean;
@@ -134,6 +137,7 @@ function MissionRun({
   const advanced = useRef(new Set<string>());
   const saved = useRef(false);
   const completedDialogues = useRef(new Set<string>());
+  const completedBuilders = useRef(new Set<string>());
   const activeCardId = useRef(mission.cards[0]?.id ?? null);
   const heading = useRef<HTMLHeadingElement>(null);
   const exploreAudio = useRef<SpeakButtonHandle>(null);
@@ -193,6 +197,7 @@ function MissionRun({
     if (card.kind === "question" && !feedback) return;
     if (card.kind === "explore" && !revealed) return;
     if (card.kind === "conversation" && !dialogueDone) return;
+    if (card.kind === "word-builder" && !builderDone) return;
     advanced.current.add(card.id);
     activeCardId.current = cards[index + 1]?.id ?? null;
     exploreAudio.current?.stop();
@@ -201,6 +206,7 @@ function MissionRun({
     setFeedback(null);
     setRevealed(false);
     setDialogueDone(false);
+    setBuilderDone(false);
   }
 
   function recordResult() {
@@ -261,17 +267,19 @@ function MissionRun({
       ? card.mode === "learn"
         ? "まずは、会話で使ってみよう"
         : "もう一度、会話で思い出そう"
-      : card?.kind === "learn"
-        ? "新しい発見"
-        : card?.kind === "explore"
-          ? "めくって思い出す"
-          : purpose === "review"
-            ? "前の冒険から"
-            : purpose === "recall"
-              ? "もう一度、思い出そう"
-              : purpose === "retry"
-                ? "仕上げのもう一度"
-                : "チェックポイント";
+      : card?.kind === "word-builder"
+        ? "ことばを組み立てよう"
+        : card?.kind === "learn"
+          ? "新しい発見"
+          : card?.kind === "explore"
+            ? "めくって思い出す"
+            : purpose === "review"
+              ? "前の冒険から"
+              : purpose === "recall"
+                ? "もう一度、思い出そう"
+                : purpose === "retry"
+                  ? "仕上げのもう一度"
+                  : "チェックポイント";
   const sourceLesson = card
     ? courseLessons.find((item) => item.id === card.lessonId)
     : lesson;
@@ -334,6 +342,8 @@ function MissionRun({
             >
               {card.kind === "conversation" ? (
                 <MessagesSquare size={19} />
+              ) : card.kind === "word-builder" ? (
+                <Layers2 size={19} />
               ) : card.kind === "learn" ? (
                 <Sparkles size={19} />
               ) : card.kind === "explore" ? (
@@ -358,11 +368,13 @@ function MissionRun({
             >
               {card.kind === "conversation"
                 ? card.unit.objective
-                : card.kind === "learn"
-                  ? "小さな発見を、ひとつ。"
-                  : card.kind === "explore"
-                    ? "めくって、確かめよう。"
-                    : question?.prompt}
+                : card.kind === "word-builder"
+                  ? card.builder.step.goal
+                  : card.kind === "learn"
+                    ? "小さな発見を、ひとつ。"
+                    : card.kind === "explore"
+                      ? "めくって、確かめよう。"
+                      : question?.prompt}
             </h1>
           </div>
           {card.kind === "conversation" && (
@@ -387,6 +399,22 @@ function MissionRun({
               key={card.id}
               block={card.block}
               number={card.number}
+            />
+          )}
+          {card.kind === "word-builder" && (
+            <CourseWordBuilderCard
+              key={card.id}
+              builder={card.builder}
+              onComplete={() => {
+                if (
+                  activeCardId.current !== card.id ||
+                  completedBuilders.current.has(card.id)
+                )
+                  return;
+                completedBuilders.current.add(card.id);
+                setBuilderDone(true);
+                setBuilderCount((value) => value + 1);
+              }}
             />
           )}
           {card.kind === "explore" && (
@@ -500,7 +528,8 @@ function MissionRun({
                 size="lg"
                 disabled={
                   (card.kind === "explore" && !revealed) ||
-                  (card.kind === "conversation" && !dialogueDone)
+                  (card.kind === "conversation" && !dialogueDone) ||
+                  (card.kind === "word-builder" && !builderDone)
                 }
                 onClick={advance}
               >
@@ -511,7 +540,7 @@ function MissionRun({
           </div>
           <p className="mission-footnote">
             教材案・専門家レビュー前。
-            {purpose && purpose !== "core"
+            {card.kind === "word-builder" || (purpose && purpose !== "core")
               ? "この問題は気軽な反復練習です。確認5問の初回成績やXPは変わりません。"
               : "途中で閉じると、この回は最初からになります。"}
           </p>
@@ -544,6 +573,12 @@ function MissionRun({
                 <div>
                   <strong>{dialogueCount}</strong>
                   <span>会話を練習したラウンド</span>
+                </div>
+              )}
+              {builderCount > 0 && (
+                <div>
+                  <strong>{builderCount}</strong>
+                  <span>ことばを組み立てた回数</span>
                 </div>
               )}
               {lesson && (

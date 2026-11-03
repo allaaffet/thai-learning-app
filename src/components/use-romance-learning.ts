@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ROMANCE_LEARNING_STORAGE_KEY,
   completeRomanceLearning,
   createEmptyRomanceLearning,
   loadRomanceLearning,
@@ -14,13 +13,21 @@ import {
   type RomanceLearningStatus,
 } from "@/lib/romance-journey";
 
+import {
+  createRomanceStoryStorage,
+  romanceSettings,
+  type RomanceSetting,
+} from "@/lib/romance-setting";
+
 const INVALID_MESSAGE =
   "会話練習の保存記録を読み取れません。元データを保護し、このタブだけで続けます。保存を再開するには、新しい会話練習の記録だけを明示的に置き換えてください。";
 const UNSAVED_MESSAGE =
   "会話練習の記録を保存できません。このタブでは続けられますが、閉じると今回の記録が失われます。";
 
 /** The new activity ledger is independent from relationship progress and course XP. */
-export function useRomanceLearning() {
+export function useRomanceLearning(setting: RomanceSetting = "city") {
+  const storage = useMemo(() => createRomanceStoryStorage(setting), [setting]);
+  const storageKey = romanceSettings[setting].learningKey;
   const [state, setState] = useState(createEmptyRomanceLearning);
   const [ready, setReady] = useState(false);
   const [status, setStatus] = useState<RomanceLearningStatus>("empty");
@@ -34,7 +41,7 @@ export function useRomanceLearning() {
   const pending = useRef<JourneyLearningInput[]>([]);
 
   useEffect(() => {
-    const loaded = loadRomanceLearning();
+    const loaded = loadRomanceLearning(storage);
     current.current = loaded.state;
     initialized.current = true;
     protectedData.current = loaded.status === "invalid";
@@ -48,9 +55,8 @@ export function useRomanceLearning() {
     );
 
     function synchronize(event: StorageEvent) {
-      if (event.key !== ROMANCE_LEARNING_STORAGE_KEY && event.key !== null)
-        return;
-      const loaded = loadRomanceLearning();
+      if (event.key !== storageKey && event.key !== null) return;
+      const loaded = loadRomanceLearning(storage);
       if (loaded.status === "invalid") {
         protectedData.current = true;
         setStatus("invalid");
@@ -68,12 +74,12 @@ export function useRomanceLearning() {
     }
     window.addEventListener("storage", synchronize);
     return () => window.removeEventListener("storage", synchronize);
-  }, []);
+  }, [storage, storageKey]);
 
   const finish = useCallback(
     (input: JourneyLearningInput): JourneyLearningReceipt | null => {
       if (!initialized.current) return null;
-      const disk = loadRomanceLearning();
+      const disk = loadRomanceLearning(storage);
       if (disk.status === "invalid") protectedData.current = true;
       try {
         let base = current.current;
@@ -87,6 +93,7 @@ export function useRomanceLearning() {
         }
         const recordedInput = {
           ...input,
+          setting,
           now: input.now ?? new Date().toISOString(),
         };
         const completion = completeRomanceLearning(base, recordedInput);
@@ -119,7 +126,7 @@ export function useRomanceLearning() {
           unsaved.current = true;
           setStatus("invalid");
           setMessage(INVALID_MESSAGE);
-        } else if (saveRomanceLearning(completion.state)) {
+        } else if (saveRomanceLearning(completion.state, storage)) {
           pending.current = [];
           unsaved.current = false;
           setStatus("loaded");
@@ -139,12 +146,12 @@ export function useRomanceLearning() {
         return null;
       }
     },
-    [],
+    [storage, setting],
   );
 
   const replaceSaved = useCallback(() => {
     if (!initialized.current) return false;
-    if (!replaceRomanceLearning(current.current)) {
+    if (!replaceRomanceLearning(current.current, storage)) {
       setMessage(UNSAVED_MESSAGE);
       return false;
     }
@@ -154,7 +161,7 @@ export function useRomanceLearning() {
     setStatus("loaded");
     setMessage(null);
     return true;
-  }, []);
+  }, [storage]);
 
   return { state, ready, status, message, finish, replaceSaved };
 }

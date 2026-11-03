@@ -94,7 +94,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "female",
     traits: ["warm", "calm"],
     description:
-      "植物と小さなカフェが好きなイラストレーター。人の話を、ゆっくり聞いてくれる。",
+      "植物とカフェを描くイラストレーター。柔らかな笑顔のまま、ときどき驚くほど真っすぐな言葉で誘ってくる。",
     portrait: { column: 0, row: 0 },
     ...story(
       [
@@ -120,7 +120,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "female",
     traits: ["calm", "curious"],
     description:
-      "翻訳の仕事をする読書家。落ち着いた雰囲気で、新しい言葉や考え方に目が輝く。",
+      "翻訳の仕事をする読書家。普段は落ち着いているのに、二人きりの静かな場所では、言葉の裏に好意がのぞく。",
     portrait: { column: 1, row: 0 },
     ...story(
       [
@@ -146,7 +146,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "female",
     traits: ["warm", "curious"],
     description:
-      "街歩きとデザインが好きな編集者。明るく、初めての場所でも楽しみを見つける。",
+      "街歩きが好きな編集者。大胆に誘い、楽しげにからかう。その一言が冗談か本気か、確かめたくなる。",
     portrait: { column: 2, row: 0 },
     ...story(
       [
@@ -172,7 +172,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "male",
     traits: ["warm", "calm"],
     description:
-      "写真とコーヒーが好きな建築スタッフ。気さくで、相手のペースを大切にする。",
+      "写真とコーヒーが好きな建築スタッフ。気さくな笑顔で歩幅を合わせ、二人になれば会いたかった気持ちを隠さない。",
     portrait: { column: 0, row: 1 },
     ...story(
       [
@@ -198,7 +198,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "male",
     traits: ["calm", "curious"],
     description:
-      "本とボードゲームが好きな研究職。穏やかに考え、面白い話題には夢中になる。",
+      "本とボードゲームが好きな研究職。普段は理知的。恋の駆け引きには少し不器用で、ふとした率直さが心に残る。",
     portrait: { column: 1, row: 1 },
     ...story(
       [
@@ -224,7 +224,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "male",
     traits: ["warm", "curious"],
     description:
-      "音楽と街の小さな店が好きなデザイナー。好奇心があり、会話を楽しませてくれる。",
+      "音楽が好きなデザイナー。柔らかな声と、少し意味ありげな微笑み。帰り際に、もう一度名前を呼んでくれる。",
     portrait: { column: 2, row: 1 },
     ...story(
       [

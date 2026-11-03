@@ -22,7 +22,9 @@ import {
   romanceWords,
   getRomanceEpisode,
 } from "@/data/romance";
-import { getJourneyScene, getJourneyChapter } from "@/data/romance-journey";
+import { getJourneyChapter } from "@/data/romance-journey";
+import { getStoryJourneyScene } from "@/data/romance-story";
+import type { RomanceSetting } from "@/lib/romance-setting";
 import {
   getJourneyPlan,
   gradeJourneyActivity,
@@ -75,6 +77,7 @@ type BuildActivity = Extract<JourneyActivity, { kind: "build" }>;
 type RespondActivity = Extract<JourneyActivity, { kind: "respond" }>;
 
 export interface RomanceJourneyPlayerProps {
+  setting?: RomanceSetting;
   character: RomanceCharacter;
   episodeId: RomanceEpisodeId;
   sessionId: string;
@@ -128,6 +131,7 @@ const signed = (value: number) => (value > 0 ? `+${value}` : String(value));
 
 /** A finite, branching lesson. Only the first core answers affect legacy affinity. */
 export function RomanceJourneyPlayer({
+  setting = "city",
   character,
   episodeId,
   sessionId,
@@ -160,7 +164,7 @@ export function RomanceJourneyPlayer({
   const recorded = useRef(false);
   const advanced = useRef(new Set<string>());
   const attemptsRef = useRef<JourneyAttempt[]>([]);
-  const scene = getJourneyScene(character.id, episodeId);
+  const scene = getStoryJourneyScene(character.id, episodeId, setting);
   const chapter = getJourneyChapter(episodeId);
   const episode = getRomanceEpisode(episodeId);
   const activity =
@@ -197,7 +201,7 @@ export function RomanceJourneyPlayer({
     );
   }
   function chooseRoute(id: JourneyRouteId) {
-    const next = getJourneyPlan(character.id, episodeId, id, gender);
+    const next = getJourneyPlan(character.id, episodeId, id, gender, setting);
     setRouteId(id);
     setPlan(next);
     setExpression(next.route.expression);
@@ -257,6 +261,7 @@ export function RomanceJourneyPlayer({
       recorded.current = true;
       setReceipt(result);
       const trained = learning.finish({
+        setting,
         characterId: character.id,
         episodeId,
         routeId,
@@ -292,7 +297,10 @@ export function RomanceJourneyPlayer({
           <ArrowLeft size={17} />
           エピソードへ
         </Button>
-        <span>CHAPTER {chapter.level} / 5</span>
+        <span>
+          {setting === "campus" ? "CAMPUS" : "DATE"} · CHAPTER {chapter.level} /
+          5
+        </span>
       </div>
       <div className="rj-scene-layout">
         <aside className="rj-character-scene" data-expression={expression}>

@@ -67,6 +67,25 @@ describe("体系的な教材を混ぜて進める本編ミッション", () => {
       const firstCore = mission.cards.findIndex(
         (card) => card.kind === "question" && card.purpose === "core",
       );
+      const builders = mission.cards.filter(
+        (card) => card.kind === "word-builder",
+      );
+      expect(builders).toHaveLength(1);
+      const builderIndex = mission.cards.indexOf(builders[0]);
+      expect(builderIndex).toBeLessThan(firstCore);
+      expect(builderIndex).toBeGreaterThan(
+        mission.cards.findIndex(
+          (card) => card.kind === "conversation" && card.mode === "learn",
+        ),
+      );
+      expect(
+        mission.cards
+          .slice(builderIndex + 1)
+          .some((card) => card.kind === "learn" || card.kind === "explore"),
+      ).toBe(false);
+      expect(appendMissionRetry(mission.cards, builders[0])).toEqual(
+        mission.cards,
+      );
       expect(firstCore).toBeGreaterThanOrEqual(
         lesson.blocks.length + lesson.explore.length,
       );

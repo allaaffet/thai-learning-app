@@ -18,6 +18,7 @@ import "./romance.css";
 import "./romance-teaser.css";
 import "./romance-journey.css";
 import "./romance-passport.css";
+import "./course-word-builder.css";
 import { AppShell } from "@/components/app-shell";
 import { LearningProvider } from "@/components/learning-provider";
 import { ReviewProvider } from "@/components/review-provider";

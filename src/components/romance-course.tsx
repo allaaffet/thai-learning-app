@@ -50,6 +50,7 @@ import { RomanceJourneyPlayer } from "@/components/romance-journey-player";
 import { RomancePassport } from "@/components/romance-passport";
 import { getJourneyChapter } from "@/data/romance-journey";
 import { getJourneyLearningProgress } from "@/lib/romance-journey";
+import { romanceSettings, type RomanceSetting } from "@/lib/romance-setting";
 import { RomancePortrait } from "@/components/romance-portrait";
 import {
   SpeakButton,
@@ -290,9 +291,16 @@ function RomanceSources() {
   );
 }
 
-export function RomanceCourse({ classic = false }: { classic?: boolean }) {
-  const progress = useRomance();
-  const learning = useRomanceLearning();
+export function RomanceCourse({
+  classic = false,
+  setting = "city",
+}: {
+  classic?: boolean;
+  setting?: RomanceSetting;
+}) {
+  const progress = useRomance(setting);
+  const learning = useRomanceLearning(setting);
+  const storySetting = romanceSettings[setting];
   const [stage, setStage] = useState<Stage>("roster");
   const [characterId, setCharacterId] = useState<string | null>(null);
   const [episodeId, setEpisodeId] = useState<RomanceEpisodeId | null>(null);
@@ -353,9 +361,12 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
       data-romance-stage={visibleStage}
       data-character-id={active?.id}
       data-episode-id={episodeId ?? undefined}
+      data-story-setting={setting}
     >
       {!classic && !["setup", "roster", "character"].includes(visibleStage) && (
-        <h1 className="sr-only">恋するタイ語 — 会話の冒険</h1>
+        <h1 className="sr-only">
+          恋するタイ語・{storySetting.title} — 会話の冒険
+        </h1>
       )}
       <header className="rc-page-header">
         <div>
@@ -363,11 +374,11 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
             <Heart size={16} aria-hidden="true" /> PRACTICE · STORY
           </p>
           <h1 className="page-title" ref={heading} tabIndex={-1}>
-            恋するタイ語
+            {setting === "campus"
+              ? "恋するタイ語・キャンパス編"
+              : "恋するタイ語"}
           </h1>
-          <p className="page-description">
-            ことばを交わすたび、少しずつ近づく。
-          </p>
+          <p className="page-description">{storySetting.description}</p>
         </div>
         {progress.state.profile && visibleStage !== "setup" && (
           <Button variant="ghost" onClick={() => setStage("setup")}>
@@ -376,6 +387,28 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
           </Button>
         )}
       </header>
+      {["setup", "roster", "character"].includes(visibleStage) && (
+        <nav className="rc-story-picker" aria-label="物語の舞台">
+          {(["city", "campus"] as const).map((place) => (
+            <Link
+              key={place}
+              href={romanceSettings[place].href}
+              aria-current={place === setting ? "page" : undefined}
+            >
+              <span>{place === "city" ? "🌙" : "📚"}</span>
+              <span>
+                <strong>{romanceSettings[place].title}</strong>
+                <small>
+                  {place === "city"
+                    ? "夜の寄り道と、ふたりのデート"
+                    : "隣の席から、放課後の恋へ"}
+                </small>
+              </span>
+            </Link>
+          ))}
+          <p>舞台ごとに、好感度・進捗・思い出を記録します。</p>
+        </nav>
+      )}
       <p className="rc-course-note">
         架空の成人との、台本付きの恋愛シミュレーション。タイ語の返答と、相手を知る選択を楽しむコースです。
       </p>
@@ -435,7 +468,7 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
         <>
           <section className="rc-roster-intro">
             <span className="rc-badge">
-              <Coffee size={17} /> Bangkok · Book café
+              <Coffee size={17} /> {storySetting.place}
             </span>
             <h2>今日、誰と話してみる？</h2>
             <p>
@@ -566,7 +599,11 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
             </section>
           </div>
           {!classic && (
-            <RomancePassport character={active} state={learning.state} />
+            <RomancePassport
+              setting={setting}
+              character={active}
+              state={learning.state}
+            />
           )}
           <section
             className="rc-episodes"
@@ -646,7 +683,7 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
               );
             })}
           </section>
-          {!classic && (
+          {!classic && setting === "city" && (
             <details className="rjp-classic-link">
               <summary>以前の練習について</summary>
               <p>
@@ -685,6 +722,7 @@ export function RomanceCourse({ classic = false }: { classic?: boolean }) {
           />
         ) : (
           <RomanceJourneyPlayer
+            setting={setting}
             key={sessionId}
             character={active}
             episodeId={episodeId}

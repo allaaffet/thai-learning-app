@@ -173,6 +173,44 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+.rc-story-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.75rem;
+}
+.rc-story-picker > a {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 1rem;
+  background: #fffdf9;
+  border: 1px solid #e8d8d8;
+  border-radius: 1.1rem;
+  min-width: 0;
+}
+.rc-story-picker > a[aria-current="page"] {
+  border-color: #b8748b;
+  background: #fbf0f2;
+  box-shadow: 0 2px #b8748b;
+}
+.rc-story-picker > a > span:first-child {
+  font-size: 1.7rem;
+  flex: 0 0 auto;
+}
+.rc-story-picker strong {
+  display: block;
+}
+.rc-story-picker small {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+.rc-story-picker > p {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
 .romance-course.is-journey-playing > .rc-page-header,
 .romance-course.is-journey-playing > .rc-course-note {
   display: none;
