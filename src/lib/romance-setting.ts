@@ -7,7 +7,7 @@ export const romanceSettings = {
     href: "/romance",
     place: "Bangkok · After hours",
     description:
-      "夜の待ち合わせ、ふたりだけの寄り道。ことばの先にある気持ちへ。",
+      "三人から同時に届くデートのお誘い。今夜の隣も、次の約束も、あなたが選ぶ。",
     relationshipKey: "thai-learning.romance.v1",
     learningKey: "thai-learning.romance-learning.v1",
   },
@@ -16,7 +16,7 @@ export const romanceSettings = {
     href: "/romance/campus",
     place: "Bangkok · Evening campus",
     description:
-      "社会人が集う大学の夜間講座。隣の席から、放課後の特別な約束へ。",
+      "大学の社会人向け夜間講座。同級生三人が、隣席も放課後もあなたを取り合う。",
     relationshipKey: "thai-learning.romance-campus.v1",
     learningKey: "thai-learning.romance-campus-learning.v1",
   },

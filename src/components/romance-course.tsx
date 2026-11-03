@@ -49,7 +49,12 @@ import { useRomanceLearning } from "@/components/use-romance-learning";
 import { RomanceJourneyPlayer } from "@/components/romance-journey-player";
 import { RomancePassport } from "@/components/romance-passport";
 import { getJourneyChapter } from "@/data/romance-journey";
-import { getJourneyLearningProgress } from "@/lib/romance-journey";
+import {
+  getJourneyLearningProgress,
+  getJourneyStoryEnding,
+} from "@/lib/romance-journey";
+import { RomanceEnsemble } from "@/components/romance-ensemble";
+import { getEnsembleNextEpisode } from "@/data/romance-ensemble";
 import { romanceSettings, type RomanceSetting } from "@/lib/romance-setting";
 import { RomancePortrait } from "@/components/romance-portrait";
 import {
@@ -348,11 +353,23 @@ export function RomanceCourse({
     setSessionId(createRomanceSessionId());
     setStage("episode");
   }
+  function acceptInvitation(personId: string) {
+    const next = getEnsembleNextEpisode(progress.state, personId);
+    if (!next) return;
+    setCharacterId(personId);
+    setEpisodeId(next);
+    setSessionId(createRomanceSessionId());
+    setStage("episode");
+  }
 
   if (!progress.ready || (!classic && !learning.ready))
     return <p role="status">物語のしおりを読み込んでいます…</p>;
   const people = getAvailableRomanceCharacters(progress.state);
   const ending = active ? getRomanceEnding(progress.state, active.id) : null;
+  const storyEnding =
+    active && !classic
+      ? getJourneyStoryEnding(learning.state, active.id, setting)
+      : undefined;
 
   return (
     <section
@@ -470,7 +487,11 @@ export function RomanceCourse({
             <span className="rc-badge">
               <Coffee size={17} /> {storySetting.place}
             </span>
-            <h2>今日、誰と話してみる？</h2>
+            <h2>
+              {classic
+                ? "今日、誰と話してみる？"
+                : "今夜、三人ともあなたを待っている。"}
+            </h2>
             <p>
               気になる相手を選びましょう。好みのタイプに近い人には、おすすめの印を付けています。
             </p>
@@ -491,6 +512,15 @@ export function RomanceCourse({
               </div>
             )}
           </section>
+          {!classic && progress.state.profile && (
+            <RomanceEnsemble
+              setting={setting}
+              gender={progress.state.profile.gender}
+              people={people}
+              progress={progress.state}
+              onPick={acceptInvitation}
+            />
+          )}
           <div className="rc-roster">
             {people.map((person) => {
               const personRecord = getRomanceCharacterProgress(
@@ -695,8 +725,11 @@ export function RomanceCourse({
           {ending?.unlocked && (
             <section className="rc-ending surface">
               <Heart size={27} aria-hidden="true" />
-              <h2>{ending.title}</h2>
-              <p>{ending.description}</p>
+              <h2>
+                {storyEnding ? "あなたが選んだ、この先の関係" : ending.title}
+              </h2>
+              <p>{storyEnding?.reaction ?? ending.description}</p>
+              {storyEnding && <p>{storyEnding.nextHook}</p>}
               <p className="rc-small">
                 物語はここでひと区切り。会話や毎日の練習は、いつでも続けられます。
               </p>

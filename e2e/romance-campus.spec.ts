@@ -587,7 +587,9 @@ test("夜間講座の5話を最後まで進め、学園だけの思い出と会�
     const plan = getJourneyPlan("mali", episode.id, "lead", "male", "campus");
     await expect(player(page)).toContainText(plan.scene.intro);
     await play(page, plan);
-    await expect(player(page)).toContainText(plan.route.nextHook);
+    await expect(player(page)).toContainText(
+      plan.route.wrapChoices[0].nextHook ?? plan.route.nextHook,
+    );
     await backToChapters(page);
   }
   expect(

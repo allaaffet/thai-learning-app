@@ -45,6 +45,11 @@ describe("社会人の夜間講座を舞台にしたキャンパス物語", () =
       expect(scene.characterId).toBe(character.id);
       expect(scene.episodeId).toBe(episode.id);
       expect(scene.intro).toContain(character.name);
+      for (const rival of romanceCharacters.filter(
+        (person) => person.gender === character.gender,
+      )) {
+        expect(JSON.stringify(scene)).toContain(rival.name);
+      }
       expect(scene.routes.map((route) => route.id)).toEqual(campusRouteIds);
       const [listen, lead] = scene.routes;
       expect(listen.title).not.toBe(lead.title);
@@ -100,8 +105,17 @@ describe("社会人の夜間講座を舞台にしたキャンパス物語", () =
           expect(old!.affinityDelta).toBeGreaterThan(0);
           expect(choice.label.trim().length).toBeGreaterThan(5);
           expect(choice.reaction.trim().length).toBeGreaterThan(15);
-          expect(choice.expression).toBe("happy");
+          expect(["neutral", "happy", "thoughtful", "concerned"]).toContain(
+            choice.expression,
+          );
+          expect(choice.nextHook?.trim().length).toBeGreaterThan(10);
         }
+        expect(
+          new Set(route.wrapChoices.map((choice) => choice.expression)).size,
+        ).toBe(2);
+        expect(
+          new Set(route.wrapChoices.map((choice) => choice.nextHook)).size,
+        ).toBe(2);
       }
       const city = getJourneyScene(character.id, episode.id);
       expect(scene.intro).not.toBe(city?.intro);

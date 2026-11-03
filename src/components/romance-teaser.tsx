@@ -15,9 +15,9 @@ export function RomanceTeaser() {
           <Heart size={17} aria-hidden="true" />
           実践編・恋するタイ語
         </p>
-        <h2>放課後も、夜の街でも。ふたりの距離を、ことばで。</h2>
+        <h2>三人から恋される。今夜は、誰の隣へ？</h2>
         <p>
-          街のデートとキャンパスの恋。6人の登場人物と、ひと言ずつ気持ちを伝えてみよう。
+          街でも学園でも、三人から同時にお誘い。ハーレム・逆ハーレムの物語を、タイ語の会話と一緒に進めよう。
         </p>
         <Button asChild variant="outline">
           <Link href="/romance">

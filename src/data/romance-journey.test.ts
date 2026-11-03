@@ -109,6 +109,12 @@ describe("物語と積み上がる会話機能の教材", () => {
         );
         expect(route.wrapChoices).toHaveLength(2);
         expect(
+          new Set(route.wrapChoices.map((choice) => choice.expression)).size,
+        ).toBe(2);
+        expect(
+          new Set(route.wrapChoices.map((choice) => choice.nextHook)).size,
+        ).toBe(2);
+        expect(
           new Set(route.wrapChoices.map((choice) => choice.storyChoiceId)).size,
         ).toBe(2);
         expect(
@@ -133,18 +139,11 @@ describe("物語と積み上がる会話機能の教材", () => {
     },
   );
 
-  it("60ルートの思い出IDと導入を混同せず、各人物に固有の連続した題材を持つ", () => {
+  it("60ルートの思い出IDと導入を混同せず、各章で三人の恋愛が交差する", () => {
     const memories: string[] = [];
     const intros: string[] = [];
-    const themes = [
-      ["mali", /展示|スケッチ/u],
-      ["rin", /栞/u],
-      ["dao", /地図/u],
-      ["arun", /写真/u],
-      ["kiet", /ゲーム|盤面/u],
-      ["niran", /音楽|フライヤー/u],
-    ] as const;
-    for (const [characterId, theme] of themes) {
+    for (const character of romanceCharacters) {
+      const characterId = character.id;
       const characterScenes = romanceEpisodes.map((episode) => {
         const scene = getJourneyScene(characterId, episode.id);
         if (!scene) throw new Error("Missing character arc");
@@ -152,11 +151,13 @@ describe("物語と積み上がる会話機能の教材", () => {
         for (const route of scene.routes) memories.push(route.keepsake.id);
         return scene;
       });
-      // The theme recurs across the arc, rather than being only a roster label.
-      const scenesWithTheme = characterScenes.filter((scene) =>
-        theme.test(JSON.stringify(scene)),
-      );
-      expect(scenesWithTheme.length).toBeGreaterThanOrEqual(4);
+      for (const scene of characterScenes) {
+        for (const rival of romanceCharacters.filter(
+          (person) => person.gender === character.gender,
+        )) {
+          expect(JSON.stringify(scene)).toContain(rival.name);
+        }
+      }
       expect(new Set(characterScenes.map((scene) => scene.intro)).size).toBe(5);
     }
     expect(memories).toHaveLength(60);

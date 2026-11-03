@@ -162,6 +162,11 @@
 .rjp-route-record {
   color: #8b425a;
 }
+.rjp-story-choice {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #d3dfcf;
+}
 .rjp-classic-link {
   padding: 1rem;
   border-radius: 1rem;

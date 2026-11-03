@@ -30,6 +30,7 @@ import {
   gradeJourneyActivity,
   getJourneyCoreAnswers,
   getJourneyRecoveryActivities,
+  getJourneyStoryEcho,
   type JourneyActivity,
   type JourneyAttempt,
   type JourneyPlan,
@@ -167,6 +168,12 @@ export function RomanceJourneyPlayer({
   const scene = getStoryJourneyScene(character.id, episodeId, setting);
   const chapter = getJourneyChapter(episodeId);
   const episode = getRomanceEpisode(episodeId);
+  const previousChoice = getJourneyStoryEcho(
+    learning.state,
+    character.id,
+    episodeId,
+    setting,
+  );
   const activity =
     phase === "repair" ? repairs[repairIndex] : plan?.activities[index];
   const authoredChoices = plan?.route.wrapChoices ?? [];
@@ -268,13 +275,12 @@ export function RomanceJourneyPlayer({
         gender,
         sessionId,
         attempts: attemptsRef.current,
+        storyChoiceId: story.storyChoiceId,
       });
       setLearningReceipt(trained);
       setLearningError(!trained);
       setError(null);
-      setExpression(
-        result.affinityAfter >= result.affinityBefore ? "happy" : "thoughtful",
-      );
+      setExpression(story.expression);
       changePhase("result");
     } catch (caught) {
       setError(
@@ -336,9 +342,16 @@ export function RomanceJourneyPlayer({
             <section className="rj-panel rj-prologue">
               <p className="rj-kicker">STORY · {episode.title}</p>
               <h2 ref={heading} tabIndex={-1}>
-                今日は、どちらへ行こう？
+                この場面、どう動く？
               </h2>
               <p>{scene.intro}</p>
+              {previousChoice && (
+                <aside className="rj-story-echo" aria-label="前の選択の続き">
+                  <strong>前の話で選んだこと</strong>
+                  <p>{previousChoice.label}</p>
+                  <p>{previousChoice.nextHook}</p>
+                </aside>
+              )}
               <div className="rj-route-options">
                 {scene.routes.map((route) => (
                   <button
@@ -502,7 +515,7 @@ export function RomanceJourneyPlayer({
                 STORY CHOICE
               </p>
               <h2 ref={heading} tabIndex={-1}>
-                この時間を、どう結ぼう？
+                次の一言で、どこまで踏み込む？
               </h2>
               <p>{plan.route.successBeat}</p>
               <p className="rj-note">
@@ -614,7 +627,7 @@ export function RomanceJourneyPlayer({
               <p>{story?.reaction}</p>
               <div className="rj-next-hook">
                 <Sparkles size={20} />
-                <p>{plan.route.nextHook}</p>
+                <p>{story?.nextHook ?? plan.route.nextHook}</p>
               </div>
               <JourneyAttemptSummary plan={plan} attempts={attempts} />
               <details className="rj-affinity-details">

@@ -106,7 +106,9 @@ Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPoi
 
 `/romance`（街）と `/romance/campus`（キャンパス）は既存の本編と独立した画面で、`romance-course.tsx` と `romance.css` が主人公の設定、相手の一覧、会話、物語の選択、結果を表示する。`romance-types.ts` が役・好み・人物・エピソード・会話問題・物語の選択の型を持ち、`src/data/romance.ts` が6人の成人、5話、既存会話の参照と限定した追加例・出典を管理する。画面へThaiや好感度計算を直接埋め込まない。
 
-標準のストーリーでは `romance-journey-types.ts` と `src/data/romance-journey.ts` が5段階の会話機能・支援とルート構築を持つ。街の日本語物語は `romance-stories-female.ts`・`romance-stories-male.ts` と `romance-story-types.ts`、学園の物語は `romance-campus.ts` に分け、`data/romance-story.ts` が舞台に合う場面と反応を選ぶ。`src/lib/romance-journey.ts` がモデル・語句の組み立て・本番3問・既習の想起の活動を計画し、登録IDによる判定と本番回答の抽出を行う。`romance-journey-player.tsx` と `romance-journey.css` が活動と分岐を表示する。旧3問プレイヤーは `?view=classic` で利用する。
+標準のストーリーでは `romance-journey-types.ts` と `src/data/romance-journey.ts` が5段階の会話機能・支援とルート構築を持つ。街の日本語物語は `romance-stories-female.ts`・`romance-stories-male.ts`、学園は `romance-campus-female.ts`・`romance-campus-male.ts` と構築用の `romance-campus.ts` に分け、共通型は `romance-story-types.ts`、舞台の選択は `data/romance-story.ts` が持つ。`src/lib/romance-journey.ts` がモデル・語句の組み立て・本番3問・既習の想起の活動を計画し、登録IDによる判定と本番回答の抽出を行う。`romance-journey-player.tsx` と `romance-journey.css` が活動と分岐を表示する。旧3問プレイヤーは `?view=classic` で利用する。
+
+`data/romance-ensemble.ts` と `RomanceEnsemble` は三人の同時の誘い・グループ会話・選ばれたときの反応を表示し、解放済みの個人エピソードへ渡す。群像の進行は画面内の状態だけで、保存や好感度には加算しない。活動のエピソード記録に任意の `lastStory: { routeId, choiceId }` を保持し、登録した選択の反応・表情・`nextHook` から前話の続きと最終話の結びを導出する。旧版1の項目なしの記録も受け入れ、選択を補完しない。詳細は [ROMANCE_ENSEMBLE.md](ROMANCE_ENSEMBLE.md)。
 
 `src/lib/romance.ts` は言語問題の判定、前話の終了による解放、初回分の好感度、相手ごとの日次ボーナス、関係段階、保存検証・重複防止を扱う。言語の正答数と物語選択の影響は別の内訳を返し、好感度を0〜100へ収める。同じ話の再演で初回分を重ねず、同日の複数操作、時計の逆行・未来の日付から日次報酬を重複生成しない。欠席では好感度を減らさない。
 

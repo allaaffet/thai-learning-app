@@ -11,6 +11,7 @@ export interface JourneyWrapChoice {
   label: string;
   reaction: string;
   expression: JourneyExpression;
+  nextHook?: string;
 }
 
 /** 会話の機能と、減らしていく学習支援。到達能力の認定ではない。 */

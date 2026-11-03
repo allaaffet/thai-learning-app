@@ -3,6 +3,7 @@ import { journeyChapters } from "@/data/romance-journey";
 import {
   getJourneyKeepsakes,
   getJourneyLearningProgress,
+  getJourneyStoryChoice,
   type RomanceLearningState,
 } from "@/lib/romance-journey";
 import type { RomanceCharacter } from "@/lib/romance-types";
@@ -51,6 +52,12 @@ export function RomancePassport({
               character.id,
               chapter.episodeId,
             );
+            const selectedStory = getJourneyStoryChoice(
+              state,
+              character.id,
+              chapter.episodeId,
+              setting,
+            );
             return (
               <li key={chapter.episodeId} data-practiced={Boolean(entry)}>
                 <span className="rjp-goal-number">
@@ -83,6 +90,13 @@ export function RomancePassport({
                       追加ヒントを開いた問題 {entry.last.hints} 問。練習{" "}
                       {entry.plays} 回。
                     </p>
+                    {selectedStory && (
+                      <div className="rjp-story-choice">
+                        <strong>直近の物語の選択</strong>
+                        <p>{selectedStory.label}</p>
+                        <p>{selectedStory.nextHook}</p>
+                      </div>
+                    )}
                   </details>
                 )}
               </li>

@@ -94,7 +94,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "female",
     traits: ["warm", "calm"],
     description:
-      "植物とカフェを描くイラストレーター。柔らかな笑顔のまま、ときどき驚くほど真っすぐな言葉で誘ってくる。",
+      "植物を描くイラストレーター。ふんわり笑って隣席を確保。二人にからかわれても、あなたを誘う番は譲らない。",
     portrait: { column: 0, row: 0 },
     ...story(
       [
@@ -120,7 +120,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "female",
     traits: ["calm", "curious"],
     description:
-      "翻訳の仕事をする読書家。普段は落ち着いているのに、二人きりの静かな場所では、言葉の裏に好意がのぞく。",
+      "翻訳の仕事をする読書家。落ち着いた顔で『今夜の予定は私が先』。静かな口説き方ほど、二人を焦らせる。",
     portrait: { column: 1, row: 0 },
     ...story(
       [
@@ -146,7 +146,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "female",
     traits: ["warm", "curious"],
     description:
-      "街歩きが好きな編集者。大胆に誘い、楽しげにからかう。その一言が冗談か本気か、確かめたくなる。",
+      "街歩きが好きな編集者。『そのデート、私も行く！』と大胆に参戦。冗談の顔で、いちばん直球の好意を向ける。",
     portrait: { column: 2, row: 0 },
     ...story(
       [
@@ -172,7 +172,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "male",
     traits: ["warm", "calm"],
     description:
-      "写真とコーヒーが好きな建築スタッフ。気さくな笑顔で歩幅を合わせ、二人になれば会いたかった気持ちを隠さない。",
+      "写真とコーヒーが好きな建築スタッフ。気さくな笑顔でエスコート。ほかの二人の前でも、あなたとのデートに立候補する。",
     portrait: { column: 0, row: 1 },
     ...story(
       [
@@ -198,7 +198,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "male",
     traits: ["calm", "curious"],
     description:
-      "本とボードゲームが好きな研究職。普段は理知的。恋の駆け引きには少し不器用で、ふとした率直さが心に残る。",
+      "本とボードゲームが好きな研究職。恋も考えすぎるけれど、今日は待つ気なし。丁寧な口調で二人きりの時間を取りにくる。",
     portrait: { column: 1, row: 1 },
     ...story(
       [
@@ -224,7 +224,7 @@ export const romanceCharacters: RomanceCharacter[] = [
     gender: "male",
     traits: ["warm", "curious"],
     description:
-      "音楽が好きなデザイナー。柔らかな声と、少し意味ありげな微笑み。帰り際に、もう一度名前を呼んでくれる。",
+      "音楽が好きなデザイナー。柔らかな声で、さらりと距離を詰める。三人でいても、あなたにだけ伝わる誘いを忍ばせる。",
     portrait: { column: 2, row: 1 },
     ...story(
       [

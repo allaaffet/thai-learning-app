@@ -6,6 +6,7 @@ import {
   romanceWords,
 } from "@/data/romance";
 import { getJourneyChapter } from "@/data/romance-journey";
+import { getStoryJourneyRoute } from "@/data/romance-story";
 import {
   ROMANCE_LEARNING_STORAGE_KEY,
   completeRomanceLearning,
@@ -15,6 +16,9 @@ import {
   getJourneyLearningProgress,
   getJourneyPlan,
   getJourneyRecoveryActivities,
+  getJourneyStoryChoice,
+  getJourneyStoryEcho,
+  getJourneyStoryEnding,
   gradeJourneyActivity,
   isRomanceLearningState,
   loadRomanceLearning,
@@ -208,6 +212,307 @@ describe("段階的な会話の活動計画", () => {
     expect(() =>
       getJourneyPlan("mali", "meet", "unknown" as "listen", "male"),
     ).toThrow();
+  });
+});
+
+describe("直近の物語選択の記憶と旧v1互換", () => {
+  it("選択を持たない既存v1を有効なまま読み、記憶を推測生成しない", () => {
+    const old = recorded();
+    expect(old.version).toBe(1);
+    expect(old.characters.mali.episodes.meet.lastStory).toBeUndefined();
+    expect(isRomanceLearningState(old)).toBe(true);
+    expect(getJourneyStoryEcho(old, "mali", "cafe")).toBeUndefined();
+    expect(getJourneyStoryEnding(old, "mali")).toBeUndefined();
+    const stored = memoryStorage(JSON.stringify(old));
+    expect(loadRomanceLearning(stored)).toEqual({
+      state: old,
+      status: "loaded",
+    });
+    expect(stored.writes).toEqual([]);
+  });
+
+  it("実際の終了時に選んだIDだけを保存し、集計は変えない", () => {
+    const original = input();
+    const withoutStory = completeRomanceLearning(
+      createEmptyRomanceLearning(),
+      original,
+    );
+    const result = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...original,
+      storyChoiceId: "meet-thoughtful",
+    });
+    expect(result.receipt.summary).toEqual(withoutStory.receipt.summary);
+    expect(result.state.characters.mali.episodes.meet.lastStory).toEqual({
+      routeId: "listen",
+      choiceId: "meet-thoughtful",
+    });
+    expect(isRomanceLearningState(result.state)).toBe(true);
+    expect(
+      Object.keys(result.state.characters.mali.episodes.meet.lastStory!),
+    ).toEqual(["routeId", "choiceId"]);
+    expect(Object.keys(result.state)).toEqual([
+      "version",
+      "characters",
+      "recentSessionIds",
+    ]);
+    const stored = memoryStorage();
+    expect(saveRomanceLearning(result.state, stored)).toBe(true);
+    expect(loadRomanceLearning(stored).state).toEqual(result.state);
+  });
+
+  it("パスポートでは指定した話の選択だけを表示し、不明な話や未選択の話を補完しない", () => {
+    const state = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-gentle",
+    }).state;
+    const choice = getStoryJourneyRoute("mali", "meet", "listen")!
+      .wrapChoices[1];
+    expect(getJourneyStoryChoice(state, "mali", "meet")).toMatchObject({
+      episodeId: "meet",
+      routeId: "listen",
+      label: choice.label,
+      reaction: choice.reaction,
+      expression: choice.expression,
+    });
+    for (const episodeId of ["cafe", "walk", "unknown", "__proto__"])
+      expect(getJourneyStoryChoice(state, "mali", episodeId)).toBeUndefined();
+    expect(getJourneyStoryChoice(state, "unknown", "meet")).toBeUndefined();
+  });
+
+  it("不正な選択記憶の原文は、別の正常な終了を保存しようとしても上書きしない", () => {
+    const invalid = recorded();
+    Reflect.set(invalid.characters.mali.episodes.meet, "lastStory", {
+      routeId: "listen",
+      choiceId: "future-choice",
+      reaction: "元データ",
+    });
+    const raw = JSON.stringify(invalid);
+    const stored = memoryStorage(raw);
+    expect(loadRomanceLearning(stored).status).toBe("invalid");
+    const fresh = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-thoughtful",
+    }).state;
+    expect(saveRomanceLearning(fresh, stored)).toBe(false);
+    expect(stored.getItem(ROMANCE_LEARNING_STORAGE_KEY)).toBe(raw);
+    expect(stored.writes).toEqual([]);
+    expect(getJourneyStoryChoice(fresh, "mali", "meet")).toBeDefined();
+  });
+
+  it("保存拒否でもこのタブの選択は参照でき、保存成功を返さない", () => {
+    const state = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-gentle",
+    }).state;
+    expect(
+      saveRomanceLearning(state, {
+        getItem: () => null,
+        setItem: () => {
+          throw new Error("denied");
+        },
+      }),
+    ).toBe(false);
+    expect(getJourneyStoryEcho(state, "mali", "cafe")).toEqual(
+      getJourneyStoryChoice(state, "mali", "meet"),
+    );
+  });
+
+  it("別ルートの再演は最新の選択へ更新し、前の記録とコレクションを壊さない", () => {
+    const first = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-thoughtful",
+    }).state;
+    const copy = structuredClone(first);
+    const second = completeRomanceLearning(first, {
+      ...input("meet", "lead", "another-choice"),
+      storyChoiceId: "meet-gentle",
+    }).state;
+    expect(first).toEqual(copy);
+    expect(second.characters.mali.episodes.meet.lastStory).toEqual({
+      routeId: "lead",
+      choiceId: "meet-gentle",
+    });
+    expect(second.characters.mali.episodes.meet.routes).toEqual([
+      "listen",
+      "lead",
+    ]);
+    expect(getJourneyKeepsakes(second, "mali")).toHaveLength(2);
+    const route = getStoryJourneyRoute("mali", "meet", "lead")!;
+    const choice = route.wrapChoices.find(
+      (entry) => entry.storyChoiceId === "meet-gentle",
+    )!;
+    expect(getJourneyStoryEcho(second, "mali", "cafe")).toEqual({
+      episodeId: "meet",
+      routeId: "lead",
+      label: choice.label,
+      reaction: choice.reaction,
+      nextHook: choice.nextHook ?? route.nextHook,
+      expression: choice.expression,
+    });
+  });
+
+  it("古い未保存の終了を再適用しても、他タブの新しい選択へ巻き戻らない", () => {
+    const first = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input("meet", "lead", "newer-tab-choice"),
+      now: "2026-11-03T10:00:00.000Z",
+      storyChoiceId: "meet-gentle",
+    }).state;
+    const result = completeRomanceLearning(first, {
+      ...input("meet", "listen", "older-pending-choice"),
+      storyChoiceId: "meet-thoughtful",
+    }).state;
+    expect(result.characters.mali.episodes.meet.lastCompletedAt).toBe(
+      "2026-11-03T10:00:00.000Z",
+    );
+    expect(result.characters.mali.episodes.meet.lastStory).toEqual({
+      routeId: "lead",
+      choiceId: "meet-gentle",
+    });
+    expect(getJourneyStoryEcho(result, "mali", "cafe")).toEqual(
+      getJourneyStoryEcho(first, "mali", "cafe"),
+    );
+    expect(result.characters.mali.episodes.meet.routes).toEqual([
+      "lead",
+      "listen",
+    ]);
+  });
+
+  it("新しい終了に選択がなければ、古い再送から過去の選択を推測しない", () => {
+    const first = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input("meet", "lead", "newer-legacy-completion"),
+      now: "2026-11-03T10:00:00.000Z",
+    }).state;
+    const result = completeRomanceLearning(first, {
+      ...input("meet", "listen", "older-pending-completion"),
+      storyChoiceId: "meet-thoughtful",
+    }).state;
+    expect(result.characters.mali.episodes.meet.lastStory).toBeUndefined();
+    expect(getJourneyStoryEcho(result, "mali", "cafe")).toBeUndefined();
+  });
+
+  it("選択を送らない旧callerの再訪は、すでに記録した選択を消さない", () => {
+    const first = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-thoughtful",
+    }).state;
+    const result = completeRomanceLearning(
+      first,
+      input("meet", "lead", "legacy-caller"),
+    );
+    expect(result.state.characters.mali.episodes.meet.lastStory).toEqual({
+      routeId: "listen",
+      choiceId: "meet-thoughtful",
+    });
+    expect(isRomanceLearningState(result.state)).toBe(true);
+    expect(result.state.characters.mali.episodes.meet.lastStory).not.toBe(
+      first.characters.mali.episodes.meet.lastStory,
+    );
+  });
+
+  it("重複セッションは、違う選択の再送信でも物語を進め直さない", () => {
+    const first = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-thoughtful",
+    }).state;
+    const repeated = completeRomanceLearning(first, {
+      ...input("meet", "lead"),
+      storyChoiceId: "meet-gentle",
+    });
+    expect(repeated.receipt.applied).toBe(false);
+    expect(repeated.state).toBe(first);
+    expect(repeated.state.characters.mali.episodes.meet.lastStory).toEqual({
+      routeId: "listen",
+      choiceId: "meet-thoughtful",
+    });
+  });
+
+  it.each(["unknown", "cafe-thoughtful", "meet-dismiss", "", null, 7])(
+    "選択IDでない入力 %s を保存しない",
+    (bad) => {
+      expect(() =>
+        completeRomanceLearning(createEmptyRomanceLearning(), {
+          ...input(),
+          storyChoiceId: bad as unknown as string,
+        }),
+      ).toThrow();
+    },
+  );
+
+  it.each([
+    null,
+    [],
+    { routeId: "unknown", choiceId: "meet-thoughtful" },
+    { routeId: "lead", choiceId: "meet-thoughtful" },
+    { routeId: "listen", choiceId: "cafe-thoughtful" },
+    { routeId: "listen", choiceId: "meet-dismiss" },
+    { routeId: "listen", choiceId: "meet-thoughtful", prose: "keep out" },
+    { routeId: "listen" },
+  ])("参照先や記録ルートと整合しないlastStoryを信用しない #%#", (bad) => {
+    const state = recorded();
+    Reflect.set(state.characters.mali.episodes.meet, "lastStory", bad);
+    expect(isRomanceLearningState(state)).toBe(false);
+    expect(saveRomanceLearning(state, memoryStorage())).toBe(false);
+  });
+
+  it.each(["city", "campus"] as const)(
+    "%s では選択した舞台の物語へ解決する",
+    (setting) => {
+      const plan = getJourneyPlan("mali", "meet", "listen", "male", setting);
+      const result = completeRomanceLearning(createEmptyRomanceLearning(), {
+        ...input(),
+        setting,
+        attempts: attempts(plan),
+        storyChoiceId: "meet-thoughtful",
+      });
+      const route = getStoryJourneyRoute("mali", "meet", "listen", setting)!;
+      const choice = route.wrapChoices.find(
+        (entry) => entry.storyChoiceId === "meet-thoughtful",
+      )!;
+      expect(
+        getJourneyStoryEcho(result.state, "mali", "cafe", setting),
+      ).toEqual({
+        episodeId: "meet",
+        routeId: "listen",
+        label: choice.label,
+        reaction: choice.reaction,
+        nextHook: choice.nextHook ?? route.nextHook,
+        expression: choice.expression,
+      });
+      expect(
+        getJourneyStoryEcho(result.state, "mali", "meet", setting),
+      ).toBeUndefined();
+      expect(
+        getJourneyStoryEcho(result.state, "mali", "likes", setting),
+      ).toBeUndefined();
+      expect(
+        getJourneyStoryEcho(result.state, "kiet", "cafe", setting),
+      ).toBeUndefined();
+      expect(
+        getJourneyStoryEcho(result.state, "mali", "unknown", setting),
+      ).toBeUndefined();
+    },
+  );
+
+  it("最終話の記憶は選んだ締めへ解決し、未記録の結末は作らない", () => {
+    const plan = getJourneyPlan("mali", "walk", "lead", "male", "campus");
+    const state = completeRomanceLearning(recorded(), {
+      ...input("walk", "lead", "ending-choice"),
+      setting: "campus",
+      attempts: attempts(plan),
+      storyChoiceId: "walk-gentle",
+    }).state;
+    const choice = plan.route.wrapChoices.find(
+      (entry) => entry.storyChoiceId === "walk-gentle",
+    )!;
+    expect(getJourneyStoryEnding(state, "mali", "campus")).toEqual({
+      episodeId: "walk",
+      routeId: "lead",
+      label: choice.label,
+      reaction: choice.reaction,
+      nextHook: choice.nextHook ?? plan.route.nextHook,
+      expression: choice.expression,
+    });
+    expect(getJourneyStoryEnding(state, "kiet", "campus")).toBeUndefined();
   });
 });
 

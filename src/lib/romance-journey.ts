@@ -1,5 +1,6 @@
 import {
   getRomanceCharacter,
+  getRomanceEpisode,
   getRomanceQuestions,
   romanceWords,
 } from "@/data/romance";
@@ -12,6 +13,7 @@ import { isRomanceSetting, type RomanceSetting } from "@/lib/romance-setting";
 import type { ConversationWord } from "@/lib/conversation-types";
 import type {
   JourneyChapter,
+  JourneyExpression,
   JourneyRoute,
   JourneyRouteId,
   JourneyScene,
@@ -411,6 +413,7 @@ export interface JourneyLearningEpisode {
   plays: number;
   routes: JourneyRouteId[];
   last: JourneyLearningSummary;
+  lastStory?: { routeId: JourneyRouteId; choiceId: string };
 }
 export interface RomanceLearningState {
   version: 1;
@@ -428,6 +431,7 @@ export interface JourneyLearningInput {
   gender: RomanceGender;
   sessionId: string;
   attempts: readonly JourneyAttempt[];
+  storyChoiceId?: string;
   now?: string;
 }
 export interface JourneyLearningReceipt {
@@ -478,6 +482,70 @@ export function getJourneyKeepsakes(
       return route ? [{ episodeId, routeId, ...route.keepsake }] : [];
     }),
   );
+}
+
+/** Saved identifiers resolve to the current authored story, never stored prose. */
+export interface JourneyStoryMemory {
+  episodeId: RomanceEpisodeId;
+  routeId: JourneyRouteId;
+  label: string;
+  reaction: string;
+  nextHook: string;
+  expression: JourneyExpression;
+}
+
+export function getJourneyStoryChoice(
+  state: RomanceLearningState,
+  characterId: string,
+  episodeId: string,
+  setting: RomanceSetting = "city",
+): JourneyStoryMemory | undefined {
+  const episode = getRomanceEpisode(episodeId);
+  if (!episode) return undefined;
+  const remembered = getJourneyLearningProgress(
+    state,
+    characterId,
+    episode.id,
+  )?.lastStory;
+  if (!remembered) return undefined;
+  const route = getStoryJourneyRoute(
+    characterId,
+    episodeId,
+    remembered.routeId,
+    setting,
+  );
+  const choice = route?.wrapChoices.find(
+    (entry) => entry.storyChoiceId === remembered.choiceId,
+  );
+  if (!route || !choice) return undefined;
+  return {
+    episodeId: episode.id,
+    routeId: remembered.routeId,
+    label: choice.label,
+    reaction: choice.reaction,
+    nextHook: choice.nextHook ?? route.nextHook,
+    expression: choice.expression,
+  };
+}
+
+export function getJourneyStoryEcho(
+  state: RomanceLearningState,
+  characterId: string,
+  currentEpisodeId: string,
+  setting: RomanceSetting = "city",
+): JourneyStoryMemory | undefined {
+  const previous = getRomanceEpisode(currentEpisodeId)?.previousEpisodeId;
+  return previous
+    ? getJourneyStoryChoice(state, characterId, previous, setting)
+    : undefined;
+}
+
+export function getJourneyStoryEnding(
+  state: RomanceLearningState,
+  characterId: string,
+  setting: RomanceSetting = "city",
+): JourneyStoryMemory | undefined {
+  return getJourneyStoryChoice(state, characterId, "walk", setting);
 }
 
 function validSummary(
@@ -556,6 +624,7 @@ export function isRomanceLearningState(
               "plays",
               "routes",
               "last",
+              "lastStory",
             ]) ||
             !isTimestamp(progress.firstCompletedAt) ||
             !isTimestamp(progress.lastCompletedAt) ||
@@ -570,6 +639,24 @@ export function isRomanceLearningState(
             progress.routes.length > progress.plays
           )
             return false;
+          if (progress.lastStory !== undefined) {
+            const remembered = progress.lastStory;
+            if (
+              !isRecord(remembered) ||
+              !hasOnly(remembered, ["routeId", "choiceId"]) ||
+              !isRoute(remembered.routeId) ||
+              !progress.routes.includes(remembered.routeId) ||
+              typeof remembered.choiceId !== "string" ||
+              !getStoryJourneyRoute(
+                characterId,
+                episodeId,
+                remembered.routeId,
+              )?.wrapChoices.some(
+                (choice) => choice.storyChoiceId === remembered.choiceId,
+              )
+            )
+              return false;
+          }
           return (
             progress.routes.every((routeId) =>
               Boolean(getStoryJourneyRoute(characterId, episodeId, routeId)),
@@ -604,6 +691,14 @@ export function completeRomanceLearning(
     input.setting ?? "city",
   );
   const checked = validateAttempts(plan, input.attempts);
+  if (
+    input.storyChoiceId !== undefined &&
+    (typeof input.storyChoiceId !== "string" ||
+      !plan.route.wrapChoices.some(
+        (choice) => choice.storyChoiceId === input.storyChoiceId,
+      ))
+  )
+    throw new Error("この物語の選択を確認してください。");
   const now = input.now ?? new Date().toISOString();
   if (!isTimestamp(now)) throw new Error("会話練習の日時を確認してください。");
   const correct = checked.filter((entry) => entry.grade.correct);
@@ -651,6 +746,9 @@ export function completeRomanceLearning(
     input.episodeId,
   );
   const routes = previous ? [...previous.routes] : [];
+  const previousIsNewer =
+    previous !== undefined &&
+    Date.parse(previous.lastCompletedAt) > Date.parse(now);
   receipt.newKeepsake = !routes.includes(input.routeId);
   if (receipt.newKeepsake) routes.push(input.routeId);
   const next: RomanceLearningState = {
@@ -662,13 +760,20 @@ export function completeRomanceLearning(
           ...(state.characters[input.characterId]?.episodes ?? {}),
           [input.episodeId]: {
             firstCompletedAt: previous?.firstCompletedAt ?? now,
-            lastCompletedAt:
-              previous && Date.parse(previous.lastCompletedAt) > Date.parse(now)
-                ? previous.lastCompletedAt
-                : now,
+            lastCompletedAt: previousIsNewer ? previous.lastCompletedAt : now,
             plays: Math.min(MAX_SESSIONS, (previous?.plays ?? 0) + 1),
             routes,
             last: summary,
+            ...(input.storyChoiceId !== undefined && !previousIsNewer
+              ? {
+                  lastStory: {
+                    routeId: input.routeId,
+                    choiceId: input.storyChoiceId,
+                  },
+                }
+              : previous?.lastStory
+                ? { lastStory: { ...previous.lastStory } }
+                : {}),
           },
         },
       },

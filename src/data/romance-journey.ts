@@ -129,19 +129,21 @@ export function getJourneyScene(
         detail: branch.memory[1],
       },
       nextHook: branch.nextHook,
-      expression: routeId === "listen" ? "thoughtful" : "happy",
+      expression: "thoughtful",
       wrapChoices: [
         {
           storyChoiceId: `${id}-thoughtful`,
           label: branch.closing[0].label,
           reaction: branch.closing[0].reaction,
-          expression: "happy",
+          expression: branch.closing[0].expression ?? "happy",
+          nextHook: branch.closing[0].nextHook ?? branch.nextHook,
         },
         {
           storyChoiceId: `${id}-gentle`,
           label: branch.closing[1].label,
           reaction: branch.closing[1].reaction,
-          expression: "happy",
+          expression: branch.closing[1].expression ?? "thoughtful",
+          nextHook: branch.closing[1].nextHook ?? branch.nextHook,
         },
       ],
     };
