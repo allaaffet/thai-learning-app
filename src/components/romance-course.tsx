@@ -52,6 +52,7 @@ import { getJourneyChapter } from "@/data/romance-journey";
 import {
   getJourneyLearningProgress,
   getJourneyStoryEnding,
+  hasCurrentRomanceDialogue,
 } from "@/lib/romance-journey";
 import { RomanceEnsemble } from "@/components/romance-ensemble";
 import { getEnsembleNextEpisode } from "@/data/romance-ensemble";
@@ -464,7 +465,7 @@ export function RomanceCourse({
       )}
       {classic && (
         <p className="rc-small">
-          以前の3問練習を表示しています。
+          3問形式で表示しています。以前の完了記録を含み、会話内容は新しい恋愛表現です。
           <Link href="/romance">新しい物語と会話の冒険へ</Link>
         </p>
       )}
@@ -662,7 +663,8 @@ export function RomanceCourse({
                 episode.id,
               );
               const chapter = getJourneyChapter(episode.id);
-              const displayCompleted = classic ? completed : Boolean(practiced);
+              const currentDialogue = hasCurrentRomanceDialogue(practiced);
+              const displayCompleted = classic ? completed : currentDialogue;
               return (
                 <button
                   type="button"
@@ -689,10 +691,15 @@ export function RomanceCourse({
                         ? episode.objective
                         : `${chapter?.level}. ${chapter?.skillTitle} — ${chapter?.canDo}`}
                     </small>
-                    {!classic && practiced && (
+                    {!classic && practiced && currentDialogue && (
                       <small className="rjp-route-record">
                         思い出 {practiced.routes.length} / 2 ・会話練習{" "}
                         {practiced.plays}回
+                      </small>
+                    )}
+                    {!classic && practiced && !currentDialogue && (
+                      <small className="rjp-route-record">
+                        以前の会話の記録・新しい恋愛の表現はこれから
                       </small>
                     )}
                     {!classic && completed && !practiced && (
@@ -1258,7 +1265,7 @@ function RomanceQuestionCard({
             </div>
           ))}
         <p className="rc-small">
-          語句ごとの辞書形IPAです。全文の発音表記ではありません。
+          IPAは資料と照合した語句に表示します。全文の発音表記ではありません。
         </p>
         <ul className="rc-words">
           {words.map((word) => (
@@ -1267,7 +1274,7 @@ function RomanceQuestionCard({
                 {word.thai}
               </span>
               <span>{word.meaning}</span>
-              <span className="ipa">{word.ipa}</span>
+              <span className="ipa">{word.ipa || "IPA未照合"}</span>
             </li>
           ))}
         </ul>

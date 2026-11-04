@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { conversationScenarios, conversationWords } from "@/data/conversations";
-import { grammarPoints, vocabularyEntries } from "@/data/language";
+import { vocabularyEntries } from "@/data/language";
 import {
   getRomanceCharacter,
   getRomanceEpisode,
@@ -70,9 +70,12 @@ describe("成人の架空人物と学ぶ実践コースの教材", () => {
       expect(episode.storyPrompt).not.toBe("");
       expect(getRomanceEpisode(episode.id)).toBe(episode);
     });
-    expect(romanceEpisodes[1].setting).toContain("店員役");
-    expect(romanceEpisodes[3].setting).toContain("20バーツ");
-    expect(romanceEpisodes[4].setting).toContain("案内の人役");
+    expect(romanceEpisodes[1].setting).toContain("近くに座り");
+    expect(romanceEpisodes[3].setting).toContain("約束");
+    expect(romanceEpisodes[4].setting).toContain("また会いたい");
+    expect(
+      romanceEpisodes.every((episode) => episode.sourceScenarioId === null),
+    ).toBe(true);
   });
 
   it.each(romanceCharacters)(
@@ -165,52 +168,45 @@ describe("成人の架空人物と学ぶ実践コースの教材", () => {
     },
   );
 
-  it("元の4会話の選択肢・正答を維持し、NPCの登録文末詞だけを切り替える", () => {
-    for (const episode of romanceEpisodes.filter(
-      (episode) => episode.sourceScenarioId,
-    )) {
-      const scenario = conversationScenarios.find(
-        (item) => item.id === episode.sourceScenarioId,
-      )!;
-      const female = getRomanceQuestions("mali", episode.id),
-        male = getRomanceQuestions("arun", episode.id);
-      scenario.steps.forEach((step, index) => {
-        expect(female[index].npc.thai).toBe(step.npc.thai);
-        expect(female[index].npc.wordIds).toEqual(step.npc.wordIds);
+  it("男女の相手でNPCの丁寧詞を切り替え、返答の正答は役の性別で狭めない", () => {
+    for (const episode of romanceEpisodes) {
+      const female = getRomanceQuestions("mali", episode.id);
+      const male = getRomanceQuestions("arun", episode.id);
+      female.forEach((step, index) => {
         expect(male[index].npc.wordIds.slice(0, -1)).toEqual(
           step.npc.wordIds.slice(0, -1),
         );
         expect(male[index].npc.wordIds.at(-1)).toBe("polite-male");
-        for (const question of [female[index], male[index]]) {
-          expect(question.npc.meaning).toBe(step.npc.meaning);
-          expect(question.choices).toEqual(step.choices);
-          expect(question.answerIds).toEqual(step.answerIds);
-          expect(question.explanation).toBe(step.explanation);
-        }
+        expect(male[index].npc.meaning).toBe(step.npc.meaning);
+        expect(male[index].choices).toEqual(step.choices);
+        expect(male[index].answerIds).toEqual(step.answerIds);
       });
     }
   });
 
-  it("好みの質問は既存の基本質問を参照し、希望と出身の違いを扱う未監修モデルとする", () => {
-    const point = grammarPoints.find(
-      (point) => point.id === "basic-questions",
-    )!;
-    expect(point.explanation.join("")).toContain("คุณชอบแมวไหม");
-    const questions = getRomanceQuestions("mali", "likes");
-    expect(questions[0].npc.thai).toBe("คุณชอบแมวไหมคะ");
-    expect(questions[1].npc.thai).toBe("คุณอยากไปญี่ปุ่นไหมคะ");
-    expect(questions[0].sourceNote).toContain("教材案");
-    const existing = conversationScenarios[0].steps[1].choices.find(
-      (choice) => choice.id === "greeting-from-wish",
-    )!;
-    expect(questions[1].choices[0].phrase).toEqual(existing.phrase);
-    expect(questions[1].choices[1].phrase.thai).toBe("อยากไปญี่ปุ่นค่ะ");
-    expect(questions[2].id).toBe("greeting-origin-close");
+  it("恋愛の返事を学び、無関係な買物・道案内の会話を混ぜない", () => {
+    const likes = getRomanceQuestions("mali", "likes");
+    expect(likes[1].npc.thai).toBe("คุณชอบใครคะ");
+    expect(likes[1].choices[0].phrase.thai).toBe("ชอบคุณครับ");
+    expect(likes[2].choices[1].phrase.thai).toBe("คิดถึงคุณค่ะ");
+    const walk = getRomanceQuestions("arun", "walk");
+    expect(walk[0].npc.thai).toBe("อยากเจอคุณอีกครับ");
+    expect(walk[2].choices[1].phrase.thai).toBe("ฝันดีค่ะ");
+    const all = romanceEpisodes.flatMap((episode) =>
+      getRomanceQuestions("mali", episode.id),
+    );
+    expect(new Set(all.map((question) => question.id)).size).toBe(15);
+    expect(JSON.stringify(all)).not.toMatch(
+      /ห้องน้ำ|ญี่ปุ่น|แมว|ยี่สิบ|20バーツ|トイレ|店員役/u,
+    );
+    expect(
+      all.every((question) => question.sourceNote.includes("教材案")),
+    ).toBe(true);
   });
 
-  it("独立した36語句を参照し、元の34語・本編40語を増減しない", () => {
-    expect(romanceWords).toHaveLength(36);
-    expect(new Set(romanceWords.map((word) => word.id)).size).toBe(36);
+  it("恋愛専用の52語句を参照し、元の34語・本編40語を増減しない", () => {
+    expect(romanceWords).toHaveLength(52);
+    expect(new Set(romanceWords.map((word) => word.id)).size).toBe(52);
     expect(conversationWords).toHaveLength(34);
     expect(vocabularyEntries).toHaveLength(40);
     for (const word of romanceWords) {

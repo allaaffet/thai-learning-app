@@ -104,6 +104,8 @@ Lesson・Character・VowelPattern・SyllableEntry・VocabularyEntry・GrammarPoi
 
 ## 恋愛シミュレーションの実践編
 
+`src/data/romance-dialogue.ts` は恋愛専用の52語句と15会話ターンを持ち、`getRomanceQuestions` が人物の話し方に合わせて取得する。挨拶・隣席・好意・デート・再会の5話で、日本語の場面と学ぶセンテンスをつなぐ。本編・独立会話のカタログは増減しない。活動の任意 `curriculumId` により、旧版1の記録を保持しながら新しい表現の実施を区別する。設計と照合範囲は [ROMANCE_DIALOGUE.md](ROMANCE_DIALOGUE.md) と [ROMANCE_DIALOGUE_SOURCES.md](ROMANCE_DIALOGUE_SOURCES.md)。
+
 `/romance`（街）と `/romance/campus`（キャンパス）は既存の本編と独立した画面で、`romance-course.tsx` と `romance.css` が主人公の設定、相手の一覧、会話、物語の選択、結果を表示する。`romance-types.ts` が役・好み・人物・エピソード・会話問題・物語の選択の型を持ち、`src/data/romance.ts` が6人の成人、5話、既存会話の参照と限定した追加例・出典を管理する。画面へThaiや好感度計算を直接埋め込まない。
 
 標準のストーリーでは `romance-journey-types.ts` と `src/data/romance-journey.ts` が5段階の会話機能・支援とルート構築を持つ。街の日本語物語は `romance-stories-female.ts`・`romance-stories-male.ts`、学園は `romance-campus-female.ts`・`romance-campus-male.ts` と構築用の `romance-campus.ts` に分け、共通型は `romance-story-types.ts`、舞台の選択は `data/romance-story.ts` が持つ。`src/lib/romance-journey.ts` がモデル・語句の組み立て・本番3問・既習の想起の活動を計画し、登録IDによる判定と本番回答の抽出を行う。`romance-journey-player.tsx` と `romance-journey.css` が活動と分岐を表示する。旧3問プレイヤーは `?view=classic` で利用する。

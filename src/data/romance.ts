@@ -1,21 +1,16 @@
 import {
-  conversationScenarios,
-  conversationSources,
-  conversationWords,
-} from "@/data/conversations";
-import { getVocabularyEntry, languageSources } from "@/data/language";
+  getRomanceDialogueQuestions,
+  romanceDialogueSources,
+  romanceDialogueWords,
+} from "@/data/romance-dialogue";
+import { conversationSources } from "@/data/conversations";
+import { languageSources } from "@/data/language";
 import type { ContentSource } from "@/lib/content-types";
-import type {
-  ConversationChoice,
-  ConversationPhrase,
-  ConversationStep,
-  ConversationWord,
-} from "@/lib/conversation-types";
+import type { ConversationWord } from "@/lib/conversation-types";
 import type {
   RomanceCharacter,
   RomanceEpisode,
   RomanceEpisodeId,
-  RomanceGender,
   RomancePreference,
   RomanceQuestion,
   RomanceStoryOption,
@@ -31,37 +26,19 @@ export type {
   RomanceStoryOption,
 } from "@/lib/romance-types";
 
-/** 既存のカタログを増減せず、このコースだけで「好き」「猫」を参照する。 */
-export const romanceWords: ConversationWord[] = [
-  ...conversationWords.map((word) => ({
-    ...word,
-    sourceIds: [...word.sourceIds],
-  })),
-  ...["like", "cat"].map((id) => {
-    const word = getVocabularyEntry(id);
-    if (!word) throw new Error("恋愛コースの参照語がありません: " + id);
-    return {
-      id: word.id,
-      thai: word.thai,
-      ipa: word.ipa,
-      meaning: word.meaning,
-      sourceIds: [...word.sourceIds],
-      verification: "unreviewed" as const,
-    };
-  }),
-];
-const words = new Map(romanceWords.map((word) => [word.id, word]));
+/** 本編の語彙を増減せず、恋愛会話だけのカタログを使う。 */
+export const romanceWords: ConversationWord[] = romanceDialogueWords;
 export const romanceSources: ContentSource[] = [
   ...conversationSources,
-  ...languageSources,
-].filter(
-  (source) =>
-    source.id === "wiktionary-ipa-phase4" ||
-    source.id === "wiktionary-ipa-phase5" ||
-    source.id === "ud-thai-grammar-phase4",
-);
+  ...languageSources.filter(
+    (source) =>
+      source.id === "wiktionary-ipa-phase4" ||
+      source.id === "ud-thai-grammar-phase4",
+  ),
+  ...romanceDialogueSources,
+];
 export const romanceSourceNotes =
-  "既存教材の語句IPAと基本の質問の説明を再利用しています。物語・日本語訳・組み合わせた会話・丁寧詞の使い方は専門家監修前です。新たな辞書の取得・照合や、文全体のIPA生成は行っていません。";
+  "新しい恋愛会話の16語句の辞書形IPAを固定資料と照合し、一部の語義も辞書と照合しています。組み合わせた例文・日本語訳・丁寧詞の用法・自然さは専門家監修前です。全文IPAやネイティブ録音の教材ではありません。";
 
 function story(intros: string[], outros: string[]) {
   const ids: RomanceEpisodeId[] = ["meet", "cafe", "likes", "market", "walk"];
@@ -99,17 +76,17 @@ export const romanceCharacters: RomanceCharacter[] = [
     ...story(
       [
         "バンコクのブックカフェ。窓際で植物を描いていたマリが、あなたへやわらかく挨拶した。今日は短いタイ語で話してみよう。",
-        "マリが顔を覚えていてくれた。カフェの注文を練習してみようと、笑顔で店員役を引き受けてくれる。",
-        "机の上にはマリが描いた猫のスケッチ。好きなものや、行ってみたい場所を、タイ語で話してみることになった。",
-        "小さな週末マーケットで、マリと紙雑貨を見て歩く。買い物の会話は、マリが店員役になって練習してくれる。",
-        "夕方の街を、マリの歩幅に合わせて散歩する。案内の練習を一緒にしてから、公園のベンチで少し休もう。",
+        "カフェでマリが隣の椅子を引く。「ここ、いい？」。近くに座り、あなたも話したいと思っていたことを伝えよう。",
+        "マリのスケッチ帳の中に、あなたの姿がある。からかわれて照れる彼女へ、好意と会えなかったときの気持ちを返してみよう。",
+        "週末マーケットで、マリが明日の予定を尋ねてきた。次は二人で出かけたい気持ちを伝え、デートを約束しよう。",
+        "夜の散歩が終わるころ、マリが少し名残惜しそうに立ち止まる。また会いたいと伝え、明日の約束とおやすみの言葉を交わそう。",
       ],
       [
         "「また、ここで会えたらうれしいね」とマリ。短い挨拶が、次に話す小さなきっかけになった。",
-        "お礼を聞いたマリは、スケッチ帳の端に小さな花を描いた。言葉の練習にも、少しずつ二人の時間が増えていく。",
-        "マリはあなたの好きなものを、丁寧に聞いていた。すべて同じでなくても、話を聞く時間が心地よい。",
-        "マリが選んだカードと、あなたが気になったしおり。違う好みを見つけるたび、新しい話題が生まれた。",
-        "並んで座るマリが、次に見たい景色を話し始めた。二人の関係は、急がず少しずつ育っている。",
+        "話したかった気持ちが伝わると、マリは椅子を少し近づけた。次の場所へも、一緒に歩いて行くことになった。",
+        "マリはあなたの返事を聞いて、閉じかけたスケッチ帳をもう一度開いた。「好きな人のページ、増えそう」",
+        "明日会う約束を、マリが手帳に書き込む。「買い物のついでじゃなくて、あなたに会う日ね」",
+        "マリは「また明日」と笑い、帰宅後にも短いおやすみの言葉を送ってきた。二人の約束が、次の日へつながる。",
       ],
     ),
   },
@@ -125,17 +102,17 @@ export const romanceCharacters: RomanceCharacter[] = [
     ...story(
       [
         "ブックカフェの読書会で、リンと隣の席になった。彼女は本を閉じて、あなたへ挨拶する。まずは短い自己紹介から。",
-        "読書の合間に、リンとカフェへ。注文をタイ語で練習したいと伝えると、彼女は店員役として手伝ってくれた。",
-        "リンの栞には猫の絵。好きなものや行きたい場所を尋ね合い、互いの新しい一面を探してみる。",
-        "古本と雑貨のマーケット。リンと値札を眺めながら、値段を尋ねる会話をロールプレイしてみよう。",
-        "読書会のあと、リンと街の散歩へ。今日は道を尋ねる練習。正解を急ぐより、相手の説明をよく聞いてみる。",
+        "読書の合間、リンがカフェであなたの隣席を指す。座っていいと返し、あなたと話したいと自分から伝えてみよう。",
+        "リンが本を閉じ、「気になっている人は？」と尋ねる。好きなのはあなただと、短いタイ語で返してみよう。",
+        "古本マーケットの帰り、リンが明日の予定を尋ねた。あなたと一緒に行きたいと、次のデートへつなげよう。",
+        "夜の読書会の帰り道、リンが歩く速さを落とす。また会いたい気持ちを返し、明日の約束とおやすみを伝えよう。",
       ],
       [
         "リンは「知らない言葉があっても、一緒に確かめればいい」と微笑んだ。次の読書会にも顔を出してみたくなる。",
-        "リンは気になった言い回しをメモした。二人で一つの表現を確かめる時間が、思った以上に楽しい。",
-        "「どうして好きなの？」という話題から、本の好みへ。違う答えを知るのも、距離が近づくきっかけになる。",
-        "気になった本を互いに見せる二人。買うものだけでなく、選んだ理由も少しずつ分かってきた。",
-        "リンが静かな通りを指さした。「次は、あちらの本屋にも行ってみたいね」。続きを感じさせる帰り道になった。",
+        "「私も、あなたと話したかった」とリン。隣り合う席から、次の寄り道の相談が始まった。",
+        "リンは本へ視線を戻しかけ、やめた。「その返事、もう少しだけ覚えていたい」。静かな声に、好意が隠れなくなった。",
+        "リンは明日の予定に二人の待ち合わせを入れた。「楽しみにしてる。今度は、本よりあなたの話を聞きたい」",
+        "「また明日。よい夢を」とリン。別れ際の短い会話が、次に会う日を待つ楽しみに変わった。",
       ],
     ),
   },
@@ -151,17 +128,17 @@ export const romanceCharacters: RomanceCharacter[] = [
     ...story(
       [
         "カフェのイベントで、ダーオが話しかけてきた。明るい挨拶につられて、あなたもタイ語で返してみる。",
-        "新しいメニューを見つけたダーオと、カフェでひと休み。注文のロールプレイに付き合ってくれることになった。",
-        "ダーオのスマホケースには猫の模様。好きなものや、いつか行ってみたい場所の話で盛り上がりそうだ。",
-        "週末マーケットを探検するダーオとあなた。彼女が店員役になり、買い物で使うタイ語を一緒に試してみる。",
-        "ダーオがおすすめの街歩きコースへ誘ってくれた。道案内の言葉を練習してから、気になった路地へ向かう。",
+        "カフェでダーオがあなたの隣へ。「ここ、空いてる？」。話したい気持ちを返し、次の寄り道へ二人で行こう。",
+        "「誰が好きか、今聞いてもいい？」とダーオがからかう。好きなのはあなただと、照れずに返してみよう。",
+        "マーケットの途中で、ダーオが明日も出かけないかと誘う。あなたと行きたい気持ちを伝え、二人の予定を決めよう。",
+        "街歩きの夜、ダーオが「まだ帰りたくない顔してる？」と笑う。また会いたいと返し、明日の約束とおやすみを交わそう。",
       ],
       [
         "「その挨拶、覚えてくれたんだね」とダーオ。次はもう一言、話してみたくなった。",
-        "ダーオが注文の練習を楽しそうに振り返る。小さな言葉のやり取りにも、二人だけの思い出ができた。",
-        "好きなものが重なるところも、違うところも面白い。ダーオは、あなたの返事から次の話題を見つけていた。",
-        "ダーオは見つけた雑貨を嬉しそうに見せてくれた。あなたも気になったものを指さし、会話が続いていく。",
-        "街角で立ち止まり、次に行きたい場所を相談する二人。ダーオの笑顔が、少し身近に感じられた。",
+        "ダーオは話したいという返事を聞いて笑った。「じゃあ次の店も一緒ね」。隣を歩く距離が、少し近くなった。",
+        "「そういうの、急に言うんだ！」とダーオ。からかっていたはずの彼女が、今度はあなたの返事に照れている。",
+        "ダーオは明日の待ち合わせをすぐに決めた。「もうデートって呼んでいいよね？」次のお誘いも、遠慮がない。",
+        "「また明日ね。よい夢を」とダーオ。帰ってからも、次のデートの話が短いメッセージで続いた。",
       ],
     ),
   },
@@ -177,17 +154,17 @@ export const romanceCharacters: RomanceCharacter[] = [
     ...story(
       [
         "ブックカフェの写真展示で、アルンと目が合った。彼は写真から少し離れ、あなたに丁寧に挨拶した。",
-        "アルンとコーヒー休憩。注文の練習をしたいあなたに、彼が店員役を申し出てくれた。",
-        "アルンが見せてくれたのは、街の猫の写真。好きなものや旅の話を、短いタイ語で話してみる。",
-        "アルンと、紙の小物が並ぶマーケットへ。気になる商品の値段を聞くロールプレイをしてみよう。",
-        "夕方の散歩に出かける二人。アルンは景色を見ながら、道を尋ねる表現の練習にも付き合ってくれる。",
+        "カフェのアルンが、隣に座っていいか尋ねる。話したかった気持ちを返し、二人で次の場所へ向かおう。",
+        "アルンがカメラを置き、誰が気になっているかを尋ねた。好きなのはあなただと返し、会えない間の気持ちも伝えよう。",
+        "マーケットの帰り、アルンが明日の予定を聞いてきた。あなたと行きたいと返して、二人のデートを約束しよう。",
+        "夜の散歩の終わり、アルンが名残惜しそうにこちらを見る。また会いたいと伝え、明日の約束とおやすみを交わそう。",
       ],
       [
         "アルンはあなたの話を急かさず聞いていた。「また、写真の話をしよう」。次の楽しみが一つ増えた。",
-        "会話を確かめたあと、アルンは温かい飲み物を手に笑った。言葉を探す時間も、気まずくはなかった。",
-        "アルンはあなたが選んだ話題を、楽しそうに広げてくれた。少しずつ、自然に話せる時間が増えていく。",
-        "アルンと見つけた小さなカード。互いの好みを尋ねながら、寄り道する時間が心地よく過ぎた。",
-        "「また、この続きを歩こうか」とアルン。二人の物語は、それぞれのペースで続いていく。",
+        "アルンは「話したかった」と返すあなたへ笑った。「僕も。じゃあ、次も一緒に行こう」二人の寄り道が始まる。",
+        "アルンはカメラへ手を戻さなかった。「今のは、写真より覚えておきたい」。あなたの好意を、真っすぐ受け止めている。",
+        "アルンは明日の待ち合わせを決め、写真の予定を空けた。「君と出かける日だから。ほかの用事は入れないよ」",
+        "「また明日。よい夢を」とアルン。夜の別れが、もう次に会う約束になっていた。",
       ],
     ),
   },
@@ -203,17 +180,17 @@ export const romanceCharacters: RomanceCharacter[] = [
     ...story(
       [
         "ブックカフェのゲーム会で、キエットと同じテーブルになった。始まる前に、タイ語で挨拶を交わしてみよう。",
-        "ゲームの休憩に、キエットとカフェへ。彼が店員役となって、注文の言い方を一緒に確かめてくれる。",
-        "キエットが読んでいる本には猫のイラストがある。好きなものや、行ってみたい国を尋ね合ってみる。",
-        "マーケットで、キエットが小さなパズルを見つけた。値段を聞く会話を練習してから、品物を見てみよう。",
-        "キエットと街をゆっくり歩く。道案内のロールプレイでは、分からないところを落ち着いて聞き返してみる。",
+        "ゲームの休憩、キエットがカフェで隣席を空ける。話したい気持ちを伝え、次の場所にも一緒に行こう。",
+        "キエットが盤面を片付け、「好きな人はいますか」と聞いてくる。あなたが好きだと返し、会えなかった日の気持ちも話そう。",
+        "マーケットでキエットが手に取った予定帳。明日は空いていると答え、二人で出かけたい気持ちを伝えよう。",
+        "夜の帰り道、キエットがもう一度会いたいと言う。自分も会いたい気持ちを返し、明日の約束とおやすみを伝えよう。",
       ],
       [
         "キエットは「分からない言葉を一緒に考えるのも楽しい」と言った。挨拶から、少しずつ話が広がる。",
-        "短い会話のあと、キエットは新しいゲームを紹介してくれた。自分の好きなものを話す表情が、印象に残った。",
-        "答えが同じでなくても、キエットは理由を面白そうに聞いていた。あなたも彼の考えを、もう少し知りたくなる。",
-        "パズルの話から、子どもの頃の遊びへ。タイ語を練習する時間に、互いを知る会話が重なった。",
-        "キエットが次のゲーム会の予定を話した。また会いたいという気持ちを、二人とも少しずつ言葉にしていく。",
+        "キエットは隣で話す約束を受け取り、片付けを早めた。「では、ここからは二人の時間ですね」",
+        "キエットは一瞬だけ言葉を探した。「率直に言われると、予想よりずっと嬉しいですね」。考えるより先に、笑顔がこぼれた。",
+        "キエットは明日の予定へ、あなたとの待ち合わせを書いた。「今度はゲームの人数に数えず、二人で会いたいです」",
+        "キエットは「また明日。よい夢を」と丁寧に返した。次に会う約束が、今夜の最後の一手になった。",
       ],
     ),
   },
@@ -229,31 +206,32 @@ export const romanceCharacters: RomanceCharacter[] = [
     ...story(
       [
         "カフェの小さな展示で、ニランがあなたに挨拶した。作品の話を始める前に、タイ語で短く返してみよう。",
-        "ニランが気になっていたカフェへ。彼が店員役になり、飲み物を頼む会話を練習してみる。",
-        "ニランが描いた猫のロゴから、好きなものの話へ。行ってみたい場所についても、少し話してみよう。",
-        "ニランと、手作りの作品が集まるマーケットへ。買い物のやり取りを試しながら、お気に入りを探す。",
-        "街の音を聞きながら、ニランと散歩する。道案内の表現を確かめてから、新しい店へ寄り道してみよう。",
+        "ニランがカフェであなたの隣を指す。「ここ、いい？」。あなたと話したい気持ちを返し、二人で次の場所へ歩こう。",
+        "ニランが音楽を止め、「誰のことを考えていた？」と聞く。好きなのはあなただと、会えない間の気持ちも伝えてみよう。",
+        "マーケットの終わり、ニランから明日の誘いが届く。空いていると返し、あなたと行きたい気持ちでデートを約束しよう。",
+        "夜の散歩が終わり、ニランが次に会う話を始める。また会いたいと伝え、明日の約束とおやすみで今夜を結ぼう。",
       ],
       [
         "ニランはあなたの挨拶に、嬉しそうに応じた。「次は、作品の感想も聞かせて」。また話すきっかけができた。",
-        "言葉を間違えても、ニランは一緒に確かめてくれた。小さな成功を二人で喜ぶ時間になった。",
-        "ニランは思いがけない共通点を見つけて笑った。違う好みの話にも、次の寄り道のヒントがある。",
-        "互いに気になった作品を見せ合う二人。ニランの好きな色や形が、少しずつ分かってきた。",
-        "ニランは次に行きたい店の名前をメモした。まだ知らない話題が、二人の前にたくさん残っている。",
+        "ニランはあなたの返事にうなずき、椅子を少し近づけた。「じゃあ、今日はもう少し、二人で話していよう」",
+        "ニランは「それ、聞きたかった」と笑う。言葉で返した好意が、二人の会話をもう一段近づけた。",
+        "明日の約束が決まると、ニランは待ち合わせの場所を確かめた。「君と行けるなら、きっと楽しいと思う」",
+        "ニランから「また明日。よい夢を」というメッセージ。今夜の続きを、次に会う日まで少し楽しみに待てる。",
       ],
     ),
   },
 ];
 
-const sourceIds = ["wiktionary-ipa-phase4", "wiktionary-ipa-phase5"];
+const sourceIds = romanceSources.map((source) => source.id);
 export const romanceEpisodes: RomanceEpisode[] = [
   {
     id: "meet",
     number: 1,
     title: "はじめまして、から",
-    setting: "ブックカフェの交流イベント。挨拶と出身を話し、お礼に返します。",
-    objective: "挨拶・日本から来たこと・お礼への返答を使う。",
-    sourceScenarioId: "greeting-origin",
+    setting:
+      "目が合った相手に挨拶を返し、話すことを受け入れ、会えてうれしい気持ちを伝えます。",
+    objective: "挨拶・会話への承諾・会えてうれしい気持ちを伝える。",
+    sourceScenarioId: null,
     previousEpisodeId: null,
     storyPrompt: "最初の会話のあと、どんなふうに過ごす？",
     sourceIds: [...sourceIds],
@@ -262,50 +240,50 @@ export const romanceEpisodes: RomanceEpisode[] = [
   {
     id: "cafe",
     number: 2,
-    title: "カフェでひと休み",
+    title: "隣に座っても、いい？",
     setting:
-      "相手が店員役になって行う注文の練習。水を頼み、コーヒーを断り、お礼を伝えます。",
-    objective: "依頼・丁寧な断り・お礼の表現を使う。",
-    sourceScenarioId: "cafe-water",
+      "カフェで近くに座り、相手と話したいことや、一緒に過ごしたい気持ちを伝えます。",
+    objective: "隣席を受け入れ、あなたと話したい・一緒に行くと伝える。",
+    sourceScenarioId: null,
     previousEpisodeId: "meet",
-    storyPrompt: "会話の練習が終わった。休憩をどう楽しもう？",
+    storyPrompt: "隣にいる相手と、どんな時間を過ごそう？",
     sourceIds: [...sourceIds],
     verification: "unreviewed",
   },
   {
     id: "likes",
     number: 3,
-    title: "好きなものを話そう",
+    title: "好きなのは、あなた",
     setting:
-      "猫の写真や絵を見ながら、好きなものと行ってみたい国を話す場面です。",
-    objective: "猫が好きなこと、日本へ行きたいことを伝える役の練習。",
+      "褒め言葉にお礼を返し、誰が好きなのか、会えないときに思い出していた気持ちを伝えます。",
+    objective: "褒め言葉へのお礼・あなたが好き・あなたが恋しいを伝える。",
     sourceScenarioId: null,
     previousEpisodeId: "cafe",
-    storyPrompt: "相手の好きなものを聞いて、あなたはどう返す？",
+    storyPrompt: "好意を向けてくる相手に、どこまで気持ちを伝えよう？",
     sourceIds: [...sourceIds],
     verification: "unreviewed",
   },
   {
     id: "market",
     number: 4,
-    title: "小さなマーケットへ",
+    title: "ふたりのデートの約束",
     setting:
-      "二人で買い物へ。相手が店員役となり、20バーツの商品を指す文脈で練習します。",
-    objective: "値段を尋ね、買う意思とお礼を伝える。",
-    sourceScenarioId: "shopping-price",
+      "街歩きや学園祭の準備の合間に、明日の予定を話し、一緒に出かける約束をします。",
+    objective: "明日の予定・あなたと行きたい・また明日を伝える。",
+    sourceScenarioId: null,
     previousEpisodeId: "likes",
-    storyPrompt: "気になる品物を見つけた相手。どんな時間にする？",
+    storyPrompt: "二人で出かける約束。どんなふうに誘いに応えよう？",
     sourceIds: [...sourceIds],
     verification: "unreviewed",
   },
   {
     id: "walk",
     number: 5,
-    title: "もう少し、一緒に",
+    title: "また会いたい、おやすみ",
     setting:
-      "街歩きの途中に案内の人役で練習。トイレの場所と右方向を確認し、お礼を言います。",
-    objective: "場所と方向を尋ね、確認してお礼を伝える。",
-    sourceScenarioId: "restroom-directions",
+      "帰り道や夜のメッセージで、また会いたいと伝え、明日の約束とおやすみの言葉を交わします。",
+    objective: "また会いたい・明日会おう・おやすみを伝える。",
+    sourceScenarioId: null,
     previousEpisodeId: "market",
     storyPrompt: "帰り道。次に会うことについて、どう話そう？",
     sourceIds: [...sourceIds],
@@ -320,182 +298,15 @@ export function getRomanceEpisode(id: string): RomanceEpisode | undefined {
   return romanceEpisodes.find((episode) => episode.id === id);
 }
 
-function phrase(
-  wordIds: string[],
-  meaning: string,
-  note?: string,
-): ConversationPhrase {
-  return {
-    thai: wordIds
-      .map((id) => {
-        const word = words.get(id);
-        if (!word) throw new Error("恋愛コースの語句参照がありません: " + id);
-        return word.thai;
-      })
-      .join(""),
-    meaning,
-    wordIds: [...wordIds],
-    ...(note ? { note } : {}),
-  };
-}
-
-/** 丁寧詞の登録IDだけを変更する。Thaiの文字列や結合記号を分解しない。 */
-function npcForGender(
-  source: ConversationPhrase,
-  gender: RomanceGender,
-): ConversationPhrase {
-  const ids = [...source.wordIds];
-  const ending = ids.at(-1);
-  if (
-    gender === "male" &&
-    (ending === "polite-female-statement" ||
-      ending === "polite-female-question")
-  )
-    ids[ids.length - 1] = "polite-male";
-  const note = source.note?.includes("性別の登録")
-    ? "文末詞は、この登場人物の話し方のモデルです。主人公の設定にかかわらず、登録した丁寧な返答例を受け付けます。"
-    : source.note;
-  return phrase(ids, source.meaning, note);
-}
-
-function copyStep(
-  step: ConversationStep,
-  gender: RomanceGender,
-  scenarioId?: string,
-): RomanceQuestion {
-  return {
-    ...step,
-    npc: npcForGender(step.npc, gender),
-    choices: step.choices.map((choice) => ({
-      ...choice,
-      phrase: { ...choice.phrase, wordIds: [...choice.phrase.wordIds] },
-    })),
-    answerIds: [...step.answerIds],
-    sourceIds: [...sourceIds],
-    verification: "unreviewed",
-    sourceNote:
-      "既存会話の語句・目標・返答例を参照。登場人物の文末詞だけ、登録済みのIDで話し方のモデルに合わせています。会話・訳・用法は専門家監修前です。",
-    ...(scenarioId ? { sourceScenarioId: scenarioId } : {}),
-  };
-}
-
-function reply(
-  id: string,
-  wordIds: string[],
-  meaning: string,
-  explanation: string,
-): ConversationChoice {
-  return { id, phrase: phrase(wordIds, meaning), explanation };
-}
-
-/** 既存の「คุณชอบแมวไหม」と登録語句に基づく小さな教材案。新しい照合済み例文ではない。 */
-function likesQuestions(gender: RomanceGender): RomanceQuestion[] {
-  const original = conversationScenarios.find(
-    (scenario) => scenario.id === "greeting-origin",
-  );
-  const originalWish = original?.steps[1]?.choices.find(
-    (choice) => choice.id === "greeting-from-wish",
-  );
-  const closing = original?.steps.find(
-    (step) => step.id === "greeting-origin-close",
-  );
-  if (!originalWish || !closing)
-    throw new Error("好みの会話で参照する元の表現がありません。");
-  const note =
-    "既存の『基本の質問』のคุณชอบแมวไหมと登録語句から組み合わせた教材案です。語句IPAの再利用は、会話・訳・自然さの監修完了を意味しません。";
-  const first: ConversationStep = {
-    id: "romance-likes-cat",
-    npc: phrase(
-      ["you", "like", "cat", "question-particle", "polite-female-question"],
-      "猫は好きですか。",
-    ),
-    goal: "この役では『猫が好きです』と答えましょう。",
-    choices: [
-      reply(
-        "romance-cat-like-male",
-        ["like", "polite-male"],
-        "好きです。",
-        "ชอบ は好きであるという意味です。猫について聞かれた文脈で対象を省いた返答例です。",
-      ),
-      reply(
-        "romance-cat-like-female",
-        ["like", "polite-female-statement"],
-        "好きです。",
-        "ชอบ に応答の丁寧詞 ค่ะ を添えた返答例です。",
-      ),
-      reply(
-        "romance-cat-not",
-        ["not", "like", "polite-male"],
-        "好きではありません。",
-        "ไม่ชอบ は好きではないという意味です。今回は好きだと答える役の練習です。実際の好みの優劣は判定しません。",
-      ),
-    ],
-    answerIds: ["romance-cat-like-male", "romance-cat-like-female"],
-    explanation:
-      "ไหม で聞かれた好みには、この文脈で ชอบ と答えられます。猫が好きという役を練習しており、利用者自身の好みを採点するものではありません。",
-  };
-  const second: ConversationStep = {
-    id: "romance-likes-japan",
-    npc: phrase(
-      [
-        "you",
-        "want",
-        "go",
-        "japan",
-        "question-particle",
-        "polite-female-question",
-      ],
-      "日本へ行きたいですか。",
-    ),
-    goal: "この役では『日本へ行きたいです』と伝えましょう。",
-    choices: [
-      {
-        ...originalWish,
-        id: "romance-japan-want-male",
-        phrase: {
-          ...originalWish.phrase,
-          wordIds: [...originalWish.phrase.wordIds],
-        },
-        explanation:
-          "อยากไปญี่ปุ่น は日本へ行きたいという希望です。元の会話で使う表現を、この目標に合わせて練習します。",
-      },
-      reply(
-        "romance-japan-want-female",
-        ["want", "go", "japan", "polite-female-statement"],
-        "日本へ行きたいです。",
-        "誰の希望か分かる返答で主語を省き、อยากไปญี่ปุ่น と伝えるモデルです。",
-      ),
-      reply(
-        "romance-japan-from",
-        ["come", "from", "japan", "polite-female-statement"],
-        "日本から来ました。",
-        "มาจากญี่ปุ่น は日本から来たという意味です。行きたいという希望とは内容が違います。",
-      ),
-    ],
-    answerIds: ["romance-japan-want-male", "romance-japan-want-female"],
-    explanation:
-      "อยาก のあとに ไป を置き、行きたいという希望を伝えています。出身の『日本から来た』と、行きたい場所を区別します。",
-  };
-  return [first, second]
-    .map((step) => ({ ...copyStep(step, gender), sourceNote: note }))
-    .concat(copyStep(closing, gender, "greeting-origin"));
-}
-
 export function getRomanceQuestions(
   characterId: string,
   episodeId: string,
 ): RomanceQuestion[] {
-  const character = getRomanceCharacter(characterId),
-    episode = getRomanceEpisode(episodeId);
-  if (!character || !episode) return [];
-  if (episode.id === "likes") return likesQuestions(character.gender);
-  const source = conversationScenarios.find(
-    (scenario) => scenario.id === episode.sourceScenarioId,
-  );
-  return (
-    source?.steps.map((step) => copyStep(step, character.gender, source.id)) ??
-    []
-  );
+  const character = getRomanceCharacter(characterId);
+  const episode = getRomanceEpisode(episodeId);
+  return character && episode
+    ? getRomanceDialogueQuestions(character.gender, episode.id)
+    : [];
 }
 
 const thoughtful: Record<RomancePreference, [string, string]> = {

@@ -10,13 +10,13 @@ import type { RomanceCharacterStory } from "@/lib/romance-story-types";
 import { femaleRomanceStories } from "@/data/romance-stories-female";
 import { maleRomanceStories } from "@/data/romance-stories-male";
 
-/** 言語項目は既存教材を参照。物語の達成を会話能力の認定にしない。 */
+/** 恋愛場面の短い会話を段階化。物語の達成を会話能力の認定にしない。 */
 export const journeyChapters: JourneyChapter[] = [
   {
     episodeId: "meet",
     level: 1,
     skillTitle: "会話の扉をひらく",
-    canDo: "挨拶を返し、出身を伝え、お礼に応じる練習。",
+    canDo: "挨拶を返し、話す誘いに応じ、会えてうれしい気持ちを伝える練習。",
     bridge:
       "まずは音と意味を一緒に。お手本を見てから、短い返答を組み立てます。",
     buildQuestionIndex: 0,
@@ -26,9 +26,10 @@ export const journeyChapters: JourneyChapter[] = [
   {
     episodeId: "cafe",
     level: 2,
-    skillTitle: "お願いと、やわらかな断り",
-    canDo: "水を頼み、コーヒーを断り、お礼で結ぶ練習。",
-    bridge: "前の挨拶を思い出しながら、欲しいものと断る言い方を使い分けます。",
+    skillTitle: "隣で、もう少し話したい",
+    canDo: "隣に座る誘いに応じ、あなたと話したい、一緒に行こうと返す練習。",
+    bridge:
+      "以前の話の表現も確認します。初めての表現なら、お手本を開いてから進めましょう。",
     buildQuestionIndex: 0,
     recallEpisodeIds: ["meet"],
     defaultSupport: "model",
@@ -37,9 +38,9 @@ export const journeyChapters: JourneyChapter[] = [
     episodeId: "likes",
     level: 3,
     skillTitle: "自分の気持ちを伝える",
-    canDo: "好みと希望の質問に、短い返答で応じる練習。",
+    canDo: "褒め言葉にお礼を返し、あなたが好き、恋しかったと好意を伝える練習。",
     bridge:
-      "選択肢の日本語訳を最初は隠します。困ったら意味もお手本も開けます。",
+      "選択肢の訳を最初は隠します。以前の話の表現も、初めてなら意味とお手本を確認できます。",
     buildQuestionIndex: 1,
     recallEpisodeIds: ["meet", "cafe"],
     defaultSupport: "meaning",
@@ -47,10 +48,10 @@ export const journeyChapters: JourneyChapter[] = [
   {
     episodeId: "market",
     level: 4,
-    skillTitle: "やり取りをつなぐ",
-    canDo: "値段を尋ね、20バーツと聞き、買う意思とお礼を伝える練習。",
+    skillTitle: "ふたりのデートを約束する",
+    canDo: "明日は空いている、あなたと行きたいと返し、また明日と約束する練習。",
     bridge:
-      "必要な表現を思い出してから、値段→買う→お礼の順で会話をつなぎます。",
+      "空いている日→一緒に行く気持ち→待ち合わせの順でつなぎます。以前の話の表現も、初めてならお手本から確認できます。",
     buildQuestionIndex: 0,
     recallEpisodeIds: ["cafe", "likes"],
     defaultSupport: "recall",
@@ -58,10 +59,10 @@ export const journeyChapters: JourneyChapter[] = [
   {
     episodeId: "walk",
     level: 5,
-    skillTitle: "確かめながら話す",
-    canDo: "トイレの場所を尋ね、右という案内を確認して、お礼を伝える練習。",
+    skillTitle: "今夜を、次の約束へ",
+    canDo: "また会いたいと返し、明日の再会を約束して、おやすみを交わす練習。",
     bridge:
-      "短い場所の会話と、前の話の表現を組み合わせます。ヒントはいつでも使えます。",
+      "別れ際の気持ちと次に会う約束をつなぎます。以前の話の表現が初めてでも、お手本とヒントで確認できます。",
     buildQuestionIndex: 1,
     recallEpisodeIds: ["meet", "cafe", "likes", "market"],
     defaultSupport: "recall",
@@ -85,13 +86,13 @@ const supportBeats: Record<string, string> = {
 };
 
 const challenges: Record<RomanceEpisodeId, string> = {
-  meet: "挨拶→日本から来たこと→お礼への返答をつなぐ。日本から来たという役の練習です。",
-  cafe: "相手の店員役と、水を頼む→コーヒーを断る→お礼を伝える流れを試す。",
+  meet: "目の前の相手へ挨拶を返す。話す誘いを受け、最後は『会えてうれしい』を言葉にしよう。",
+  cafe: "隣へ座る誘いに応じ、『あなたと話したい』『一緒に行こう』で二人の時間を続けよう。",
   likes:
-    "『猫が好き』『日本へ行きたい』という役で、好みと希望の質問に短く答える。実際の好みの優劣は判定しません。",
+    "褒め言葉にはお礼を。好意を返す役で『あなたが好き』『恋しかった』を相手本人へ伝えよう。",
   market:
-    "相手の店員役と、指さした商品の値段→20バーツと聞いて買う意思→お礼をつなぐ。",
-  walk: "相手の案内役に、トイレの場所を尋ねる→右という説明を確認する→お礼を伝える。",
+    "明日は空いていると返し、『あなたと行きたい』『また明日』で次のデートを約束しよう。",
+  walk: "『また会いたい』を本人に返す。明日会う約束を交わし、『おやすみ』まで二人の会話をつなごう。",
 };
 
 export function getJourneyChapter(

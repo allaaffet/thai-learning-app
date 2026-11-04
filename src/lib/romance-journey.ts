@@ -5,6 +5,7 @@ import {
   romanceWords,
 } from "@/data/romance";
 import { getJourneyChapter } from "@/data/romance-journey";
+import { ROMANCE_DIALOGUE_CURRICULUM_ID } from "@/data/romance-dialogue";
 import {
   getStoryJourneyScene,
   getStoryJourneyRoute,
@@ -414,6 +415,7 @@ export interface JourneyLearningEpisode {
   routes: JourneyRouteId[];
   last: JourneyLearningSummary;
   lastStory?: { routeId: JourneyRouteId; choiceId: string };
+  curriculumId?: typeof ROMANCE_DIALOGUE_CURRICULUM_ID;
 }
 export interface RomanceLearningState {
   version: 1;
@@ -462,6 +464,13 @@ export function getJourneyLearningProgress(
     Object.hasOwn(state.characters[characterId].episodes, episodeId)
     ? state.characters[characterId].episodes[episodeId]
     : undefined;
+}
+
+/** Older activity records remain readable without claiming the new dialogue was practiced. */
+export function hasCurrentRomanceDialogue(
+  progress: JourneyLearningEpisode | undefined,
+): boolean {
+  return progress?.curriculumId === ROMANCE_DIALOGUE_CURRICULUM_ID;
 }
 export function getJourneyKeepsakes(
   state: RomanceLearningState,
@@ -625,7 +634,10 @@ export function isRomanceLearningState(
               "routes",
               "last",
               "lastStory",
+              "curriculumId",
             ]) ||
+            (progress.curriculumId !== undefined &&
+              progress.curriculumId !== ROMANCE_DIALOGUE_CURRICULUM_ID) ||
             !isTimestamp(progress.firstCompletedAt) ||
             !isTimestamp(progress.lastCompletedAt) ||
             Date.parse(progress.lastCompletedAt) <
@@ -759,6 +771,7 @@ export function completeRomanceLearning(
         episodes: {
           ...(state.characters[input.characterId]?.episodes ?? {}),
           [input.episodeId]: {
+            curriculumId: ROMANCE_DIALOGUE_CURRICULUM_ID,
             firstCompletedAt: previous?.firstCompletedAt ?? now,
             lastCompletedAt: previousIsNewer ? previous.lastCompletedAt : now,
             plays: Math.min(MAX_SESSIONS, (previous?.plays ?? 0) + 1),

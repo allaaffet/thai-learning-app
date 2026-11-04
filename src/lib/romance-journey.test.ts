@@ -6,6 +6,7 @@ import {
   romanceWords,
 } from "@/data/romance";
 import { getJourneyChapter } from "@/data/romance-journey";
+import { ROMANCE_DIALOGUE_CURRICULUM_ID } from "@/data/romance-dialogue";
 import { getStoryJourneyRoute } from "@/data/romance-story";
 import {
   ROMANCE_LEARNING_STORAGE_KEY,
@@ -20,6 +21,7 @@ import {
   getJourneyStoryEcho,
   getJourneyStoryEnding,
   gradeJourneyActivity,
+  hasCurrentRomanceDialogue,
   isRomanceLearningState,
   loadRomanceLearning,
   replaceRomanceLearning,
@@ -215,9 +217,95 @@ describe("段階的な会話の活動計画", () => {
   });
 });
 
+describe("恋愛会話の教材更新と以前の活動記録", () => {
+  it("旧版1の記録は、保存・思い出・物語選択を保持しながら新教材の実施と区別する", () => {
+    const legacy = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-gentle",
+    }).state;
+    delete legacy.characters.mali.episodes.meet.curriculumId;
+    const raw = JSON.stringify(legacy);
+    const stored = memoryStorage(raw);
+    const loaded = loadRomanceLearning(stored);
+    expect(loaded.status).toBe("loaded");
+    expect(loaded.state).toEqual(legacy);
+    expect(isRomanceLearningState(loaded.state)).toBe(true);
+    expect(
+      hasCurrentRomanceDialogue(loaded.state.characters.mali.episodes.meet),
+    ).toBe(false);
+    expect(hasCurrentRomanceDialogue(undefined)).toBe(false);
+    expect(getJourneyKeepsakes(loaded.state, "mali")).toHaveLength(1);
+    expect(getJourneyStoryEcho(loaded.state, "mali", "cafe")).toBeDefined();
+    expect(stored.raw).toBe(raw);
+    expect(stored.writes).toEqual([]);
+  });
+
+  it("新しい教材の終了を受理したときだけ現行教材を記録し、旧履歴を引き継ぐ", () => {
+    const legacy = completeRomanceLearning(createEmptyRomanceLearning(), {
+      ...input(),
+      storyChoiceId: "meet-gentle",
+    }).state;
+    delete legacy.characters.mali.episodes.meet.curriculumId;
+    const copy = structuredClone(legacy);
+    const result = completeRomanceLearning(legacy, {
+      ...input("meet", "lead", "new-romantic-dialogue"),
+      now: "2026-11-04T09:00:00.000Z",
+    });
+    expect(result.receipt.applied).toBe(true);
+    expect(legacy).toEqual(copy);
+    const entry = result.state.characters.mali.episodes.meet;
+    expect(entry.curriculumId).toBe(ROMANCE_DIALOGUE_CURRICULUM_ID);
+    expect(hasCurrentRomanceDialogue(entry)).toBe(true);
+    expect(entry.firstCompletedAt).toBe(
+      copy.characters.mali.episodes.meet.firstCompletedAt,
+    );
+    expect(entry.plays).toBe(2);
+    expect(entry.routes).toEqual(["listen", "lead"]);
+    expect(entry.lastStory).toEqual(
+      copy.characters.mali.episodes.meet.lastStory,
+    );
+    const stored = memoryStorage();
+    expect(saveRomanceLearning(result.state, stored)).toBe(true);
+    expect(loadRomanceLearning(stored).state).toEqual(result.state);
+  });
+
+  it("以前のセッションを再送しただけでは、新教材の実施へ書き換えない", () => {
+    const legacy = recorded();
+    delete legacy.characters.mali.episodes.meet.curriculumId;
+    const copy = structuredClone(legacy);
+    const result = completeRomanceLearning(legacy, input());
+    expect(result.receipt.applied).toBe(false);
+    expect(result.state).toBe(legacy);
+    expect(result.state).toEqual(copy);
+    expect(
+      hasCurrentRomanceDialogue(result.state.characters.mali.episodes.meet),
+    ).toBe(false);
+  });
+
+  it.each(["future-romance", 1, null, {}, ""])(
+    "未知・不正な教材IDは元データを保護する #%#",
+    (curriculumId) => {
+      const state = recorded();
+      Reflect.set(
+        state.characters.mali.episodes.meet,
+        "curriculumId",
+        curriculumId,
+      );
+      const raw = JSON.stringify(state);
+      const stored = memoryStorage(raw);
+      expect(isRomanceLearningState(state)).toBe(false);
+      expect(loadRomanceLearning(stored).status).toBe("invalid");
+      expect(saveRomanceLearning(recorded(), stored)).toBe(false);
+      expect(stored.raw).toBe(raw);
+      expect(stored.writes).toEqual([]);
+    },
+  );
+});
+
 describe("直近の物語選択の記憶と旧v1互換", () => {
   it("選択を持たない既存v1を有効なまま読み、記憶を推測生成しない", () => {
     const old = recorded();
+    delete old.characters.mali.episodes.meet.curriculumId;
     expect(old.version).toBe(1);
     expect(old.characters.mali.episodes.meet.lastStory).toBeUndefined();
     expect(isRomanceLearningState(old)).toBe(true);

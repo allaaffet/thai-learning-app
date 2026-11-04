@@ -759,7 +759,7 @@ function JourneySource({ question }: { question: RomanceQuestion }) {
     <details className="rj-source">
       <summary>ことば・出典・確認状況</summary>
       <p>{question.sourceNote}</p>
-      <p>語句ごとの辞書形IPAです。全文の発音表記ではありません。</p>
+      <p>IPAは資料と照合した語句に表示します。全文の発音表記ではありません。</p>
       <ul>
         {romanceWords
           .filter((word) =>
@@ -774,7 +774,7 @@ function JourneySource({ question }: { question: RomanceQuestion }) {
                 {word.thai}
               </span>
               <span>{word.meaning}</span>
-              <span className="ipa">{word.ipa}</span>
+              <span className="ipa">{word.ipa || "IPA未照合"}</span>
             </li>
           ))}
       </ul>
@@ -1189,7 +1189,7 @@ function JourneyRespondCard({
           <MessageCircle size={17} />
         )}
         {activity.purpose === "recall"
-          ? `前の会話を思い出す · ${sourceEpisode?.title ?? "前の話"}`
+          ? `前の話の表現 · ${sourceEpisode?.title ?? "前の話"}`
           : activity.purpose === "repair"
             ? "もう一度、一緒に"
             : "会話の本番"}
@@ -1200,6 +1200,11 @@ function JourneyRespondCard({
       <h2 ref={heading} tabIndex={-1}>
         {question.goal}
       </h2>
+      {activity.purpose === "recall" && (
+        <p className="rj-note">
+          初めての表現なら、ヒントで意味とお手本を確かめられます。
+        </p>
+      )}
       <JourneyDisclosure />
       <div className="rj-chat-bubble">
         <span>{character.name}</span>

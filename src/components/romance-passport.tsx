@@ -4,6 +4,7 @@ import {
   getJourneyKeepsakes,
   getJourneyLearningProgress,
   getJourneyStoryChoice,
+  hasCurrentRomanceDialogue,
   type RomanceLearningState,
 } from "@/lib/romance-journey";
 import type { RomanceCharacter } from "@/lib/romance-types";
@@ -19,7 +20,9 @@ export function RomancePassport({
   state: RomanceLearningState;
 }) {
   const practiced = journeyChapters.filter((chapter) =>
-    getJourneyLearningProgress(state, character.id, chapter.episodeId),
+    hasCurrentRomanceDialogue(
+      getJourneyLearningProgress(state, character.id, chapter.episodeId),
+    ),
   ).length;
   const keepsakes = getJourneyKeepsakes(state, character.id, setting);
   return (
@@ -43,7 +46,7 @@ export function RomancePassport({
           </span>
         </div>
         <p>
-          挨拶から街歩きへ。新しい表現を使いながら、前の出会いのひと言も思い出します。
+          挨拶から、また会う約束へ。相手への気持ちを伝えながら、前の出会いのひと言も思い出します。
         </p>
         <ol className="rjp-goals">
           {journeyChapters.map((chapter) => {
@@ -58,10 +61,11 @@ export function RomancePassport({
               chapter.episodeId,
               setting,
             );
+            const current = hasCurrentRomanceDialogue(entry);
             return (
-              <li key={chapter.episodeId} data-practiced={Boolean(entry)}>
+              <li key={chapter.episodeId} data-practiced={current}>
                 <span className="rjp-goal-number">
-                  {entry ? (
+                  {current ? (
                     <Check size={20} aria-label="練習した" />
                   ) : (
                     chapter.level
@@ -70,11 +74,20 @@ export function RomancePassport({
                 <strong>{chapter.skillTitle}</strong>
                 <p>{chapter.canDo}</p>
                 <span className="rjp-goal-state">
-                  {entry ? "練習した" : "これから"}
+                  {current
+                    ? "練習した"
+                    : entry
+                      ? "以前の会話の記録"
+                      : "これから"}
                 </span>
+                {entry && !current && (
+                  <p>新しい恋愛の表現は、これから練習できます。</p>
+                )}
                 {entry && (
                   <details>
-                    <summary>直近の練習を見る</summary>
+                    <summary>
+                      {current ? "直近の練習を見る" : "以前の練習を見る"}
+                    </summary>
                     <p>
                       会話 {entry.last.coreCorrect} / {entry.last.coreTotal}{" "}
                       問・組立 {entry.last.buildCorrect} /{" "}
