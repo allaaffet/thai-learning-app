@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isRomanceExpression } from "@/lib/romance-expressions";
 import {
   getJourneyChapter,
   getJourneyRoute,
@@ -19,6 +20,20 @@ const scenes = romanceCharacters.flatMap((character) =>
 );
 
 describe("物語と積み上がる会話機能の教材", () => {
+  it("各人物の後半には、見つめる表情と照れる表情の両方がある", () => {
+    for (const character of romanceCharacters) {
+      const expressions = new Set(
+        ["likes", "market", "walk"].flatMap((episodeId) =>
+          getJourneyScene(character.id, episodeId)!.routes.flatMap((route) =>
+            route.wrapChoices.map((choice) => choice.expression),
+          ),
+        ),
+      );
+      expect(expressions.has("romantic")).toBe(true);
+      expect(expressions.has("blushing")).toBe(true);
+    }
+  });
+
   it("旧5話を同じ順で参照し、お手本から意味・想起へ支援を減らす", () => {
     expect(journeyChapters.map((chapter) => chapter.episodeId)).toEqual(
       romanceEpisodes.map((episode) => episode.id),
@@ -104,9 +119,7 @@ describe("物語と積み上がる会話機能の教材", () => {
           route.nextHook,
         ])
           expect(text.trim()).not.toBe("");
-        expect(["neutral", "happy", "thoughtful", "concerned"]).toContain(
-          route.expression,
-        );
+        expect(isRomanceExpression(route.expression)).toBe(true);
         expect(route.wrapChoices).toHaveLength(2);
         expect(
           new Set(route.wrapChoices.map((choice) => choice.expression)).size,
@@ -131,9 +144,7 @@ describe("物語と積み上がる会話機能の教材", () => {
           expect(choice.storyChoiceId).not.toMatch(/-dismiss$/u);
           expect(choice.label.trim()).not.toBe("");
           expect(choice.reaction.trim()).not.toBe("");
-          expect(["neutral", "happy", "thoughtful", "concerned"]).toContain(
-            choice.expression,
-          );
+          expect(isRomanceExpression(choice.expression)).toBe(true);
         }
       }
     },

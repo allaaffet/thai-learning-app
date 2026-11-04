@@ -1,8 +1,8 @@
 import type { RomanceEpisodeId } from "@/lib/romance-types";
+import type { RomanceExpression } from "@/lib/romance-expressions";
 
 /** 表情は台本の演出。学習者の発音や実在の感情の推定ではない。 */
-export type JourneyExpression =
-  "neutral" | "happy" | "thoughtful" | "concerned";
+export type JourneyExpression = RomanceExpression;
 export type JourneyRouteId = "listen" | "lead";
 export type JourneySupport = "model" | "meaning" | "recall";
 

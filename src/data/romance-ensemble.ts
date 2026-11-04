@@ -159,22 +159,22 @@ const scenes: Record<
         {
           characterId: "dao",
           text: "じゃあ今日は、三人ともデートに誘ってるってことでいい？",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "mali",
           text: "私は、最初からそのつもりだったけど。……あなたはどう思ってた？",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "rin",
           text: "みんなで話すのは賛成。でも、帰りの約束まで同じにするとは言っていないわ。",
-          expression: "thoughtful",
+          expression: "romantic",
         },
         {
           characterId: "dao",
           text: "それなら、次の二人きりの時間は早い者勝ちね。私も遠慮しないから！",
-          expression: "happy",
+          expression: "blushing",
         },
       ],
     },
@@ -186,22 +186,22 @@ const scenes: Record<
         {
           characterId: "arun",
           text: "三人で待ってたけど、君と二人になるつもりで来たんだ。これは先に言っておく。",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "kiet",
           text: "そこは同じです。今日のために空けた時間、人数で割るつもりはありません。",
-          expression: "thoughtful",
+          expression: "romantic",
         },
         {
           characterId: "niran",
           text: "じゃあ、誰と帰るかはまだ決めないで。話してる間に、僕を選びたくなるかもしれないし。",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "arun",
           text: "みんなで過ごすのもいいね。でも、次に会う約束だけは譲りたくないな。",
-          expression: "happy",
+          expression: "blushing",
         },
       ],
     },
@@ -215,22 +215,22 @@ const scenes: Record<
         {
           characterId: "mali",
           text: "じゃあ、まずはみんなで休憩しよう？ そのあと、少しだけ私に時間をちょうだい。",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "dao",
           text: "『少しだけ』って、二人きりで抜け出すやつでしょ。私も同じこと考えてた！",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "rin",
           text: "だったら本人に決めてもらいましょう。次の授業の隣席も、まだ空けてあるもの。",
-          expression: "thoughtful",
+          expression: "romantic",
         },
         {
           characterId: "mali",
           text: "三人と仲良くするのはいいけど、私が誘ってる意味まで友だち扱いはしないでね。",
-          expression: "happy",
+          expression: "blushing",
         },
       ],
     },
@@ -242,22 +242,22 @@ const scenes: Record<
         {
           characterId: "niran",
           text: "三人とも、君に会う口実ばかり上手くなってるよね。僕もだけど。",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "arun",
           text: "だったら口実はやめよう。僕は、君とデートがしたい。",
-          expression: "happy",
+          expression: "blushing",
         },
         {
           characterId: "kiet",
           text: "僕も同じです。次の班分けがどうなっても、あなたを誘います。",
-          expression: "thoughtful",
+          expression: "romantic",
         },
         {
           characterId: "niran",
           text: "今夜はみんなで話してもいいよ。だけど、二人きりの続きまで諦めたわけじゃないから。",
-          expression: "happy",
+          expression: "blushing",
         },
       ],
     },
@@ -269,102 +269,102 @@ const rivalLines: Record<string, [EnsembleLine, EnsembleLine, EnsembleLine]> = {
     {
       characterId: "mali",
       text: "私を選んでくれたんだ。じゃあ、今からは二人きりって期待してもいい？",
-      expression: "happy",
+      expression: "blushing",
     },
     {
       characterId: "rin",
       text: "今夜は譲るわ。でも、次の誘いまで遠慮するつもりはないから。",
-      expression: "thoughtful",
+      expression: "romantic",
     },
     {
       characterId: "dao",
       text: "マリ、うれしそう！ 次は私も本気で誘うから、予定を全部埋めないでね。",
-      expression: "happy",
+      expression: "blushing",
     },
   ],
   rin: [
     {
       characterId: "rin",
       text: "返事を待っていたの。今夜、私の誘いがどういう意味か、もう分かっているでしょう？",
-      expression: "happy",
+      expression: "blushing",
     },
     {
       characterId: "mali",
       text: "リンばっかりずるい、とは言わないけど。私との約束も、ちゃんと残しておいてね。",
-      expression: "thoughtful",
+      expression: "romantic",
     },
     {
       characterId: "dao",
       text: "次は私から迎えに行く。二人きりを邪魔しないのは、今夜だけってことで！",
-      expression: "happy",
+      expression: "blushing",
     },
   ],
   dao: [
     {
       characterId: "dao",
       text: "よし、今夜は私の番！ 二人とも見てるけど、デートって呼んじゃうからね。",
-      expression: "happy",
+      expression: "blushing",
     },
     {
       characterId: "mali",
       text: "そんなふうにはっきり誘うの、少し妬けるな。私も次は、ちゃんと言おうかな。",
-      expression: "thoughtful",
+      expression: "romantic",
     },
     {
       characterId: "rin",
       text: "楽しんできて。そのあとの予定が決まったら、私にも聞かせてくれる？",
-      expression: "happy",
+      expression: "blushing",
     },
   ],
   arun: [
     {
       characterId: "arun",
       text: "選んでくれてうれしい。二人の前でも、君との時間がほしいって言ってよかった。",
-      expression: "happy",
+      expression: "blushing",
     },
     {
       characterId: "kiet",
       text: "今日は先を越されましたね。次に誘うときは、もっとはっきり気持ちを伝えます。",
-      expression: "thoughtful",
+      expression: "romantic",
     },
     {
       characterId: "niran",
       text: "そんな顔されたら、こっちも本気になるよ。僕の次の誘いも、忘れないで。",
-      expression: "happy",
+      expression: "blushing",
     },
   ],
   kiet: [
     {
       characterId: "kiet",
       text: "返事をもらえて、今やっと安心しました。では、ここから先は二人の予定にしませんか。",
-      expression: "happy",
+      expression: "blushing",
     },
     {
       characterId: "arun",
       text: "今日は譲るよ。でも、君を誘うのをやめたわけじゃない。次は僕の返事も聞いて。",
-      expression: "thoughtful",
+      expression: "romantic",
     },
     {
       characterId: "niran",
       text: "キエット、ずいぶんうれしそう。僕もその顔を君の前でしてみたいな。",
-      expression: "happy",
+      expression: "blushing",
     },
   ],
   niran: [
     {
       characterId: "niran",
       text: "迎えに来た甲斐があった。今夜は、友だち同士の約束ってごまかさないから。",
-      expression: "happy",
+      expression: "blushing",
     },
     {
       characterId: "arun",
       text: "君が選んだなら、楽しんできて。帰ってきたら、次のデートは僕から誘わせて。",
-      expression: "thoughtful",
+      expression: "romantic",
     },
     {
       characterId: "kiet",
       text: "今回は見送ります。でも、次も同じ結果になるとは思わないでください。",
-      expression: "happy",
+      expression: "blushing",
     },
   ],
 };

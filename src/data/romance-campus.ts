@@ -73,7 +73,10 @@ export function getCampusJourneyScene(
         detail: branch.memory[1],
       },
       nextHook: branch.nextHook,
-      expression: "thoughtful",
+      expression:
+        episode.id === "walk" || episode.id === "likes"
+          ? "romantic"
+          : "thoughtful",
       wrapChoices: [
         {
           storyChoiceId: `${episode.id}-thoughtful`,

@@ -157,7 +157,7 @@ export function RomanceEnsemble({
               <div className="re-person-header">
                 <RomancePortrait
                   character={person}
-                  expression={reaction?.expression ?? "happy"}
+                  expression={reaction?.expression ?? "romantic"}
                   className="re-invite-portrait"
                 />
                 <div>

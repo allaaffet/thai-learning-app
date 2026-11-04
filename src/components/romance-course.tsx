@@ -547,6 +547,7 @@ export function RomanceCourse({
                 >
                   <RomancePortrait
                     character={person}
+                    expression={classic ? "neutral" : "romantic"}
                     className="rc-roster-portrait"
                   />
                   <div className="rc-person-copy">
@@ -598,6 +599,9 @@ export function RomanceCourse({
           <div className="rc-character-grid">
             <RomancePortrait
               character={active}
+              expression={
+                classic ? "neutral" : (storyEnding?.expression ?? "romantic")
+              }
               className="rc-character-portrait"
             />
             <section className="surface rc-character-info">

@@ -231,7 +231,7 @@ export function RomanceJourneyPlayer({
         setExpression("thoughtful");
         changePhase("repair");
       } else {
-        setExpression("happy");
+        setExpression(plan.route.expression);
         changePhase("story");
       }
     }
@@ -243,7 +243,7 @@ export function RomanceJourneyPlayer({
     setExpression("neutral");
     if (repairIndex < repairs.length - 1) setRepairIndex(repairIndex + 1);
     else {
-      setExpression("happy");
+      setExpression(plan?.route.expression ?? "happy");
       changePhase("story");
     }
   }

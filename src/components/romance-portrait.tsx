@@ -1,13 +1,7 @@
 import Image from "next/image";
 import type { RomanceCharacter } from "@/lib/romance-types";
 import type { JourneyExpression } from "@/lib/romance-journey-types";
-
-const expressions: Record<JourneyExpression, { src: string; label: string }> = {
-  neutral: { src: "/romance/cast.png", label: "通常の表情" },
-  happy: { src: "/romance/cast-happy.png", label: "笑顔" },
-  thoughtful: { src: "/romance/cast-thoughtful.png", label: "考える表情" },
-  concerned: { src: "/romance/cast-concerned.png", label: "優しく戸惑う表情" },
-};
+import { romanceExpressions } from "@/lib/romance-expressions";
 
 /** One original six-panel illustration, displayed through a cell-sized window. */
 export function RomancePortrait({
@@ -19,7 +13,7 @@ export function RomancePortrait({
   className?: string;
   expression?: JourneyExpression;
 }) {
-  const frame = expressions[expression];
+  const frame = romanceExpressions[expression];
   return (
     <div
       className={`romance-portrait ${className}`}

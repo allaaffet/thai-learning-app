@@ -130,7 +130,7 @@ export function getJourneyScene(
         detail: branch.memory[1],
       },
       nextHook: branch.nextHook,
-      expression: "thoughtful",
+      expression: id === "walk" || id === "likes" ? "romantic" : "thoughtful",
       wrapChoices: [
         {
           storyChoiceId: `${id}-thoughtful`,

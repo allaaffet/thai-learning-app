@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isRomanceExpression } from "@/lib/romance-expressions";
 import {
   campusRouteIds,
   campusSettingDescription,
@@ -19,6 +20,20 @@ const pairs = romanceCharacters.flatMap((character) =>
 );
 
 describe("社会人の夜間講座を舞台にしたキャンパス物語", () => {
+  it("各人物の後半には、新しい夜の表情を両方使う", () => {
+    for (const character of romanceCharacters) {
+      const expressions = new Set(
+        ["likes", "market", "walk"].flatMap((episodeId) =>
+          getCampusJourneyScene(character.id, episodeId)!.routes.flatMap(
+            (route) => route.wrapChoices.map((choice) => choice.expression),
+          ),
+        ),
+      );
+      expect(expressions.has("romantic")).toBe(true);
+      expect(expressions.has("blushing")).toBe(true);
+    }
+  });
+
   it("既存の成人6人と5話を使い、夜間講座の同級生という設定を明示する", () => {
     expect(romanceCharacters).toHaveLength(6);
     expect(romanceEpisodes.map((episode) => episode.id)).toEqual([
@@ -105,9 +120,7 @@ describe("社会人の夜間講座を舞台にしたキャンパス物語", () =
           expect(old!.affinityDelta).toBeGreaterThan(0);
           expect(choice.label.trim().length).toBeGreaterThan(5);
           expect(choice.reaction.trim().length).toBeGreaterThan(15);
-          expect(["neutral", "happy", "thoughtful", "concerned"]).toContain(
-            choice.expression,
-          );
+          expect(isRomanceExpression(choice.expression)).toBe(true);
           expect(choice.nextHook?.trim().length).toBeGreaterThan(10);
         }
         expect(
